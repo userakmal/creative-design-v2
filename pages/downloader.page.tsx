@@ -54,15 +54,15 @@ export const VideoDownloaderPage: React.FC = () => {
     setResult(null);
 
     try {
-      // Server orqali video URL olish
-      const response = await fetch("/api/proxy.php", {
+      // Lokal server orqali video URL olish
+      const response = await fetch("http://localhost:3000/api/download", {
         method: "POST",
         headers: {
           "Accept": "application/json",
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          u: btoa(url.trim()),
+          url: url.trim(),
         })
       });
 
@@ -72,13 +72,13 @@ export const VideoDownloaderPage: React.FC = () => {
         data = JSON.parse(responseText);
       } catch {
         console.error("Non-JSON response:", responseText.substring(0, 200));
-        throw new Error("Server xatosi yuz berdi. Keyinroq qayta urinib ko'ring.");
+        throw new Error("Server xatosi yuz berdi. Lokal server ishga tushganligini tekshiring.");
       }
 
-      if (data.status === "success" && data.url) {
+      if (data.status === "success" && data.data?.url) {
         setResult({
-          url: data.url,
-          title: data.title || "Yuklab olingan video",
+          url: data.data.url,
+          title: data.data.title || "Yuklab olingan video",
           type: "video",
         });
       } else {
