@@ -1,4 +1,17 @@
 <?php
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
+
+function exception_error_handler($severity, $message, $file, $line) {
+    if (!(error_reporting() & $severity)) {
+        return;
+    }
+    http_response_code(500);
+    echo json_encode(['status' => 'error', 'text' => "PHP Error: $message"]);
+    exit;
+}
+set_error_handler("exception_error_handler");
+
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Accept');
