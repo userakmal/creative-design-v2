@@ -90,7 +90,7 @@ export const VideoDownloaderPage: React.FC = () => {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            url: url.trim(),
+            url_b64: btoa(url.trim()), // WAF (ModSecurity) bloklamasligi uchun Base64 da jonatamiz
             videoQuality: "1080"
           })
         });
