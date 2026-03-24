@@ -34,17 +34,24 @@ try {
 
     $q = isset($data['q']) ? $data['q'] : '1080';
 
+    // Cobalt v10/v11 community instances (POST / endpoint)
     $endpoints = [
-        base64_decode('aHR0cHM6Ly9hcGkuY29iYWx0LnRvb2xzL2FwaS9qc29u'),
-        base64_decode('aHR0cHM6Ly9jby53dWsuc2gvYXBpL2pzb24='),
-        base64_decode('aHR0cHM6Ly9jb2JhbHQucXd5aC5kZXYvYXBpL2pzb24='),
-        base64_decode('aHR0cHM6Ly9hcGkuY29iYWx0LmxvbC9hcGkvanNvbg=='),
+        'https://cobalt-api.meowing.de/',
+        'https://cobalt-backend.canine.tools/',
+        'https://capi.3kh0.net/',
+        'https://downloadapi.stuff.solutions/',
     ];
 
     $ok = null;
     $err = null;
 
-    $body = json_encode(['url' => $targetUrl, 'videoQuality' => $q]);
+    // New Cobalt v10+ API format
+    $body = json_encode([
+        'url' => $targetUrl,
+        'videoQuality' => $q,
+        'downloadMode' => 'auto',
+        'filenameStyle' => 'basic'
+    ]);
 
     foreach ($endpoints as $ep) {
         $r = null;
@@ -55,14 +62,15 @@ try {
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 20);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 'Accept: application/json',
                 'Content-Type: application/json',
-                'User-Agent: Mozilla/5.0'
+                'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
             ]);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 
             $r = curl_exec($ch);
             $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -74,15 +82,44 @@ try {
 
         if ($r && $code >= 200 && $code < 300) {
             $d = json_decode($r, true);
-            if ($d && (!isset($d['status']) || $d['status'] !== 'error')) {
-                $ok = $r;
-                break;
-            } else if ($d && isset($d['text'])) {
-                $err = $d['text'];
+            if ($d && isset($d['status'])) {
+                // New v10+ response: status can be "tunnel", "redirect", "picker", "error"
+                if ($d['status'] === 'tunnel' || $d['status'] === 'redirect') {
+                    // Direct download link available
+                    $ok = json_encode([
+                        'status' => 'success',
+                        'url' => $d['url'],
+                        'filename' => isset($d['filename']) ? $d['filename'] : 'video.mp4',
+                        'type' => 'video'
+                    ]);
+                    break;
+                } else if ($d['status'] === 'picker' && !empty($d['picker'])) {
+                    // Multiple items - take first video
+                    $pickerUrl = null;
+                    foreach ($d['picker'] as $item) {
+                        if (isset($item['url'])) {
+                            $pickerUrl = $item['url'];
+                            break;
+                        }
+                    }
+                    if ($pickerUrl) {
+                        $ok = json_encode([
+                            'status' => 'success',
+                            'url' => $pickerUrl,
+                            'filename' => 'video.mp4',
+                            'type' => 'video'
+                        ]);
+                        break;
+                    }
+                } else if ($d['status'] === 'error') {
+                    $errorCode = isset($d['error']) ? $d['error']['code'] : 'unknown';
+                    $err = "Cobalt xatosi: " . $errorCode;
+                }
             }
         }
     }
 
+    // Fallback: Direct HTML scraping for .mp4 links
     if (!$ok) {
         $html = '';
         if (function_exists('curl_init')) {
@@ -90,7 +127,9 @@ try {
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
             curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ['User-Agent: Mozilla/5.0']);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            ]);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
             $html = curl_exec($ch);
@@ -98,8 +137,7 @@ try {
         }
 
         if ($html) {
-            $ext = base64_decode('Lm1wNA==');
-            $pattern = '/(https?:\/\/[^\s"\'<>]+?' . preg_quote($ext, '/') . ')/i';
+            $pattern = '/(https?:\/\/[^\s"\'<>]+?\.mp4)/i';
             if (preg_match($pattern, $html, $m)) {
                 $ok = json_encode([
                     'status' => 'success',
@@ -118,7 +156,7 @@ try {
         http_response_code(200);
         echo json_encode([
             'status' => 'error',
-            'text' => $err ? $err : 'Topilmadi'
+            'text' => $err ? $err : 'Video topilmadi. Boshqa havolani sinang.'
         ]);
     }
 

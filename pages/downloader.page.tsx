@@ -54,7 +54,7 @@ export const VideoDownloaderPage: React.FC = () => {
     setResult(null);
 
     try {
-      // 1. Agar qilingan havola to'g'ridan-to'g'ri M3U8 bo'lsa, lokal (Node.js) serverga jo'natamiz
+      // 1. M3U8 havolalari uchun lokal server
       if (url.trim().includes(".m3u8")) {
         try {
           const m3u8Response = await fetch("http://localhost:3001/api/download-m3u8", {
@@ -62,26 +62,20 @@ export const VideoDownloaderPage: React.FC = () => {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ url: url.trim() })
           });
-
           const m3u8Data = await m3u8Response.json();
-          if (!m3u8Response.ok) throw new Error(m3u8Data.error || "M3U8 saqlashda xatolik yuz berdi.");
-
-          setResult({
-            url: m3u8Data.url,
-            title: "M3U8 Jonli Efir Videos",
-            type: "video"
-          });
+          if (!m3u8Response.ok) throw new Error(m3u8Data.error || "M3U8 xatolik.");
+          setResult({ url: m3u8Data.url, title: "M3U8 Video", type: "video" });
           setIsLoading(false);
           return;
-        } catch (err: any) {
-          throw new Error("Lokal serverga ulanib bo'lmadi yoki FFmpeg yetishmayapti. Iltimos tekshiring.");
+        } catch {
+          throw new Error("Lokal serverga ulanib bo'lmadi. FFmpeg yoki serverni tekshiring.");
         }
       }
 
-      // Proxy orqali Cobalt serveriga ulanish
       let successData = null;
       let lastError: Error | null = null;
 
+      // 2. Proxy.php (Cobalt API) orqali urinish
       try {
         const response = await fetch("/api/proxy.php", {
           method: "POST",
@@ -99,32 +93,54 @@ export const VideoDownloaderPage: React.FC = () => {
         let data;
         try {
           data = JSON.parse(responseText);
-        } catch (err) {
-          console.error("Non-JSON response:", responseText);
-          let errorSnippet = responseText.substring(0, 100);
-          throw new Error(`Server xatosi: ${errorSnippet}... (JSON emas)`);
+        } catch {
+          console.error("Non-JSON response:", responseText.substring(0, 200));
+          throw new Error("Server noto'g'ri javob qaytardi (JSON emas)");
         }
 
-        if (data.status !== "error") {
+        if (data.status === "success" || data.status === "tunnel" || data.status === "redirect") {
           successData = data;
+        } else if (data.status === "picker" && data.picker?.length > 0) {
+          successData = { url: data.picker[0].url, status: "success" };
         } else {
-          lastError = new Error(data.text || "Yuklab olish imkoni bo'lmadi.");
+          lastError = new Error(data.text || "Cobalt API orqali yuklab bo'lmadi.");
         }
       } catch (err: any) {
+        console.log("Proxy.php xatosi, lokal serverga o'tilmoqda...", err.message);
         lastError = err;
       }
 
+      // 3. Fallback: Lokal Node.js server (yt-dlp)
       if (!successData) {
-        throw new Error(lastError?.message || "Sayt serverida yoki tasdiqlangan API'larda tarmoq muammosi.");
+        try {
+          const localResponse = await fetch("http://localhost:3000/api/download", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url: url.trim() })
+          });
+
+          const localData = await localResponse.json();
+          if (localData.status === "success" && localData.data?.url) {
+            successData = { url: localData.data.url, title: localData.data.title };
+          } else {
+            lastError = new Error(localData.text || "Lokal server ham yuklay olmadi.");
+          }
+        } catch {
+          // Lokal server ishlamayapti — asl xatoni ko'rsatamiz
+          console.log("Lokal server ham javob bermadi.");
+        }
       }
 
-      // Format natijalarni chiqarish
+      if (!successData) {
+        throw new Error(lastError?.message || "Videoni yuklab bo'lmadi. Havolani tekshirib qayta urinib ko'ring.");
+      }
+
       setResult({
         url: successData.url,
-        title: "Yuklab olingan video", 
+        title: successData.title || "Yuklab olingan video",
         type: "video",
       });
-      
+
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Kutilmagan xatolik yuz berdi.");
