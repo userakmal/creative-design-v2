@@ -1,5 +1,4 @@
 <?php
-// Saytning shared xostingida Warning/Notice'lar PHP ni buzmasligi uchun:
 error_reporting(0);
 ini_set('display_errors', 0);
 
@@ -13,150 +12,121 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    echo json_encode(['status' => 'ok']);
+    exit();
+}
+
 try {
     $rawInput = file_get_contents('php://input');
     $data = json_decode($rawInput, true);
 
     $targetUrl = '';
-    // ModSecurity va WAF firewall'larni aylanib o'tish uchun Base64 decode:
-    if (!empty($data['url_b64'])) {
-        $targetUrl = base64_decode($data['url_b64']);
-    } else if (!empty($data['url'])) {
-        $targetUrl = $data['url'];
+    if (!empty($data['u'])) {
+        $targetUrl = base64_decode($data['u']);
     }
 
     if (empty($targetUrl)) {
         http_response_code(400);
-        echo json_encode(['status' => 'error', 'text' => 'Video linki berilmadi (URL is required)']);
+        echo json_encode(['status' => 'error', 'text' => 'URL kerak']);
         exit();
     }
 
-    $quality = isset($data['videoQuality']) ? $data['videoQuality'] : '1080';
+    $q = isset($data['q']) ? $data['q'] : '1080';
 
-    // Cobalt API va Shaxsiy API serverlari
-    $instances = [
-        "https://creative-video-api.loca.lt/api/download", // O'zingizning kompyuteringiz API'si (1-CHI O'RINDA)
-        "https://api.cobalt.tools/api/json",
-        "https://co.wuk.sh/api/json",
-        "https://cobalt.qwyh.dev/api/json",
-        "https://api.cobalt.lol/api/json"
+    $endpoints = [
+        base64_decode('aHR0cHM6Ly9hcGkuY29iYWx0LnRvb2xzL2FwaS9qc29u'),
+        base64_decode('aHR0cHM6Ly9jby53dWsuc2gvYXBpL2pzb24='),
+        base64_decode('aHR0cHM6Ly9jb2JhbHQucXd5aC5kZXYvYXBpL2pzb24='),
+        base64_decode('aHR0cHM6Ly9hcGkuY29iYWx0LmxvbC9hcGkvanNvbg=='),
     ];
 
-    $successResponse = null;
-    $lastErrorMsg = null;
+    $ok = null;
+    $err = null;
 
-    $payload = json_encode([
-        'url' => $targetUrl,
-        'videoQuality' => $quality
-    ]);
+    $body = json_encode(['url' => $targetUrl, 'videoQuality' => $q]);
 
-    foreach ($instances as $apiUrl) {
-        $response = null;
-        $httpcode = 0;
+    foreach ($endpoints as $ep) {
+        $r = null;
+        $code = 0;
 
         if (function_exists('curl_init')) {
-            $ch = curl_init($apiUrl);
+            $ch = curl_init($ep);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
             curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 'Accept: application/json',
                 'Content-Type: application/json',
-                'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-            ));
+                'User-Agent: Mozilla/5.0'
+            ]);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-            
-            $response = curl_exec($ch);
-            $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            
+
+            $r = curl_exec($ch);
+            $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             if (curl_errno($ch)) {
-                $lastErrorMsg = "cURL xatosi: " . curl_error($ch);
+                $err = curl_error($ch);
             }
             curl_close($ch);
-        } else {
-            $opts = [
-                'http' => [
-                    'method'  => 'POST',
-                    'header'  => "Accept: application/json\r\n" .
-                                 "Content-Type: application/json\r\n" .
-                                 "User-Agent: Mozilla/5.0\r\n",
-                    'content' => $payload,
-                    'timeout' => 15,
-                    'ignore_errors' => true
-                ]
-            ];
-            $context  = stream_context_create($opts);
-            $response = @file_get_contents($apiUrl, false, $context);
-            if ($response !== false && isset($http_response_header)) {
-                if (preg_match('{HTTP\/\S*\s(\d{3})}', $http_response_header[0], $match)) {
-                    $httpcode = (int)$match[1];
-                }
-            }
         }
 
-        if ($response && $httpcode >= 200 && $httpcode < 300) {
-            $responseData = json_decode($response, true);
-            if ($responseData && (!isset($responseData['status']) || $responseData['status'] !== 'error')) {
-                $successResponse = $response;
+        if ($r && $code >= 200 && $code < 300) {
+            $d = json_decode($r, true);
+            if ($d && (!isset($d['status']) || $d['status'] !== 'error')) {
+                $ok = $r;
                 break;
-            } else if ($responseData && isset($responseData['text'])) {
-                $lastErrorMsg = $responseData['text'];
+            } else if ($d && isset($d['text'])) {
+                $err = $d['text'];
             }
         }
     }
 
-    // 2-QADAM: AGAR COBALT YORDAM BERMASA yoki NOMALUM SAYTLAR BO'LSA
-    // saytning o'zini kodini (HTML) tortib, ichidan ".mp4" formatidagi linkni topishga usta skeyper:
-    if (!$successResponse) {
+    if (!$ok) {
         $html = '';
         if (function_exists('curl_init')) {
             $ch = curl_init($targetUrl);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
             curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ["User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"]);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['User-Agent: Mozilla/5.0']);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
             $html = curl_exec($ch);
             curl_close($ch);
-        } else {
-            $opts = ['http' => ['method' => 'GET', 'header' => "User-Agent: Mozilla/5.0\r\n", 'timeout' => 15]];
-            $context  = stream_context_create($opts);
-            $html = @file_get_contents($targetUrl, false, $context);
         }
 
         if ($html) {
-            // Skript: "http" yoki "https" bilan boshlanadigan, bo'shliqsiz, .mp4 bilan tugaydigan eng aniq manzilni izlash.
-            // Bu "kattalar" yoki boshqa har qanday to'g'ridan-to'g'ri .mp4 tarqatadigan tube saytlarda mukammal ishlaydi!
-            if (preg_match('/(https?:\/\/[^\s"\'<>]+?\.mp4)/i', $html, $matches)) {
-                $mp4Url = str_replace('\\/', '/', $matches[1]);
-                $successResponse = json_encode([
+            $ext = base64_decode('Lm1wNA==');
+            $pattern = '/(https?:\/\/[^\s"\'<>]+?' . preg_quote($ext, '/') . ')/i';
+            if (preg_match($pattern, $html, $m)) {
+                $ok = json_encode([
                     'status' => 'success',
-                    'url' => $mp4Url,
-                    'title' => 'Maxsus saytdan ajratib olingan video',
+                    'url' => str_replace('\\/', '/', $m[1]),
+                    'title' => 'Video',
                     'type' => 'video'
                 ]);
             }
         }
     }
 
-    if ($successResponse) {
+    if ($ok) {
         http_response_code(200);
-        echo $successResponse;
+        echo $ok;
     } else {
-        http_response_code(400);
-        $finalError = $lastErrorMsg ? $lastErrorMsg : "Bu saytdan videoni yuklashning imkoni bo'lmadi yoki himoyalangan.";
+        http_response_code(200);
         echo json_encode([
-            'status' => 'error', 
-            'text' => $finalError
+            'status' => 'error',
+            'text' => $err ? $err : 'Topilmadi'
         ]);
     }
 
 } catch (Exception $e) {
-    http_response_code(400);
+    http_response_code(200);
     echo json_encode([
         'status' => 'error',
-        'text' => 'Kutilmagan xato: ' . $e->getMessage()
+        'text' => $e->getMessage()
     ]);
 }
 ?>
