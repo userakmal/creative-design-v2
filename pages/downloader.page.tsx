@@ -54,6 +54,31 @@ export const VideoDownloaderPage: React.FC = () => {
     setResult(null);
 
     try {
+      // 1. Agar qilingan havola to'g'ridan-to'g'ri M3U8 bo'lsa, lokal (Node.js) serverga jo'natamiz
+      if (url.trim().includes(".m3u8")) {
+        try {
+          const m3u8Response = await fetch("http://localhost:3001/api/download-m3u8", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url: url.trim() })
+          });
+
+          const m3u8Data = await m3u8Response.json();
+          if (!m3u8Response.ok) throw new Error(m3u8Data.error || "M3U8 saqlashda xatolik yuz berdi.");
+
+          setResult({
+            url: m3u8Data.url,
+            title: "M3U8 Jonli Efir Videos",
+            type: "video"
+          });
+          setIsLoading(false);
+          return;
+        } catch (err: any) {
+          throw new Error("Lokal serverga ulanib bo'lmadi yoki FFmpeg yetishmayapti. Iltimos tekshiring.");
+        }
+      }
+
+      // 2. Oddiy ijtimoiy tarmoqlar (Cobalt) uchun
       // List of robust Cobalt instances
       const instances = [
         "https://co.wuk.sh",

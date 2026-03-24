@@ -103,6 +103,46 @@ app.post(
   }
 );
 
+// M3U8 Downloader Endpoint
+import { spawn } from "child_process";
+
+app.post("/api/download-m3u8", async (req, res) => {
+  try {
+    const { url } = req.body;
+    if (!url || !url.includes('.m3u8')) {
+      return res.status(400).json({ error: "M3U8 havola kiritilmadi yoki yaroqsiz." });
+    }
+
+    const fileName = `m3u8-${Date.now()}.mp4`;
+    const outputPath = path.join(__dirname, "public", "videos", fileName);
+
+    // M3U8 dan MP4 ga o'girish uchun FFmpeg buyrug'i
+    const ffmpeg = spawn("ffmpeg", [
+      "-i", url,
+      "-c", "copy",
+      "-bsf:a", "aac_adtstoasc",
+      outputPath
+    ]);
+
+    let errorOutput = "";
+    ffmpeg.stderr.on("data", (data) => {
+      errorOutput += data.toString();
+    });
+
+    ffmpeg.on("close", (code) => {
+      if (code === 0) {
+        res.json({ success: true, url: `http://localhost:3001/videos/${fileName}`, file: fileName });
+      } else {
+        console.error("FFmpeg error:", errorOutput);
+        res.status(500).json({ error: "Videoni saqlab bo'lmadi. Serverda FFmpeg dasturi o'rnatilganligiga ishonch hosil qiling." });
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 const PORT = 3001;
 app.listen(PORT, () => {
   console.log(`✅ Admin Upload Server running on http://localhost:${PORT}`);
