@@ -78,7 +78,7 @@ export const VideoDownloaderPage: React.FC = () => {
         }
       }
 
-      // 2. Oddiy ijtimoiy tarmoqlar (Cobalt) uchun proxy orqali urinib ko'rish
+      // Proxy orqali Cobalt serveriga ulanish
       let successData = null;
       let lastError: Error | null = null;
 
@@ -101,58 +101,21 @@ export const VideoDownloaderPage: React.FC = () => {
           data = JSON.parse(responseText);
         } catch (err) {
           console.error("Non-JSON response:", responseText);
-          let errorSnippet = responseText.substring(0, 80);
+          let errorSnippet = responseText.substring(0, 100);
           throw new Error(`Server xatosi: ${errorSnippet}... (JSON emas)`);
         }
 
         if (response.ok && data.status !== "error") {
           successData = data;
         } else {
-          lastError = new Error(data.text || data.error?.code || "Proxy orqali ulanish muvaffaqiyatsiz.");
+          lastError = new Error(data.text || data.error?.code || "Yuklab olish imkoni bo'lmadi.");
         }
       } catch (err: any) {
         lastError = err;
       }
 
-      // Agar proxy ishlamasa (masalan cURL yo'qligi, CORS), zaxira reja sifatida to'g'ridan-to'g'ri umumiy api.cobalt serverlariga ulanamiz:
       if (!successData) {
-        console.warn("Proxy failed, trying direct instances. Reason:", lastError?.message);
-        const instances = [
-          "https://co.wuk.sh",
-          "https://cobalt.qwyh.dev",
-          "https://api.cobalt.lol"
-        ];
-
-        for (const instance of instances) {
-          try {
-            const response = await fetch(instance, {
-              method: "POST",
-              headers: {
-                "Accept": "application/json",
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify({
-                url: url.trim(),
-                videoQuality: "1080"
-              })
-            });
-
-            if (!response.ok) continue;
-
-            const data = await response.json();
-            if (data.status === "error") continue;
-
-            successData = data;
-            break; 
-          } catch (err) {
-            console.warn(`Failed with direct ${instance}:`, err);
-            continue; 
-          }
-        }
-      }
-
-      if (!successData) {
-        throw new Error(lastError?.message || "Barcha serverlar band yoki tarmoq xatosi. Iltimos keyinroq qayta urinib ko'ring yoki VPN ni yoqing.");
+        throw new Error(lastError?.message || "Sayt serverida yoki tasdiqlangan API'larda tarmoq muammosi.");
       }
 
       // Format natijalarni chiqarish
