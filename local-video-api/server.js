@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require('cors');
+const localtunnel = require('localtunnel');
 const { exec } = require("child_process");
 let chromium;
 try {
@@ -127,11 +128,45 @@ app.post("/api/download", async (req, res) => {
 });
 
 const PORT = 3000;
-app.listen(PORT, () => {
+const SUBDOMAIN = "creative-video-api";
+
+app.listen(PORT, async () => {
     console.log(`\n================================`);
     console.log(`🚀 Universal Video Server Ishga Tushdi (Port: ${PORT})`);
     console.log(`Muallif: ${AUTHOR}`);
     console.log(`================================`);
     console.log(`🌐 API manzili: http://localhost:${PORT}/api/download`);
-    console.log(`(Ushbu oynani yopmang, video yuklash uchun server yoniq turishi kerak)`);
+    
+    // Tunnellni avtomatik yoqish
+    const setupTunnel = async () => {
+        try {
+            console.log(`\n[Tunnel] Internetga ulanishga harakat qilinmoqda (${SUBDOMAIN}.loca.lt)...`);
+            const tunnel = await localtunnel({ 
+                port: PORT, 
+                subdomain: SUBDOMAIN 
+            });
+
+            console.log(`\n✅ TUNNEL TAYYOR!`);
+            console.log(`🔗 Tashqi havola: ${tunnel.url}`);
+            console.log(`--------------------------------`);
+            console.log(`(Ushbu oynani yopmang, video yuklash uchun server yoniq turishi kerak)\n`);
+
+            tunnel.on('close', () => {
+                console.log("\n[!] Tunnel yopildi. Qayta ulanishga harakat qilinmoqda...");
+                setTimeout(setupTunnel, 5000);
+            });
+
+            tunnel.on('error', (err) => {
+                console.error("\n[Xato] Tunnelda xatolik:", err.message);
+                tunnel.close();
+            });
+
+        } catch (e) {
+            console.error("\n[Xato] Tunnelni yoqishda xatolik:", e.message);
+            console.log("5 soniyadan so'ng qayta uriniladi...");
+            setTimeout(setupTunnel, 5000);
+        }
+    };
+
+    setupTunnel();
 });

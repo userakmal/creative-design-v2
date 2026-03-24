@@ -7,5 +7,9 @@ echo     "your url is: https://..." degan yozuv chiqishini kuting!
 echo     Shu ssilka sizning haqiqiy ishlaydigan serveringiz.
 echo ===================================================
 cd local-video-api
+:start
+echo [Tunnell] Bog'lanishga harakat qilinmoqda...
 npx localtunnel --port 3000 --subdomain creative-video-api
-pause
+echo [Ogohlantirish] Tunnel uzildi yoki vaqt tugadi. 5 soniyadan so'ng qayta uriniladi...
+timeout /t 5
+goto start
