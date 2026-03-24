@@ -1,0 +1,38 @@
+name: Deploy via FTP
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: 31.184.242.14
+          username: gihub-deploy
+          password: gM9aH7jD3c
+          # # Optional: ftp | ftps | ftps-legacy
+          # protocol: ${{ secrets.FTP_PROTOCOL }}
+          # # Optional: defaults to 21 if omitted by the action, set if your host requires a specific port
+          # port: ${{ secrets.FTP_PORT }}
+          local-dir: dist/
+          server-dir: /
