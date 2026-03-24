@@ -35,7 +35,7 @@ try {
 
     // Cobalt API va Shaxsiy API serverlari
     $instances = [
-        "https://forty-rocks-appear.loca.lt/api/download", // O'zingizning kompyuteringiz API'si (1-CHI O'RINDA)
+        "https://creative-video-api.loca.lt/api/download", // O'zingizning kompyuteringiz API'si (1-CHI O'RINDA)
         "https://api.cobalt.tools/api/json",
         "https://co.wuk.sh/api/json",
         "https://cobalt.qwyh.dev/api/json",

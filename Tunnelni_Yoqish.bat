@@ -7,5 +7,5 @@ echo     "your url is: https://..." degan yozuv chiqishini kuting!
 echo     Shu ssilka sizning haqiqiy ishlaydigan serveringiz.
 echo ===================================================
 cd local-video-api
-npx localtunnel --port 3000
+npx localtunnel --port 3000 --subdomain creative-video-api
 pause
