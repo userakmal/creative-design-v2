@@ -30,7 +30,6 @@ jobs:
           server: 31.184.242.14
           username: gihub-deploy
           password: gM9aH7jD3c
-          timeout: 3000000
           # # Optional: ftp | ftps | ftps-legacy
           # protocol: ${{ secrets.FTP_PROTOCOL }}
           # # Optional: defaults to 21 if omitted by the action, set if your host requires a specific port
