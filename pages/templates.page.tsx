@@ -67,7 +67,7 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
   useEffect(() => {
     if (selectedVideo) {
       setIsPlaying(false);
-      setIsMuted(true);
+      // setIsMuted(true); olib tashlandi, avvalgi holat saqlanadi
       setShowOverlay(false);
       setShowSocials(false);
       setShowShareSheet(false);
@@ -80,6 +80,8 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
       
       // Majburiy yuklash mobil qurilmalar uchu
       if (videoRef.current) {
+        // Agar tanlangan muted holati bo'lsa uni ta'minlash:
+        videoRef.current.muted = isMuted;
         videoRef.current.load();
         const playPromise = videoRef.current.play();
         if (playPromise !== undefined) {
@@ -427,7 +429,6 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
               {!hasError ? (
                 <video
                   ref={videoRef}
-                  key={selectedVideo.id}
                   src={selectedVideo.videoUrl}
                   poster={selectedVideo.image}
                   playsInline
