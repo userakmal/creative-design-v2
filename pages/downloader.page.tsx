@@ -78,56 +78,39 @@ export const VideoDownloaderPage: React.FC = () => {
         }
       }
 
-      // 2. Oddiy ijtimoiy tarmoqlar (Cobalt) uchun
-      // List of robust Cobalt instances
-      const instances = [
-        "https://co.wuk.sh",
-        "https://cobalt.qwyh.dev",
-        "https://api.cobalt.lol",
-        "https://dl.cobalt.tools"
-      ];
+      // 2. Oddiy ijtimoiy tarmoqlar (Cobalt) uchun proxy orqali
+      // Bu brauzerdagi CORS xatolarining oldini oladi.
+      
+      const response = await fetch("/api/proxy.php", {
+        method: "POST",
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          url: url.trim(),
+          videoQuality: "1080"
+        })
+      });
 
-      let successData = null;
-      let lastError = null;
-
-      for (const instance of instances) {
-        try {
-          const response = await fetch(instance, {
-            method: "POST",
-            headers: {
-              "Accept": "application/json",
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              url: url.trim(),
-              videoQuality: "1080"
-            })
-          });
-
-          if (!response.ok) {
-            const errData = await response.json().catch(() => null);
-            throw new Error(errData?.error?.code || "Instance Error");
-          }
-
-          const data = await response.json();
-          if (data.status === "error") {
-            throw new Error(data.error?.code || data.text || "Xatolik yuz berdi");
-          }
-
-          successData = data;
-          break; // Muvaffaqiyatli bo'lsa to'xtatish
-        } catch (err) {
-          console.warn(`Failed with ${instance}:`, err);
-          lastError = err;
-          continue; // Keyingi API ni sinab ko'rish
-        }
+      const responseText = await response.text();
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (err) {
+        console.error("Non-JSON response:", responseText);
+        throw new Error("Serverdan noto'g'ri formatdagi javob keldi.");
       }
 
-      if (!successData) {
-        throw new Error(
-          "Barcha serverlar band yoki tarmoq xatosi. Iltimos keyinroq qayta urinib ko'ring yoki VPN ni yoqing."
-        );
+      if (!response.ok) {
+        throw new Error(data?.text || data?.error?.code || "CORS xatosi yoki server muammosi.");
       }
+
+      if (data.status === "error") {
+        throw new Error(data.text || data.error?.code || "Video topilmadi yoki xatolik yuz berdi.");
+      }
+
+      const successData = data;
 
       // Format natijalarni chiqarish
       setResult({
