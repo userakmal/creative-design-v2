@@ -65,6 +65,8 @@ try {
                 'Content-Type: application/json',
                 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
             ));
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
             
             $response = curl_exec($ch);
             $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -142,7 +144,7 @@ try {
         http_response_code(200);
         echo $successResponse;
     } else {
-        http_response_code(500);
+        http_response_code(400);
         $finalError = $lastErrorMsg ? $lastErrorMsg : "Bu saytdan videoni yuklashning imkoni bo'lmadi yoki himoyalangan.";
         echo json_encode([
             'status' => 'error', 
@@ -151,7 +153,7 @@ try {
     }
 
 } catch (Exception $e) {
-    http_response_code(500);
+    http_response_code(400);
     echo json_encode([
         'status' => 'error',
         'text' => 'Kutilmagan xato: ' . $e->getMessage()
