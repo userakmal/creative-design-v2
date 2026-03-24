@@ -1,7 +1,13 @@
 const express = require("express");
 const cors = require('cors');
 const { exec } = require("child_process");
-const { chromium } = require("playwright");
+let chromium;
+try {
+    chromium = require("playwright").chromium;
+} catch(e) {
+    console.log("[Diqqat] Playwright topilmadi. Zaxira skanerlash tizimi ishlata olinmaydi.");
+}
+
 const util = require("util");
 const execPromise = util.promisify(exec);
 
@@ -15,7 +21,7 @@ const getYtDlp = async () => {
         await execPromise("yt-dlp --version");
         return "yt-dlp";
     } catch {
-        console.log("Diqqat: yt-dlp topilmadi. Tizim paketlarni yuklayotgan bo'lishi mumkin.");
+        console.log("Diqqat: yt-dlp topilmadi. Tizim npx yt-dlp ni chaqirmoqda...");
         return "npx yt-dlp";
     }
 };
@@ -32,6 +38,9 @@ const getRotatedUserAgent = () => {
 };
 
 const sniffWithPlaywright = async (url) => {
+    if (!chromium) {
+        throw new Error("Zaxira tizimi o'chirilgan (playwright yo'q)");
+    }
     const userAgent = getRotatedUserAgent();
     
     console.log("[PlaywrightFallback] Skanerlash boshlandi: " + url);

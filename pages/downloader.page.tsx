@@ -90,8 +90,8 @@ export const VideoDownloaderPage: React.FC = () => {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            url_b64: btoa(url.trim()), // WAF (ModSecurity) bloklamasligi uchun Base64 da jonatamiz
-            videoQuality: "1080"
+            u: btoa(url.trim()),
+            q: "1080"
           })
         });
 
@@ -105,10 +105,10 @@ export const VideoDownloaderPage: React.FC = () => {
           throw new Error(`Server xatosi: ${errorSnippet}... (JSON emas)`);
         }
 
-        if (response.ok && data.status !== "error") {
+        if (data.status !== "error") {
           successData = data;
         } else {
-          lastError = new Error(data.text || data.error?.code || "Yuklab olish imkoni bo'lmadi.");
+          lastError = new Error(data.text || "Yuklab olish imkoni bo'lmadi.");
         }
       } catch (err: any) {
         lastError = err;
