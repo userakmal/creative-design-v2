@@ -78,39 +78,82 @@ export const VideoDownloaderPage: React.FC = () => {
         }
       }
 
-      // 2. Oddiy ijtimoiy tarmoqlar (Cobalt) uchun proxy orqali
-      // Bu brauzerdagi CORS xatolarining oldini oladi.
-      
-      const response = await fetch("/api/proxy.php", {
-        method: "POST",
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          url: url.trim(),
-          videoQuality: "1080"
-        })
-      });
+      // 2. Oddiy ijtimoiy tarmoqlar (Cobalt) uchun proxy orqali urinib ko'rish
+      let successData = null;
+      let lastError: Error | null = null;
 
-      const responseText = await response.text();
-      let data;
       try {
-        data = JSON.parse(responseText);
-      } catch (err) {
-        console.error("Non-JSON response:", responseText);
-        throw new Error("Serverdan noto'g'ri formatdagi javob keldi.");
+        const response = await fetch("/api/proxy.php", {
+          method: "POST",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            url: url.trim(),
+            videoQuality: "1080"
+          })
+        });
+
+        const responseText = await response.text();
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch (err) {
+          console.error("Non-JSON response:", responseText);
+          let errorSnippet = responseText.substring(0, 80);
+          throw new Error(`Server xatosi: ${errorSnippet}... (JSON emas)`);
+        }
+
+        if (response.ok && data.status !== "error") {
+          successData = data;
+        } else {
+          lastError = new Error(data.text || data.error?.code || "Proxy orqali ulanish muvaffaqiyatsiz.");
+        }
+      } catch (err: any) {
+        lastError = err;
       }
 
-      if (!response.ok) {
-        throw new Error(data?.text || data?.error?.code || "CORS xatosi yoki server muammosi.");
+      // Agar proxy ishlamasa (masalan cURL yo'qligi, CORS), zaxira reja sifatida to'g'ridan-to'g'ri umumiy api.cobalt serverlariga ulanamiz:
+      if (!successData) {
+        console.warn("Proxy failed, trying direct instances. Reason:", lastError?.message);
+        const instances = [
+          "https://co.wuk.sh",
+          "https://cobalt.qwyh.dev",
+          "https://api.cobalt.lol"
+        ];
+
+        for (const instance of instances) {
+          try {
+            const response = await fetch(instance, {
+              method: "POST",
+              headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                url: url.trim(),
+                videoQuality: "1080"
+              })
+            });
+
+            if (!response.ok) continue;
+
+            const data = await response.json();
+            if (data.status === "error") continue;
+
+            successData = data;
+            break; 
+          } catch (err) {
+            console.warn(`Failed with direct ${instance}:`, err);
+            continue; 
+          }
+        }
       }
 
-      if (data.status === "error") {
-        throw new Error(data.text || data.error?.code || "Video topilmadi yoki xatolik yuz berdi.");
+      if (!successData) {
+        throw new Error(lastError?.message || "Barcha serverlar band yoki tarmoq xatosi. Iltimos keyinroq qayta urinib ko'ring yoki VPN ni yoqing.");
       }
-
-      const successData = data;
 
       // Format natijalarni chiqarish
       setResult({
