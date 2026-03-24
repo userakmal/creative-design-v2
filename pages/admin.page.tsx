@@ -25,7 +25,7 @@ export const AdminPage: React.FC = () => {
       setLoginError("Login yoki parol noto'g'ri!");
     }
   };
-
+ 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !videoFile || !imageFile) {
