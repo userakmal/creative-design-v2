@@ -17,13 +17,8 @@ app.use(cors());
 
 // Yt-dlp yuklash (avtomatik ravishda ddl)
 const getYtDlp = async () => {
-    try {
-        await execPromise("yt-dlp --version");
-        return "yt-dlp";
-    } catch {
-        console.log("Diqqat: yt-dlp topilmadi. Tizim npx yt-dlp ni chaqirmoqda...");
-        return "npx yt-dlp";
-    }
+    return ".\\yt-dlp.exe";
+
 };
 
 const AUTHOR = "G'ulomov Akmal";
@@ -90,10 +85,12 @@ app.post("/api/download", async (req, res) => {
 
         try {
             const ytcmd = await getYtDlp();
-            const command = `${ytcmd} -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best" --dump-json "${url}"`;
-            console.log("[Yt-Dlp] Ishga tushyapti...");
+            const command = `${ytcmd} -f "best" --dump-json "${url}"`;
+            console.log(`[Yt-Dlp] Ishga tushyapti: ${command}`);
             
-            const { stdout } = await execPromise(command, { maxBuffer: 1024 * 1024 * 10 });
+            const { stdout, stderr } = await execPromise(command, { maxBuffer: 1024 * 1024 * 50, timeout: 30000 });
+            if (stderr) console.log("[Yt-Dlp STDERR]:", stderr);
+            console.log("[Yt-Dlp] Tugallandi, JSON parse qilinmoqda...");
             const videoData = JSON.parse(stdout);
             
             return res.status(200).json({
