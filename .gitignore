@@ -23,6 +23,3 @@ dist-ssr
 *.sln
 *.sw?
 
-# Media optimizations
-public/videos/
-public/image/
