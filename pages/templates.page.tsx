@@ -46,7 +46,7 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
   });
   const [showOverlay, setShowOverlay] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   const [showSocials, setShowSocials] = useState(false);
   const [showShareSheet, setShowShareSheet] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
@@ -67,7 +67,7 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
   useEffect(() => {
     if (selectedVideo) {
       setIsPlaying(false);
-      setIsMuted(false);
+      setIsMuted(true);
       setShowOverlay(false);
       setShowSocials(false);
       setShowShareSheet(false);
@@ -77,6 +77,18 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
       const timer = setTimeout(() => {
         setShowOverlay(true);
       }, 500);
+      
+      // Majburiy yuklash mobil qurilmalar uchu
+      if (videoRef.current) {
+        videoRef.current.load();
+        const playPromise = videoRef.current.play();
+        if (playPromise !== undefined) {
+           playPromise.catch(e => {
+               console.warn("Autoplay prevented by browser", e);
+               setIsPlaying(false);
+           });
+        }
+      }
 
       return () => clearTimeout(timer);
     }
@@ -138,39 +150,12 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
   };
 
   const handleVideoReady = () => {
-    if (!videoRef.current) return;
     setIsLoading(false);
-
-    // Try to play with sound first
-    const playPromise = videoRef.current.play();
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          setIsPlaying(true);
-          setIsMuted(false);
-        })
-        .catch((error) => {
-          // Auto-play was prevented.
-          if (error.name !== "AbortError") {
-            console.warn(
-              "Autoplay with sound failed, trying muted.",
-              error.name
-            );
-            if (videoRef.current) {
-              videoRef.current.muted = true;
-              setIsMuted(true);
-              videoRef.current
-                .play()
-                .then(() => setIsPlaying(true))
-                .catch((e) => {
-                  if (e.name !== "AbortError") {
-                    console.error("Muted playback failed", e);
-                    setIsPlaying(false);
-                  }
-                });
-            }
-          }
-        });
+    if (videoRef.current && videoRef.current.paused) {
+         videoRef.current.play().catch(() => {
+            setIsPlaying(false);
+            console.log("Play interrupted");
+         });
     }
   };
 
@@ -447,6 +432,8 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
                   poster={selectedVideo.image}
                   playsInline
                   webkit-playsinline="true"
+                  autoPlay
+                  muted={isMuted}
                   className="w-full h-full object-cover bg-stone-900"
                   onCanPlay={handleVideoReady}
                   onWaiting={() => setIsLoading(true)}
