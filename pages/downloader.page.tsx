@@ -54,47 +54,66 @@ export const VideoDownloaderPage: React.FC = () => {
     setResult(null);
 
     try {
-      // Proxy orqali CORS xatosini chetlab o'tamiz
-      const apiUri = "https://api.cobalt.tools/api/json";
-      const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(apiUri)}`;
+      // List of robust Cobalt instances
+      const instances = [
+        "https://co.wuk.sh",
+        "https://cobalt.qwyh.dev",
+        "https://api.cobalt.lol",
+        "https://dl.cobalt.tools"
+      ];
 
-      const response = await fetch(proxyUrl, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          url: url.trim(),
-        }),
-      });
+      let successData = null;
+      let lastError = null;
 
-      if (!response.ok) {
-        throw new Error("Server xatosi yoki bunday video yuklash taqiqlangan.");
+      for (const instance of instances) {
+        try {
+          const response = await fetch(instance, {
+            method: "POST",
+            headers: {
+              "Accept": "application/json",
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              url: url.trim(),
+              videoQuality: "1080"
+            })
+          });
+
+          if (!response.ok) {
+            const errData = await response.json().catch(() => null);
+            throw new Error(errData?.error?.code || "Instance Error");
+          }
+
+          const data = await response.json();
+          if (data.status === "error") {
+            throw new Error(data.error?.code || data.text || "Xatolik yuz berdi");
+          }
+
+          successData = data;
+          break; // Muvaffaqiyatli bo'lsa to'xtatish
+        } catch (err) {
+          console.warn(`Failed with ${instance}:`, err);
+          lastError = err;
+          continue; // Keyingi API ni sinab ko'rish
+        }
       }
 
-      const data = await response.json();
-
-      if (data.status === "error") {
-        throw new Error(data.text || "Videoni yuklab bo'lmadi.");
+      if (!successData) {
+        throw new Error(
+          "Barcha serverlar band yoki tarmoq xatosi. Iltimos keyinroq qayta urinib ko'ring yoki VPN ni yoqing."
+        );
       }
 
       // Format natijalarni chiqarish
       setResult({
-        url: data.url,
-        title: "Yuklab olingan video", // Cobalt ko'pincha title jo'natmaydi
+        url: successData.url,
+        title: "Yuklab olingan video", 
         type: "video",
       });
       
     } catch (err: any) {
       console.error(err);
-      if (err instanceof TypeError && err.message === "Failed to fetch") {
-        setError(
-          "CORS xatosi yoki tarmoq muammosi. Iltimos, boshqa link bilan urinib ko'ring yoki keyinroq qayta urinib ko'ring."
-        );
-      } else {
-        setError(err.message || "Kutilmagan xatolik yuz berdi.");
-      }
+      setError(err.message || "Kutilmagan xatolik yuz berdi.");
     } finally {
       setIsLoading(false);
     }
