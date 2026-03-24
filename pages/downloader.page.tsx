@@ -54,12 +54,13 @@ export const VideoDownloaderPage: React.FC = () => {
     setResult(null);
 
     try {
-      // Lokal server orqali video URL olish
-      const response = await fetch("http://localhost:3000/api/download", {
+      // Lokal server public URL manzili (localtunnel orqali)
+      const response = await fetch("https://creative-video-api.loca.lt/api/download", {
         method: "POST",
         headers: {
           "Accept": "application/json",
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "Bypass-Tunnel-Reminder": "true"
         },
         body: JSON.stringify({
           url: url.trim(),
