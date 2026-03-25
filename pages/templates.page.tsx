@@ -511,7 +511,7 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
                   {!showSocials ? (
                     <button
                       onClick={() => setShowSocials(true)}
-                      className="flex-1 py-4 bg-[#229ED9] text-white rounded-xl font-medium text-sm hover:bg-[#1c8lb4] flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-lg shadow-blue-500/30"
+                      className="flex-1 py-4 bg-[#229ED9] text-white rounded-xl font-medium text-sm hover:bg-[#1c81b4] flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-lg shadow-blue-500/30"
                     >
                       <Share2 size={18} />
                       Buyurtma berish
