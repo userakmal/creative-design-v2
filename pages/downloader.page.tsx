@@ -18,6 +18,7 @@ interface DownloadResult {
   thumbnail?: string;
   title?: string;
   type: "video" | "audio" | "unknown";
+  isM3U8?: boolean;
 }
 
 // API manzillari: avval lokal, keyin tunnel
@@ -138,6 +139,7 @@ export const VideoDownloaderPage: React.FC = () => {
             url: data.data.url,
             title: data.data.title || "Yuklab olingan video",
             type: "video",
+            isM3U8: data.data.isM3U8 || false,
           });
           setIsLoading(false);
           return; // Muvaffaqiyat!
@@ -205,8 +207,9 @@ export const VideoDownloaderPage: React.FC = () => {
               Istagan videoni yuklang
             </h3>
             <p className="text-xs text-stone-500 leading-relaxed">
-              Instagram, TikTok, YouTube va boshqa ijtimoiy tarmoqlardan
-              videolarni havolasi orqali bepul yuklab oling.
+              Instagram, TikTok, YouTube, M3U8 streamlar va boshqa
+              platformalardan videolarni havolasi orqali bepul yuklab oling.
+              Barcha cheklovlardan avtomatik o'tadi.
             </p>
           </div>
         </div>
@@ -307,15 +310,20 @@ export const VideoDownloaderPage: React.FC = () => {
             </div>
 
             <div className="p-4 grid grid-cols-1 gap-3">
+              {result.isM3U8 && (
+                <div className="px-3 py-2 bg-amber-50 border border-amber-100 rounded-lg text-[11px] text-amber-700 mb-1">
+                  ⚡ M3U8 stream — VLC yoki brauzerda ochish mumkin
+                </div>
+              )}
               <a
                 href={result.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                download
+                download={!result.isM3U8}
                 className="w-full py-3.5 bg-stone-800 hover:bg-stone-900 text-white rounded-xl font-medium text-sm flex items-center justify-center gap-2 transition-colors"
               >
                 <Video size={18} />
-                Videoni yuklab olish
+                {result.isM3U8 ? "Streamni ochish" : "Videoni yuklab olish"}
               </a>
             </div>
           </div>
@@ -326,7 +334,7 @@ export const VideoDownloaderPage: React.FC = () => {
             Qanday ishlaydi?
           </p>
           <p className="text-xs text-stone-500 leading-relaxed max-w-[280px] mx-auto">
-            Ijtimoiy tarmoqlardagi (Instagram, TikTok, YouTube) videoning havolasini nusxalang, shu yerga tashlang va yuklab oling.
+            Ijtimoiy tarmoqlardagi videoning havolasini yoki M3U8 stream URL ni nusxalang, shu yerga tashlang va yuklab oling. Geo va SSL cheklovlardan avtomatik o'tadi.
           </p>
         </div>
       </div>
