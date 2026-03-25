@@ -109,81 +109,285 @@ const downloadWithYtDlp = async (url) => {
     };
 };
 
-// ========== PLAYWRIGHT SKANERLASH (m3u8 + mp4 ushlash) ==========
+// ========== PLAYWRIGHT SKANERLASH (CHUQUR — iframe, play tugma, m3u8, mp4) ==========
 const sniffWithPlaywright = async (url) => {
     if (!chromium) {
         throw new Error("Zaxira tizimi o'chirilgan (playwright yo'q)");
     }
     const userAgent = getRotatedUserAgent();
     
-    console.log("[PlaywrightFallback] Skanerlash boshlandi: " + url);
+    console.log("[Playwright] Chuqur skanerlash boshlandi: " + url);
     const browser = await chromium.launch({
-        headless: true
+        headless: true,
+        args: [
+            '--no-sandbox',
+            '--disable-web-security',
+            '--disable-features=IsolateOrigins,site-per-process',
+            '--allow-running-insecure-content',
+        ]
     });
     
     const context = await browser.newContext({ 
         userAgent,
-        ignoreHTTPSErrors: true,           // SSL xatolarni o'tkazib yuborish
-        bypassCSP: true,                   // Content Security Policy bypass
+        ignoreHTTPSErrors: true,
+        bypassCSP: true,
+        javaScriptEnabled: true,
         extraHTTPHeaders: {
             'Accept': '*/*',
             'Accept-Language': 'en-US,en;q=0.9',
             'Referer': url,
-        }
+        },
+        permissions: ['clipboard-read'],
+        viewport: { width: 1280, height: 720 },
     });
-    const page = await context.newPage();
     
     // Barcha topilgan video URLlarni saqlash
     const foundVideos = [];
     
-    page.on("response", async (response) => {
-        const reqUrl = response.url();
-        const contentType = response.headers()['content-type'] || '';
+    // Videoni aniqlash funksiyasi
+    const checkVideoUrl = (reqUrl, contentType = '') => {
+        if (!reqUrl || reqUrl.startsWith('data:') || reqUrl.includes('advertisement') || reqUrl.includes('/ads/')) return;
         
-        // M3U8 playlist topildi
-        if (reqUrl.includes(".m3u8") || contentType.includes('application/vnd.apple.mpegurl') || contentType.includes('application/x-mpegURL')) {
-            foundVideos.push({ url: reqUrl, type: "m3u8", priority: 10 });
-            console.log("[Playwright] M3U8 topildi:", reqUrl.substring(0, 100));
+        // M3U8
+        if (reqUrl.includes(".m3u8") || contentType.includes('mpegurl')) {
+            // master.m3u8 ni yuqori prioritetda qo'shish
+            const isMaster = reqUrl.includes('master') || reqUrl.includes('index');
+            foundVideos.push({ url: reqUrl, type: "m3u8", priority: isMaster ? 25 : 10 });
+            console.log("[Playwright] M3U8 topildi:", reqUrl.substring(0, 120));
         }
-        // MP4 video topildi
-        else if (reqUrl.includes(".mp4") || contentType.includes('video/mp4')) {
+        // MP4
+        else if (/\.mp4(\?|$|#)/i.test(reqUrl) || contentType.includes('video/mp4')) {
             foundVideos.push({ url: reqUrl, type: "mp4", priority: 20 });
-            console.log("[Playwright] MP4 topildi:", reqUrl.substring(0, 100));
+            console.log("[Playwright] MP4 topildi:", reqUrl.substring(0, 120));
         }
-        // Boshqa video formatlar
-        else if (reqUrl.includes(".webm") || reqUrl.includes(".ts") || contentType.includes('video/')) {
+        // WebM / FLV / TS / boshqa video
+        else if (/\.(webm|flv|ts|mkv|avi|mov)(\?|$|#)/i.test(reqUrl) || (contentType.includes('video/') && !contentType.includes('javascript'))) {
             foundVideos.push({ url: reqUrl, type: "video", priority: 5 });
-            console.log("[Playwright] Video stream topildi:", reqUrl.substring(0, 100));
+            console.log("[Playwright] Video stream topildi:", reqUrl.substring(0, 120));
         }
+    };
+
+    // BARCHA FRAME-LARDAN TARMOQ so'rovlarini kuzatish
+    const monitorPage = (targetPage) => {
+        targetPage.on("response", async (response) => {
+            try {
+                const reqUrl = response.url();
+                const contentType = response.headers()['content-type'] || '';
+                checkVideoUrl(reqUrl, contentType);
+            } catch(e) {}
+        });
+    };
+    
+    const page = await context.newPage();
+    monitorPage(page);
+    
+    // Yangi ochilgan sahifalarni ham kuzatish
+    context.on('page', (newPage) => {
+        monitorPage(newPage);
     });
 
     try {
-        await page.goto(url, { waitUntil: "networkidle", timeout: 25000 });
+        // 1-BOSQICH: Sahifani yuklash
+        await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
+        console.log("[Playwright] Sahifa yuklandi, DOM tekshirilmoqda...");
         
-        // Agar hech narsa topilmasa — sahifadagi video elementlarni tekshirish
+        // Birozdan so'ng networkidle ni kutish
+        await page.waitForLoadState("networkidle", { timeout: 10000 }).catch(() => {});
+        
+        // 2-BOSQICH: Iframe-larni topib, ulardan ham video izlash
+        const allFrames = page.frames();
+        console.log(`[Playwright] ${allFrames.length} ta frame topildi`);
+        
+        for (const frame of allFrames) {
+            if (frame === page.mainFrame()) continue;
+            try {
+                const frameUrl = frame.url();
+                console.log("[Playwright] Frame URL:", frameUrl?.substring(0, 100));
+                
+                // Frame ichidagi video elementlarni tekshirish
+                const frameSrcs = await frame.evaluate(() => {
+                    const srcs = [];
+                    // Video tag
+                    document.querySelectorAll('video, video source, source').forEach(v => {
+                        if (v.src) srcs.push(v.src);
+                        if (v.currentSrc) srcs.push(v.currentSrc);
+                    });
+                    // JW Player, Video.js, Plyr va boshqa player-lardan izlash
+                    if (typeof jwplayer !== 'undefined') {
+                        try { const src = jwplayer().getPlaylistItem()?.file; if (src) srcs.push(src); } catch(e) {}
+                    }
+                    // Global o'zgaruvchilardan video URL izlash
+                    const bodyText = document.body?.innerHTML || '';
+                    const m3u8Match = bodyText.match(/(https?:\/\/[^\s"'<>]+\.m3u8[^\s"'<>]*)/i);
+                    if (m3u8Match) srcs.push(m3u8Match[1]);
+                    const mp4Match = bodyText.match(/(https?:\/\/[^\s"'<>]+\.mp4[^\s"'<>]*)/i);
+                    if (mp4Match) srcs.push(mp4Match[1]);
+                    return [...new Set(srcs)];
+                }).catch(() => []);
+                
+                for (const src of frameSrcs) {
+                    if (src && src.startsWith('http')) {
+                        checkVideoUrl(src);
+                    }
+                }
+            } catch(e) {}
+        }
+        
+        // 3-BOSQICH: Agar hali video topilmasa — play tugmasini bosish
+        if (foundVideos.length === 0) {
+            console.log("[Playwright] Video topilmadi, play tugmalarini izlayapti...");
+            
+            // Reklamalarni yopish — yopish tugmalarini bosish
+            const closeSelectors = [
+                '.close', '[class*="close"]', '[id*="close"]', 
+                '.dismiss', '[aria-label="Close"]', 'button[class*="close"]',
+                '.popup-close', '#overlay-close',
+            ];
+            for (const sel of closeSelectors) {
+                try { await page.click(sel, { timeout: 1000 }); } catch(e) {}
+            }
+            
+            // Play tugmasini bosish (asosiy sahifa va iframelarda)
+            const playSelectors = [
+                'video', '.play-button', '[class*="play"]', '[id*="play"]',
+                '.vjs-big-play-button', '.jw-icon-display',
+                '.plyr__control--overlaid', '.video-js .vjs-big-play-button',
+                '[class*="player"]', '.fp-play', '.mejs__overlay-play',
+                'button[aria-label="Play"]', '.ytp-large-play-button',
+                '.flowplayer .fp-ui', '.flowplayer',
+            ];
+            
+            for (const sel of playSelectors) {
+                try {
+                    const el = await page.$(sel);
+                    if (el) {
+                        await el.click({ timeout: 2000 });
+                        console.log(`[Playwright] "${sel}" tugmasi bosildi`);
+                        await page.waitForTimeout(2000);
+                        if (foundVideos.length > 0) break;
+                    }
+                } catch(e) {}
+            }
+            
+            // Iframe ichida ham play tugmasi bosish
+            for (const frame of page.frames()) {
+                if (frame === page.mainFrame()) continue;
+                for (const sel of playSelectors) {
+                    try {
+                        const el = await frame.$(sel);
+                        if (el) {
+                            await el.click({ timeout: 2000 });
+                            console.log(`[Playwright] Frame ichida "${sel}" tugmasi bosildi`);
+                            await page.waitForTimeout(2000);
+                            if (foundVideos.length > 0) break;
+                        }
+                    } catch(e) {}
+                }
+                if (foundVideos.length > 0) break;
+            }
+        }
+        
+        // 4-BOSQICH: Agar hali topilmasa — 5 soniya kutish (dinamik yuklash)
+        if (foundVideos.length === 0) {
+            console.log("[Playwright] 5 soniya kutilmoqda (dinamik yuklash)...");
+            await page.waitForTimeout(5000);
+        }
+        
+        // 5-BOSQICH: Asosiy sahifadagi video elementlarni DOM dan tekshirish
         if (foundVideos.length === 0) {
             const videoSrcs = await page.evaluate(() => {
-                const videos = document.querySelectorAll('video, video source');
                 const srcs = [];
-                videos.forEach(v => {
+                // Video, source taglar
+                document.querySelectorAll('video, video source, source, embed, object').forEach(v => {
                     if (v.src) srcs.push(v.src);
                     if (v.currentSrc) srcs.push(v.currentSrc);
-                    const source = v.querySelector && v.querySelector('source');
-                    if (source && source.src) srcs.push(source.src);
+                    if (v.data) srcs.push(v.data);
                 });
+                // Iframedagi src (video player)
+                document.querySelectorAll('iframe').forEach(iframe => {
+                    if (iframe.src) srcs.push(iframe.src);
+                });
+                // Sahifa HTML dan m3u8/mp4 havolalarni izlash
+                const bodyText = document.body?.innerHTML || '';
+                const m3u8Matches = bodyText.match(/https?:\/\/[^\s"'<>]+\.m3u8[^\s"'<>]*/gi) || [];
+                const mp4Matches = bodyText.match(/https?:\/\/[^\s"'<>]+\.mp4[^\s"'<>]*/gi) || [];
+                srcs.push(...m3u8Matches, ...mp4Matches);
+                
+                // Script taglar ichidan video URL izlash
+                document.querySelectorAll('script').forEach(script => {
+                    const text = script.textContent || '';
+                    const m3u8 = text.match(/["'](https?:\/\/[^\s"']+\.m3u8[^\s"']*)/gi) || [];
+                    const mp4 = text.match(/["'](https?:\/\/[^\s"']+\.mp4[^\s"']*)/gi) || [];
+                    m3u8.forEach(u => srcs.push(u.replace(/^["']/, '')));
+                    mp4.forEach(u => srcs.push(u.replace(/^["']/, '')));
+                });
+                
                 return [...new Set(srcs)];
-            });
+            }).catch(() => []);
             
             for (const src of videoSrcs) {
                 if (src && src.startsWith('http')) {
-                    foundVideos.push({ 
-                        url: src, 
-                        type: src.includes('.m3u8') ? 'm3u8' : 'mp4', 
-                        priority: 15 
-                    });
+                    checkVideoUrl(src);
                 }
             }
         }
+        
+        // 6-BOSQICH: Iframe src URL larga alohida Playwright sahifa orqali kirish
+        if (foundVideos.length === 0) {
+            console.log("[Playwright] Iframe URLlarga alohida kirilmoqda...");
+            const iframeSrcs = await page.evaluate(() => {
+                return [...document.querySelectorAll('iframe')].map(f => f.src).filter(s => s && s.startsWith('http'));
+            }).catch(() => []);
+            
+            for (const iframeSrc of iframeSrcs.slice(0, 3)) {
+                try {
+                    console.log("[Playwright] Iframe URL ochilmoqda:", iframeSrc.substring(0, 100));
+                    const iframePage = await context.newPage();
+                    monitorPage(iframePage);
+                    
+                    await iframePage.goto(iframeSrc, { waitUntil: "domcontentloaded", timeout: 15000 });
+                    await iframePage.waitForLoadState("networkidle", { timeout: 8000 }).catch(() => {});
+                    
+                    // Iframe sahifasidan DOM scrape
+                    const innerSrcs = await iframePage.evaluate(() => {
+                        const srcs = [];
+                        document.querySelectorAll('video, source').forEach(v => { if (v.src) srcs.push(v.src); });
+                        const bodyText = document.body?.innerHTML || '';
+                        const m3u8 = bodyText.match(/https?:\/\/[^\s"'<>]+\.m3u8[^\s"'<>]*/gi) || [];
+                        const mp4 = bodyText.match(/https?:\/\/[^\s"'<>]+\.mp4[^\s"'<>]*/gi) || [];
+                        srcs.push(...m3u8, ...mp4);
+                        // Script taglardan izlash
+                        document.querySelectorAll('script').forEach(script => {
+                            const text = script.textContent || '';
+                            const m = text.match(/["'](https?:\/\/[^\s"']+\.(m3u8|mp4)[^\s"']*)/gi) || [];
+                            m.forEach(u => srcs.push(u.replace(/^["']/, '')));
+                        });
+                        return [...new Set(srcs)];
+                    }).catch(() => []);
+                    
+                    for (const src of innerSrcs) {
+                        if (src && src.startsWith('http')) checkVideoUrl(src);
+                    }
+                    
+                    // Play tugmasini bosish
+                    if (foundVideos.length === 0) {
+                        for (const sel of ['.play-button', '[class*="play"]', 'video', '.vjs-big-play-button', '.jw-icon-display']) {
+                            try {
+                                const el = await iframePage.$(sel);
+                                if (el) { await el.click({ timeout: 2000 }); await iframePage.waitForTimeout(3000); }
+                                if (foundVideos.length > 0) break;
+                            } catch(e) {}
+                        }
+                    }
+                    
+                    await iframePage.close();
+                    if (foundVideos.length > 0) break;
+                } catch(e) {
+                    console.log("[Playwright] Iframe xatolik:", e.message?.substring(0, 80));
+                }
+            }
+        }
+        
     } catch(e) {
         console.log("[Playwright] Sahifa yuklash timeout/xatolik:", e.message?.substring(0, 100));
     }
@@ -191,14 +395,23 @@ const sniffWithPlaywright = async (url) => {
     await browser.close();
     
     if (foundVideos.length === 0) {
-        throw new Error("Video topilmadi yoki himoyalangan");
+        throw new Error("Video topilmadi yoki himoyalangan. Sahifada video element yo'q.");
     }
     
-    // Eng yaxshi natijani tanlash (mp4 > m3u8 > boshqa)
-    foundVideos.sort((a, b) => b.priority - a.priority);
-    const best = foundVideos[0];
+    // Dublikatlarni olib tashlash va eng yaxshi natijani tanlash
+    const uniqueUrls = new Map();
+    for (const v of foundVideos) {
+        const cleanUrl = v.url.split('?')[0]; // query-siz URL
+        if (!uniqueUrls.has(cleanUrl) || uniqueUrls.get(cleanUrl).priority < v.priority) {
+            uniqueUrls.set(cleanUrl, v);
+        }
+    }
     
-    console.log(`[Playwright] Tanlangan: ${best.type} — ${best.url.substring(0, 100)}`);
+    const sorted = [...uniqueUrls.values()].sort((a, b) => b.priority - a.priority);
+    const best = sorted[0];
+    
+    console.log(`[Playwright] ✅ Tanlangan: ${best.type} — ${best.url.substring(0, 120)}`);
+    console.log(`[Playwright] Jami topilgan: ${sorted.length} ta unikal video URL`);
     
     return { url: best.url, type: `playwright_${best.type}` };
 };

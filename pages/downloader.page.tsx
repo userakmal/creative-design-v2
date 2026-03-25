@@ -52,6 +52,48 @@ export const VideoDownloaderPage: React.FC = () => {
   const [result, setResult] = useState<DownloadResult | null>(null);
   const [serverStatus, setServerStatus] = useState<"checking" | "online" | "offline">("checking");
   const [activeEndpoint, setActiveEndpoint] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  // Videoni to'g'ridan-to'g'ri yuklab olish (yangi oyna ochmasdan)
+  const triggerDownload = async (videoUrl: string, title: string) => {
+    // M3U8 stream ni ochish (yuklab bo'lmaydi)
+    if (videoUrl.includes('.m3u8')) {
+      window.open(videoUrl, '_blank');
+      return;
+    }
+    
+    setIsDownloading(true);
+    try {
+      const response = await fetch(videoUrl, { mode: 'cors' });
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `${title || 'video'}.mp4`;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      
+      // Tozalash
+      setTimeout(() => {
+        URL.revokeObjectURL(blobUrl);
+        document.body.removeChild(a);
+      }, 1000);
+    } catch (err) {
+      // CORS xatolik bo'lsa — fallback: oyna ochish
+      console.log("Blob download failed, fallback to link:", err);
+      const a = document.createElement('a');
+      a.href = videoUrl;
+      a.download = `${title || 'video'}.mp4`;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => document.body.removeChild(a), 1000);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   // Server holatini tekshirish
   const checkServerStatus = async () => {
@@ -315,16 +357,23 @@ export const VideoDownloaderPage: React.FC = () => {
                   ⚡ M3U8 stream — VLC yoki brauzerda ochish mumkin
                 </div>
               )}
-              <a
-                href={result.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                download={!result.isM3U8}
-                className="w-full py-3.5 bg-stone-800 hover:bg-stone-900 text-white rounded-xl font-medium text-sm flex items-center justify-center gap-2 transition-colors"
+              <button
+                onClick={() => triggerDownload(result.url, result.title || 'video')}
+                disabled={isDownloading}
+                className="w-full py-3.5 bg-stone-800 hover:bg-stone-900 text-white rounded-xl font-medium text-sm flex items-center justify-center gap-2 transition-colors disabled:opacity-70"
               >
-                <Video size={18} />
-                {result.isM3U8 ? "Streamni ochish" : "Videoni yuklab olish"}
-              </a>
+                {isDownloading ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    Yuklanmoqda...
+                  </>
+                ) : (
+                  <>
+                    <Video size={18} />
+                    {result.isM3U8 ? "Streamni ochish" : "Videoni yuklab olish"}
+                  </>
+                )}
+              </button>
             </div>
           </div>
         )}
