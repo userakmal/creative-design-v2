@@ -13,12 +13,30 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+interface Format {
+  format_id: string;
+  extension: string;
+  resolution: string;
+  filesize: number | null;
+  quality: string;
+}
+
 interface DownloadResult {
   url: string;
   thumbnail?: string;
   title?: string;
   type: "video" | "audio" | "unknown";
   isM3U8?: boolean;
+  formats?: Format[];
+}
+
+interface DownloadProgress {
+  status: string;
+  percent: number;
+  size?: string;
+  speed?: string;
+  eta?: string;
+  message?: string;
 }
 
 // API manzillari: avval lokal, keyin tunnel
@@ -53,17 +71,33 @@ export const VideoDownloaderPage: React.FC = () => {
   const [serverStatus, setServerStatus] = useState<"checking" | "online" | "offline">("checking");
   const [activeEndpoint, setActiveEndpoint] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [selectedFormat, setSelectedFormat] = useState<string>("best");
+  const [downloadProgress, setDownloadProgress] = useState<DownloadProgress | null>(null);
 
   // Videoni server orqali yuklab olish (yangi oyna ochmasdan, to'g'ridan-to'g'ri download)
   const triggerDownload = async (videoUrl: string, title: string) => {
     setIsDownloading(true);
+    setDownloadProgress({ status: 'starting', percent: 0 });
     
+    const jobId = `job_${Date.now()}`;
+    const serverBase = activeEndpoint?.replace(/\/api\/(download|info)$/, "") || "http://localhost:3000";
+
+    // Progressni kuzatish (SSE)
+    const eventSource = new EventSource(`${serverBase}/api/progress/${jobId}`);
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      setDownloadProgress(data);
+      if (data.status === 'completed' || data.status === 'error') {
+        eventSource.close();
+      }
+    };
+    eventSource.onerror = () => {
+      eventSource.close();
+    };
+
     try {
-      // Server orqali proxy download — server yt-dlp bilan yuklab, mp4 qaytaradi
-      const serverBase = activeEndpoint?.replace("/api/download", "") || "http://localhost:3000";
-      const proxyUrl = `${serverBase}/api/proxy-download?url=${encodeURIComponent(videoUrl)}&title=${encodeURIComponent(title)}`;
+      const proxyUrl = `${serverBase}/api/proxy-download?url=${encodeURIComponent(videoUrl)}&title=${encodeURIComponent(title)}&format=${selectedFormat}&jobId=${jobId}`;
       
-      // Tunnelni bypass headerini qo'shish
       const response = await fetch(proxyUrl, {
         headers: { "Bypass-Tunnel-Reminder": "true" },
       });
@@ -88,16 +122,12 @@ export const VideoDownloaderPage: React.FC = () => {
       }, 1000);
     } catch (err) {
       console.error("Proxy download failed:", err);
-      // Fallback: to'g'ridan-to'g'ri havola orqali sinash
-      const a = document.createElement('a');
-      a.href = videoUrl;
-      a.download = `${title || 'video'}.mp4`;
-      a.style.display = 'none';
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => document.body.removeChild(a), 1000);
+      // Fallback
+      window.open(videoUrl, '_blank');
     } finally {
       setIsDownloading(false);
+      // Progressni bir ozdan keyin yashirish
+      setTimeout(() => setDownloadProgress(null), 5000);
     }
   };
 
@@ -158,7 +188,7 @@ export const VideoDownloaderPage: React.FC = () => {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 90000); // 90s timeout
 
-        const response = await fetch(endpoint, {
+        const response = await fetch(endpoint.replace("/download", "/info"), {
           method: "POST",
           headers: {
             Accept: "application/json",
@@ -180,14 +210,15 @@ export const VideoDownloaderPage: React.FC = () => {
           continue; // Keyingi endpoint ga o'tish
         }
 
-        if (data.status === "success" && data.data?.url) {
+        if (data.status === "success" && data.data) {
           setActiveEndpoint(endpoint); // Ishlaganni eslab qolish
           setServerStatus("online");
           setResult({
-            url: data.data.url,
+            url: url.trim(), // Asl URL ni saqlaymiz, triggerDownload da ishlatish uchun
             title: data.data.title || "Yuklab olingan video",
+            thumbnail: data.data.thumbnail,
             type: "video",
-            isM3U8: data.data.isM3U8 || false,
+            formats: data.data.formats || [],
           });
           setIsLoading(false);
           return; // Muvaffaqiyat!
@@ -358,6 +389,58 @@ export const VideoDownloaderPage: React.FC = () => {
             </div>
 
             <div className="p-4 grid grid-cols-1 gap-3">
+              {result.formats && result.formats.length > 0 && (
+                <div className="mb-2">
+                  <label className="block text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2">
+                    Video sifatini tanlang:
+                  </label>
+                  <select
+                    value={selectedFormat}
+                    onChange={(e) => setSelectedFormat(e.target.value)}
+                    className="w-full p-3 bg-stone-50 border border-stone-100 rounded-xl text-sm text-stone-700 outline-none focus:ring-2 focus:ring-blue-100 transition-all"
+                  >
+                    <option value="best">Eng yaxshi sifat (Auto)</option>
+                    {result.formats.map((f) => (
+                      <option key={f.format_id} value={f.format_id}>
+                        {f.resolution} {f.quality && `(${f.quality})`} - {f.extension} 
+                        {f.filesize ? ` (~${(f.filesize / 1024 / 1024).toFixed(1)} MB)` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {downloadProgress && (
+                <div className="mb-4 animate-fade-in">
+                  <div className="flex justify-between items-center mb-1.5">
+                    <span className="text-xs font-medium text-stone-600">
+                      {downloadProgress.status === 'downloading' ? 'Yuklanmoqda...' : 
+                       downloadProgress.status === 'starting' ? 'Tayyorlanmoqda...' : 
+                       downloadProgress.status === 'completed' ? 'Tugallandi!' : 
+                       downloadProgress.status === 'error' ? 'Xatolik!' : 'Kutilmoqda...'}
+                    </span>
+                    <span className="text-xs font-bold text-blue-500">
+                      {Math.round(downloadProgress.percent)}%
+                    </span>
+                  </div>
+                  <div className="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-blue-500 transition-all duration-300" 
+                      style={{ width: `${downloadProgress.percent}%` }}
+                    />
+                  </div>
+                  {downloadProgress.speed && (
+                    <div className="flex justify-between mt-2 text-[10px] text-stone-400 font-medium">
+                      <span>Tezlik: {downloadProgress.speed}</span>
+                      <span>Qoldi: {downloadProgress.eta}</span>
+                    </div>
+                  )}
+                  {downloadProgress.message && (
+                    <p className="mt-1 text-[10px] text-red-500">{downloadProgress.message}</p>
+                  )}
+                </div>
+              )}
+
               {result.isM3U8 && (
                 <div className="px-3 py-2 bg-amber-50 border border-amber-100 rounded-lg text-[11px] text-amber-700 mb-1">
                   ⚡ M3U8 stream — VLC yoki brauzerda ochish mumkin
@@ -371,7 +454,7 @@ export const VideoDownloaderPage: React.FC = () => {
                 {isDownloading ? (
                   <>
                     <Loader2 size={18} className="animate-spin" />
-                    Yuklanmoqda...
+                    {downloadProgress?.status === 'downloading' ? `Yuklanmoqda (${Math.round(downloadProgress.percent)}%)` : 'Yuklanmoqda...'}
                   </>
                 ) : (
                   <>
