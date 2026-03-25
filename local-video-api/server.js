@@ -89,7 +89,7 @@ app.post("/api/download", async (req, res) => {
             const command = `${ytcmd} -f "best" --dump-json "${url}"`;
             console.log(`[Yt-Dlp] Ishga tushyapti: ${command}`);
             
-            const { stdout, stderr } = await execPromise(command, { maxBuffer: 1024 * 1024 * 50, timeout: 30000 });
+            const { stdout, stderr } = await execPromise(command, { maxBuffer: 1024 * 1024 * 50, timeout: 60000 });
             if (stderr) console.log("[Yt-Dlp STDERR]:", stderr);
             console.log("[Yt-Dlp] Tugallandi, JSON parse qilinmoqda...");
             const videoData = JSON.parse(stdout);

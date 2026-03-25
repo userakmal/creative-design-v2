@@ -1,0 +1,21 @@
+/* 
+ * Creative Design UZ — Global Styles
+ * Asosiy CSS fayl. index.html da reference qilingan.
+ */
+
+/* Smooth scroll for all pages */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Better font rendering */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Ensure fill-mode-forwards works for animations */
+.fill-mode-forwards {
+  animation-fill-mode: forwards;
+}

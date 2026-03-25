@@ -46,7 +46,7 @@ export const CustomPage = () => {
             href={telegramUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full py-4 bg-[#229ED9] text-white rounded-xl font-medium text-sm hover:bg-[#1c8lb4] transition-all shadow-lg shadow-blue-200/50 flex items-center justify-center gap-3 active:scale-[0.98] no-underline"
+            className="w-full py-4 bg-[#229ED9] text-white rounded-xl font-medium text-sm hover:bg-[#1c81b4] transition-all shadow-lg shadow-blue-200/50 flex items-center justify-center gap-3 active:scale-[0.98] no-underline"
           >
             <Send size={18} />
             Rasm jo‘natish (Telegram)

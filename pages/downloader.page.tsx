@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ArrowLeft,
   Download,
@@ -6,8 +6,10 @@ import {
   Link2,
   Loader2,
   Video,
-  Music,
   CheckCircle2,
+  RefreshCw,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -18,12 +20,56 @@ interface DownloadResult {
   type: "video" | "audio" | "unknown";
 }
 
+// API manzillari: avval lokal, keyin tunnel
+const API_ENDPOINTS = [
+  "http://localhost:3000/api/download",
+  "https://creative-video-api.loca.lt/api/download",
+];
+
+// Tez ulanish tekshiruvi
+const checkEndpoint = async (url: string): Promise<boolean> => {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+    const res = await fetch(url.replace("/api/download", ""), {
+      method: "HEAD",
+      signal: controller.signal,
+      headers: { "Bypass-Tunnel-Reminder": "true" },
+    });
+    clearTimeout(timeoutId);
+    return res.ok || res.status === 404; // 404 is ok — server is alive, just no GET route
+  } catch {
+    return false;
+  }
+};
+
 export const VideoDownloaderPage: React.FC = () => {
   const navigate = useNavigate();
   const [url, setUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<DownloadResult | null>(null);
+  const [serverStatus, setServerStatus] = useState<"checking" | "online" | "offline">("checking");
+  const [activeEndpoint, setActiveEndpoint] = useState<string | null>(null);
+
+  // Server holatini tekshirish
+  const checkServerStatus = async () => {
+    setServerStatus("checking");
+    for (const endpoint of API_ENDPOINTS) {
+      const isAlive = await checkEndpoint(endpoint);
+      if (isAlive) {
+        setActiveEndpoint(endpoint);
+        setServerStatus("online");
+        return;
+      }
+    }
+    setActiveEndpoint(null);
+    setServerStatus("offline");
+  };
+
+  useEffect(() => {
+    checkServerStatus();
+  }, []);
 
   const handlePaste = async () => {
     try {
@@ -42,7 +88,6 @@ export const VideoDownloaderPage: React.FC = () => {
     }
 
     try {
-      // Basic URL validation
       new URL(url);
     } catch {
       setError("Iltimos, to'g'ri havola kiriting (https://...)");
@@ -53,45 +98,66 @@ export const VideoDownloaderPage: React.FC = () => {
     setError(null);
     setResult(null);
 
-    try {
-      // Lokal server public URL manzili (localtunnel orqali)
-      const response = await fetch("https://creative-video-api.loca.lt/api/download", {
-        method: "POST",
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json",
-          "Bypass-Tunnel-Reminder": "true"
-        },
-        body: JSON.stringify({
-          url: url.trim(),
-        })
-      });
+    // Barcha endpointlarni sinash
+    let lastError = "";
+    const endpointsToTry = activeEndpoint
+      ? [activeEndpoint, ...API_ENDPOINTS.filter((e) => e !== activeEndpoint)]
+      : API_ENDPOINTS;
 
-      const responseText = await response.text();
-      let data;
+    for (const endpoint of endpointsToTry) {
       try {
-        data = JSON.parse(responseText);
-      } catch {
-        console.error("Non-JSON response:", responseText.substring(0, 200));
-        throw new Error("Server xatosi yuz berdi. Lokal server ishga tushganligini tekshiring.");
-      }
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 90000); // 90s timeout
 
-      if (data.status === "success" && data.data?.url) {
-        setResult({
-          url: data.data.url,
-          title: data.data.title || "Yuklab olingan video",
-          type: "video",
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            "Bypass-Tunnel-Reminder": "true",
+          },
+          body: JSON.stringify({ url: url.trim() }),
+          signal: controller.signal,
         });
-      } else {
-        throw new Error(data.text || "Video topilmadi. Havolani tekshirib qayta urinib ko'ring.");
-      }
+        clearTimeout(timeoutId);
 
-    } catch (err: any) {
-      console.error(err);
-      setError(err.message || "Kutilmagan xatolik yuz berdi.");
-    } finally {
-      setIsLoading(false);
+        const responseText = await response.text();
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch {
+          console.error("Non-JSON response from", endpoint, responseText.substring(0, 200));
+          lastError = "Server javob bermadi. Qayta urinib ko'ring.";
+          continue; // Keyingi endpoint ga o'tish
+        }
+
+        if (data.status === "success" && data.data?.url) {
+          setActiveEndpoint(endpoint); // Ishlaganni eslab qolish
+          setServerStatus("online");
+          setResult({
+            url: data.data.url,
+            title: data.data.title || "Yuklab olingan video",
+            type: "video",
+          });
+          setIsLoading(false);
+          return; // Muvaffaqiyat!
+        } else {
+          lastError = data.text || "Video topilmadi. Havolani tekshirib qayta urinib ko'ring.";
+        }
+      } catch (err: any) {
+        if (err.name === "AbortError") {
+          lastError = "So'rov vaqti tugadi. Internet aloqangizni tekshiring.";
+        } else {
+          lastError = err.message || "Server bilan bog'lanib bo'lmadi.";
+        }
+        continue;
+      }
     }
+
+    // Hech bir endpoint ishlamadi
+    setError(lastError || "Server ishlamayapti. Serverni yoqib qayta urinib ko'ring.");
+    setServerStatus("offline");
+    setIsLoading(false);
   };
 
   return (
@@ -109,6 +175,23 @@ export const VideoDownloaderPage: React.FC = () => {
             Video Downloader
           </h2>
         </div>
+
+        {/* Server Status Indicator */}
+        <button
+          onClick={checkServerStatus}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-semibold uppercase tracking-wider transition-all active:scale-95 ${
+            serverStatus === "online"
+              ? "bg-green-50 text-green-600 border border-green-100"
+              : serverStatus === "offline"
+              ? "bg-red-50 text-red-500 border border-red-100"
+              : "bg-stone-50 text-stone-400 border border-stone-100 animate-pulse"
+          }`}
+        >
+          {serverStatus === "online" && <Wifi size={12} />}
+          {serverStatus === "offline" && <WifiOff size={12} />}
+          {serverStatus === "checking" && <Loader2 size={12} className="animate-spin" />}
+          {serverStatus === "online" ? "Server ON" : serverStatus === "offline" ? "Server OFF" : "Tekshirilmoqda"}
+        </button>
       </div>
 
       <div className="px-5 mt-6">
@@ -127,6 +210,28 @@ export const VideoDownloaderPage: React.FC = () => {
             </p>
           </div>
         </div>
+
+        {/* Server Offline Warning */}
+        {serverStatus === "offline" && (
+          <div className="mb-4 p-4 bg-amber-50 rounded-2xl border border-amber-100 animate-fade-in">
+            <div className="flex items-start gap-3">
+              <WifiOff size={18} className="text-amber-500 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-amber-800 mb-1">Server ishlamayapti</p>
+                <p className="text-xs text-amber-600 leading-relaxed">
+                  Video serverini yoqish uchun <b>Serverni_Yoqish.bat</b> faylini ishga tushiring.
+                </p>
+                <button
+                  onClick={checkServerStatus}
+                  className="mt-3 flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg text-xs font-medium transition-colors"
+                >
+                  <RefreshCw size={12} />
+                  Qayta tekshirish
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Downloader Form */}
         <form onSubmit={downloadVideo} className="mb-8">
@@ -151,9 +256,19 @@ export const VideoDownloaderPage: React.FC = () => {
           </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-xl text-xs flex items-center gap-2 border border-red-100 animate-fadeInUp">
-              <AlertCircle size={16} className="shrink-0" />
-              <span>{error}</span>
+            <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-xl text-xs flex items-start gap-2 border border-red-100 animate-fade-in">
+              <AlertCircle size={16} className="shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <span>{error}</span>
+                <button
+                  type="button"
+                  onClick={() => { setError(null); downloadVideo(new Event("submit") as any); }}
+                  className="mt-2 flex items-center gap-1 text-red-500 hover:text-red-700 font-medium"
+                >
+                  <RefreshCw size={12} />
+                  Qayta urinish
+                </button>
+              </div>
             </div>
           )}
 
@@ -202,7 +317,6 @@ export const VideoDownloaderPage: React.FC = () => {
                 <Video size={18} />
                 Videoni yuklab olish
               </a>
-              {/* If you add audio support to API, add button here */}
             </div>
           </div>
         )}
