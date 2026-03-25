@@ -54,17 +54,24 @@ export const VideoDownloaderPage: React.FC = () => {
   const [activeEndpoint, setActiveEndpoint] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
 
-  // Videoni to'g'ridan-to'g'ri yuklab olish (yangi oyna ochmasdan)
+  // Videoni server orqali yuklab olish (yangi oyna ochmasdan, to'g'ridan-to'g'ri download)
   const triggerDownload = async (videoUrl: string, title: string) => {
-    // M3U8 stream ni ochish (yuklab bo'lmaydi)
-    if (videoUrl.includes('.m3u8')) {
-      window.open(videoUrl, '_blank');
-      return;
-    }
-    
     setIsDownloading(true);
+    
     try {
-      const response = await fetch(videoUrl, { mode: 'cors' });
+      // Server orqali proxy download — server yt-dlp bilan yuklab, mp4 qaytaradi
+      const serverBase = activeEndpoint?.replace("/api/download", "") || "http://localhost:3000";
+      const proxyUrl = `${serverBase}/api/proxy-download?url=${encodeURIComponent(videoUrl)}&title=${encodeURIComponent(title)}`;
+      
+      // Tunnelni bypass headerini qo'shish
+      const response = await fetch(proxyUrl, {
+        headers: { "Bypass-Tunnel-Reminder": "true" },
+      });
+      
+      if (!response.ok) {
+        throw new Error("Server yuklab bera olmadi");
+      }
+      
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
       
@@ -75,14 +82,13 @@ export const VideoDownloaderPage: React.FC = () => {
       document.body.appendChild(a);
       a.click();
       
-      // Tozalash
       setTimeout(() => {
         URL.revokeObjectURL(blobUrl);
         document.body.removeChild(a);
       }, 1000);
     } catch (err) {
-      // CORS xatolik bo'lsa — fallback: oyna ochish
-      console.log("Blob download failed, fallback to link:", err);
+      console.error("Proxy download failed:", err);
+      // Fallback: to'g'ridan-to'g'ri havola orqali sinash
       const a = document.createElement('a');
       a.href = videoUrl;
       a.download = `${title || 'video'}.mp4`;
