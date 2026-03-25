@@ -522,9 +522,109 @@ app.post("/api/download", async (req, res) => {
     }
 });
 
+// ========== PROXY DOWNLOAD (Server orqali yuklab olish) ==========
+app.get("/api/proxy-download", async (req, res) => {
+    const videoUrl = req.query.url;
+    const title = req.query.title || "video";
+    
+    if (!videoUrl) {
+        return res.status(400).json({ status: "error", message: "URL kerak" });
+    }
+    
+    console.log(`\n[Proxy Download] Boshlanmoqda: ${videoUrl.substring(0, 100)}`);
+    
+    const ytcmd = await getYtDlp();
+    const userAgent = getRotatedUserAgent();
+    const fileName = `${title.replace(/[^a-zA-Z0-9_\-\s]/g, '').substring(0, 50)}_${Date.now()}.mp4`;
+    const outputPath = path.join(__dirname, fileName);
+    
+    try {
+        // yt-dlp bilan videoni mp4 formatda yuklab olish
+        const command = `${ytcmd} --no-check-certificates --user-agent "${userAgent}" --geo-bypass --prefer-insecure --legacy-server-connect -f "best[ext=mp4]/best" -o "${outputPath}" "${videoUrl}"`;
+        
+        console.log("[Proxy Download] yt-dlp ishga tushyapti...");
+        await execPromise(command, { maxBuffer: 1024 * 1024 * 100, timeout: 300000 }); // 5 daqiqa timeout
+        
+        // Fayl mavjudligini tekshirish
+        if (!fs.existsSync(outputPath)) {
+            throw new Error("Fayl yuklanmadi");
+        }
+        
+        const stat = fs.statSync(outputPath);
+        console.log(`[Proxy Download] ✅ Tayyor! Hajmi: ${(stat.size / 1024 / 1024).toFixed(1)} MB`);
+        
+        // Faylni stream qilib yuborish (download bo'lishi uchun)
+        res.setHeader('Content-Type', 'video/mp4');
+        res.setHeader('Content-Length', stat.size);
+        res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(title)}.mp4"`);
+        res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
+        
+        const stream = fs.createReadStream(outputPath);
+        stream.pipe(res);
+        
+        // Yuborib bo'lgach faylni o'chirish
+        stream.on('end', () => {
+            try { fs.unlinkSync(outputPath); } catch(e) {}
+            console.log("[Proxy Download] Temp fayl o'chirildi");
+        });
+        stream.on('error', (err) => {
+            console.error("[Proxy Download] Stream xatolik:", err.message);
+            try { fs.unlinkSync(outputPath); } catch(e) {}
+            if (!res.headersSent) {
+                res.status(500).json({ status: "error", text: "Yuklashda xatolik" });
+            }
+        });
+        
+    } catch (err) {
+        console.error("[Proxy Download] Xatolik:", err.message?.substring(0, 200));
+        // Temp faylni tozalash
+        try { fs.unlinkSync(outputPath); } catch(e) {}
+        
+        // Agar yt-dlp ishlamasa — oddiy HTTP proxy orqali yuborish
+        try {
+            console.log("[Proxy Download] Fallback: HTTP proxy...");
+            const http = require(videoUrl.startsWith('https') ? 'https' : 'http');
+            
+            const proxyReq = http.get(videoUrl, {
+                headers: { 
+                    'User-Agent': userAgent,
+                    'Referer': videoUrl,
+                    'Accept': '*/*'
+                },
+                timeout: 30000,
+            }, (proxyRes) => {
+                if (proxyRes.statusCode >= 300 && proxyRes.statusCode < 400 && proxyRes.headers.location) {
+                    // Redirect — follow it
+                    const redirectUrl = proxyRes.headers.location;
+                    const http2 = require(redirectUrl.startsWith('https') ? 'https' : 'http');
+                    http2.get(redirectUrl, { headers: { 'User-Agent': userAgent }, timeout: 30000 }, (finalRes) => {
+                        res.setHeader('Content-Type', finalRes.headers['content-type'] || 'video/mp4');
+                        if (finalRes.headers['content-length']) res.setHeader('Content-Length', finalRes.headers['content-length']);
+                        res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(title)}.mp4"`);
+                        finalRes.pipe(res);
+                    }).on('error', () => res.status(500).json({ status: "error", text: "Yuklab bo'lmadi" }));
+                    return;
+                }
+                
+                res.setHeader('Content-Type', proxyRes.headers['content-type'] || 'video/mp4');
+                if (proxyRes.headers['content-length']) res.setHeader('Content-Length', proxyRes.headers['content-length']);
+                res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(title)}.mp4"`);
+                proxyRes.pipe(res);
+            });
+            proxyReq.on('error', () => {
+                if (!res.headersSent) res.status(500).json({ status: "error", text: "Yuklab bo'lmadi" });
+            });
+        } catch(proxyErr) {
+            if (!res.headersSent) {
+                res.status(500).json({ status: "error", text: "Video yuklab bo'lmadi: " + err.message });
+            }
+        }
+    }
+});
+
 // ========== HEALTH CHECK ==========
 app.get("/", (req, res) => {
-    res.json({ status: "ok", author: AUTHOR, features: ["yt-dlp", "m3u8", "playwright", "bypass"] });
+    res.json({ status: "ok", author: AUTHOR, features: ["yt-dlp", "m3u8", "playwright", "bypass", "proxy-download"] });
 });
 
 const PORT = 3000;
