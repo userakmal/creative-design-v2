@@ -22,7 +22,7 @@ const bot = new Telegraf(BOT_TOKEN);
 
 // Gemini Sozlamalari
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
 // --- FOYDALANUVCHILARNI BOSHQARISH ---
 const loadUsers = () => {
@@ -182,28 +182,6 @@ bot.on('text', async (ctx, next) => {
     }
 });
 
-// Gemini AI handler (Agarda matn havola bo'lmasa)
-bot.on('text', async (ctx) => {
-    const text = ctx.message.text;
-    if (text.startsWith('/')) return; // Buyruqlarni e'tiborsiz qoldiramiz
-
-    try {
-        if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY') {
-            return ctx.reply("⚠️ Gemini AI kaliti o'rnatilmagan. Iltimos, admin bilan bog'laning.");
-        }
-
-        await ctx.sendChatAction('typing');
-        const result = await model.generateContent(text);
-        const response = await result.response;
-        const aiText = response.text();
-        
-        await ctx.reply(aiText, { parse_mode: 'Markdown' });
-    } catch (err) {
-        console.error("[Gemini Error]:", err.message);
-        ctx.reply(`❌ AI xatosi: ${err.message}`);
-    }
-});
-
 // Reklama yuborish (Admin buyrug'i)
 bot.command('send', async (ctx) => {
     if (ctx.from.id !== ADMIN_ID) return;
@@ -231,10 +209,32 @@ bot.command('send', async (ctx) => {
     await bot.telegram.editMessageText(ctx.chat.id, waitMsg.message_id, null, `✅ Reklama yakunlandi!\n\n👤 Qabul qildi: ${count}\n🚫 Bloklagan: ${blocked}`);
 });
 
-bot.command('stats', (ctx) => {
+bot.command(['stats', 'stars'], (ctx) => {
     if (ctx.from.id !== ADMIN_ID) return;
     const users = loadUsers();
     ctx.reply(`📊 Bot statistikasi:\n\n👥 Foydalanuvchilar: ${users.length} ta`);
+});
+
+// Gemini AI handler (Agarda matn havola bo'lmasa)
+bot.on('text', async (ctx, next) => {
+    const text = ctx.message.text;
+    if (text.startsWith('/')) return next(); // Buyruqlarni e'tiborsiz qoldiramiz
+
+    try {
+        if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY') {
+            return ctx.reply("⚠️ Gemini AI kaliti o'rnatilmagan. Iltimos, admin bilan bog'laning.");
+        }
+
+        await ctx.sendChatAction('typing');
+        const result = await model.generateContent(text);
+        const response = await result.response;
+        const aiText = response.text();
+        
+        await ctx.reply(aiText, { parse_mode: 'Markdown' });
+    } catch (err) {
+        console.error("[Gemini Error]:", err.message);
+        ctx.reply(`❌ AI xatosi: ${err.message}`);
+    }
 });
 
 // Botni ishga tushirish
