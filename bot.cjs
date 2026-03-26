@@ -22,7 +22,7 @@ const bot = new Telegraf(BOT_TOKEN);
 
 // Gemini Sozlamalari
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
 // --- FOYDALANUVCHILARNI BOSHQARISH ---
 const loadUsers = () => {
@@ -55,7 +55,7 @@ const fullCleanup = (outputPath) => {
     safeUnlink(outputPath + '.ytdl');
 };
 
-console.log("🚀 Telegram Bot boshlanmoqda...");
+console.log("🚀 Telegram Bot (v2.1 Updated) boshlanmoqda...");
 
 // Startapda eski axlatlarni tozalash
 const startupCleanup = () => {
