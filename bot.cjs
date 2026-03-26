@@ -15,7 +15,7 @@ const {
 
 // --- BOT SOZLAMALARI ---
 const BOT_TOKEN = '8628132129:AAGuU0M2KaZJATpyINnh4xpGoQyXU6uuFso';
-const ADMIN_ID = 0; // ⚠️ /myid orqali ID'ingizni bilib olib, bu yerga yozing
+const ADMIN_ID = 853691902;
 const GEMINI_API_KEY = 'AIzaSyD3sEfK9mIzWjOEkO5ykxQLr5zTb7R1LUQ';
 const USERS_FILE = path.join(__dirname, 'data', 'users.json');
 const bot = new Telegraf(BOT_TOKEN);
@@ -200,7 +200,7 @@ bot.on('text', async (ctx) => {
         await ctx.reply(aiText, { parse_mode: 'Markdown' });
     } catch (err) {
         console.error("[Gemini Error]:", err.message);
-        ctx.reply("❌ AI bilan bog'lanishda xato yuz berdi.");
+        ctx.reply(`❌ AI xatosi: ${err.message}`);
     }
 });
 
