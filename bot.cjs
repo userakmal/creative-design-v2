@@ -20,9 +20,31 @@ const GEMINI_API_KEY = 'AIzaSyD3sEfK9mIzWjOEkO5ykxQLr5zTb7R1LUQ';
 const USERS_FILE = path.join(__dirname, 'data', 'users.json');
 const bot = new Telegraf(BOT_TOKEN);
 
-// Gemini Sozlamalari
+// Gemini Sozlamalari (Senior Architect Level)
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+// Standart model: gemini-1.5-flash (v1 barqaror)
+let model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: 'v1' });
+
+// Modellarni tekshirish va terminalda ko'rsatish
+async function syncGeminiModels() {
+    try {
+        console.log("🔍 Gemini diagnostikasi boshlanmoqda...");
+        const result = await genAI.listModels();
+        console.log("✅ Sizning API kalitingiz uchun mavjud modellardan biri:");
+        if (result.models && result.models.length > 0) {
+            // Birinchi mos keladigan flash modelni tanlashga urinish
+            const flashModel = result.models.find(m => m.name.includes('flash'));
+            if (flashModel) {
+                const modelName = flashModel.name.split('/').pop();
+                console.log(` 🌀 Mos model topildi: ${modelName}`);
+                model = genAI.getGenerativeModel({ model: modelName }, { apiVersion: 'v1' });
+            }
+        }
+    } catch (e) {
+        console.error("⚠️ Gemini diagnostikasida xato (lekin bot ishlashda davom etadi):", e.message);
+    }
+}
+syncGeminiModels();
 
 // --- FOYDALANUVCHILARNI BOSHQARISH ---
 const loadUsers = () => {
@@ -215,10 +237,10 @@ bot.command(['stats', 'stars'], (ctx) => {
     ctx.reply(`📊 Bot statistikasi:\n\n👥 Foydalanuvchilar: ${users.length} ta`);
 });
 
-// Gemini AI handler (Agarda matn havola bo'lmasa)
+// Gemini AI handler (Senior Approach with fallback & detailed logging)
 bot.on('text', async (ctx, next) => {
     const text = ctx.message.text;
-    if (text.startsWith('/')) return next(); // Buyruqlarni e'tiborsiz qoldiramiz
+    if (text.startsWith('/')) return next(); 
 
     try {
         if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY') {
@@ -226,14 +248,33 @@ bot.on('text', async (ctx, next) => {
         }
 
         await ctx.sendChatAction('typing');
-        const result = await model.generateContent(text);
-        const response = await result.response;
-        const aiText = response.text();
         
-        await ctx.reply(aiText, { parse_mode: 'Markdown' });
+        // 1-urinish
+        try {
+            const result = await model.generateContent(text);
+            const response = await result.response;
+            const aiText = response.text();
+            return await ctx.reply(aiText, { parse_mode: 'Markdown' });
+        } catch (geminiErr) {
+            console.error(`[Gemini Error - 1st Try]: ${geminiErr.message}`);
+            
+            // Fallback Urinish (Agar birinchi model 404 bo'lsa)
+            if (geminiErr.message.includes('404')) {
+                console.log("🔄 Zaxira modelga (gemini-1.5-pro) o'tilmoqda...");
+                const backupModel = genAI.getGenerativeModel({ model: "gemini-1.5-pro" }, { apiVersion: 'v1' });
+                const result = await backupModel.generateContent(text);
+                const response = await result.response;
+                return await ctx.reply(response.text(), { parse_mode: 'Markdown' });
+            }
+            throw geminiErr; // Agar 404 bo'lmasa, yuqoriga uzatamiz
+        }
     } catch (err) {
-        console.error("[Gemini Error]:", err.message);
-        ctx.reply(`❌ AI xatosi: ${err.message}`);
+        console.error("[Gemini Global Error]:", err.message);
+        let errorMsg = `❌ AI xatosi: ${err.message}`;
+        if (err.message.includes('404')) {
+            errorMsg += "\n\n💡 Maslahat: API kalitining modellarga ruxsati yo'q yoki model nomi xato. Terminaldagi model ro'yxatini tekshiring.";
+        }
+        ctx.reply(errorMsg);
     }
 });
 
