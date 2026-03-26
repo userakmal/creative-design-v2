@@ -287,11 +287,28 @@ bot.on('text', async (ctx, next) => {
         await ctx.sendChatAction('typing');
         const result = await model.generateContent(text);
         const response = await result.response;
-        await ctx.reply(response.text(), { parse_mode: 'Markdown' });
+        const replyText = response.text();
+
+        try {
+            // Birinchi Markdown bilan ko'ramiz
+            await ctx.reply(replyText, { parse_mode: 'Markdown' });
+        } catch (formatErr) {
+            if (formatErr.message && formatErr.message.includes('can\'t parse entities')) {
+                console.warn("[Bot] Markdown xatosi, oddiy matn sifatida yuborilmoqda...");
+                await ctx.reply(replyText); // Formatsiz (plain text) yuborish
+            } else {
+                throw formatErr; // Boshqa turdagi xatolarni tashqariga uzatamiz
+            }
+        }
 
     } catch (err) {
         console.error("[Gemini Global Error]:", err.message);
-        ctx.reply(`❌ AI xatosi: ${err.message}\n\n💡 Maslahat: API kalitingizda muammo bo'lishi mumkin.`);
+        if (err.message.includes('can\'t parse entities')) {
+            // Bu holatda biz yuqorida fallback qildik, lekin mabodo boshqa joydan chiqsa:
+            ctx.reply(`❌ Formatlash xatosi yuz berdi. Javobni to'g'ri ko'rsatib bo'lmadi.`);
+        } else {
+            ctx.reply(`❌ AI xatosi: ${err.message}\n\n💡 Maslahat: Model yoki API kalit bilan muammo bo'lishi mumkin.`);
+        }
     }
 });
 
