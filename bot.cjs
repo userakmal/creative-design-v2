@@ -28,31 +28,33 @@ const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 let model = null;
 const modelsToTry = [
     "gemini-1.5-flash", 
-    "gemini-1.5-flash-8b", 
-    "gemini-2.0-flash", 
     "gemini-1.5-pro", 
+    "gemini-2.0-flash", 
+    "gemini-1.5-flash-8b", 
     "gemini-pro",
-    "gemini-1.0-pro",
-    "gemini-2.0-flash-exp",
-    "gemini-3-flash"
+    "gemini-1.0-pro"
 ];
 
 async function ultimateSyncGemini() {
-    console.log("🔍 Gemini modellarini auto-discovery qilish boshlanmoqda...");
+    console.log("🔍 Gemini modellarini chuqur auto-discovery qilish boshlanmoqda...");
     for (const name of modelsToTry) {
         try {
             console.log(` 🌀 Tekshirilmoqda: ${name}...`);
-            const testModel = genAI.getGenerativeModel({ model: name }, { apiVersion: 'v1' });
-            // Ping testi
+            // Ba'zi hollarda apiVersion ko'rsatmaslik yaxshiroq ishlaydi
+            const testModel = genAI.getGenerativeModel({ model: name });
             await testModel.generateContent("ping");
             console.log(`✅ Mos model topildi va faollashtirildi: ${name}`);
             model = testModel;
             return;
         } catch (e) {
-            // Agar 429 bo'lsa, demak model bor, lekin kuta turish kerak
+            // Agar 429 bo'lsa, lekin limit: 0 bo'lsa, demak bu model o'chirilgan!
             if (e.message.includes('429')) {
-                console.log(` ✅ ${name} modeli topildi (Ammo hozirda Quota Limitda). Uni baribir tanlaymiz.`);
-                model = genAI.getGenerativeModel({ model: name }, { apiVersion: 'v1' });
+                if (e.message.includes('limit: 0')) {
+                    console.log(` ⚠️ ${name} topildi, lekin unda Quota 0 (O'chirilgan). Navbatdagisi...`);
+                    continue; // Keyingisiga o'tamiz
+                }
+                console.log(` ✅ ${name} modeli topildi (Hozirda band, lekin ulanish muvaffaqiyatli).`);
+                model = genAI.getGenerativeModel({ model: name });
                 return;
             }
             console.log(` ⚠️ ${name} ishlamadi: ${e.message.split('\n')[0]}`);
@@ -60,7 +62,7 @@ async function ultimateSyncGemini() {
         }
     }
     console.error("❌ BIROTA MODEL ISHLAMADI!");
-    console.log("💡 Maslahat: Google AI Studio-da yangi 'Project' ochib ko'ring yoki mintaqani (VPN) o'zgartiring.");
+    console.log("💡 Tavsiya: AI Studio-da mutlaqo YANGI PROJECT va yangi API KEY oching.");
 }
 ultimateSyncGemini();
 
@@ -95,7 +97,7 @@ const fullCleanup = (outputPath) => {
     safeUnlink(outputPath + '.ytdl');
 };
 
-console.log("🚀 Telegram Bot (v2.6 Auto-Repair) boshlanmoqda...");
+console.log("🚀 Telegram Bot (v2.7 Deep Quota Fix) boshlanmoqda...");
 
 // Startapda eski axlatlarni tozalash
 const startupCleanup = () => {
