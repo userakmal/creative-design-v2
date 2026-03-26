@@ -1,179 +1,321 @@
+/**
+ * Telegram Video Downloader Bot - Senior-level Refactored Version
+ * Improved error handling, code organization, and maintainability
+ * 
+ * @author G'ulomov Akmal
+ * @version 2.0.0
+ */
+
 const { Telegraf } = require('telegraf');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const { 
-    downloadWithYtDlp, 
-    sniffWithPlaywright, 
-    isM3U8, 
-    isDirectVideo, 
-    getYtDlp, 
+
+// Import from refactored server
+const {
+    downloadWithYtDlp,
+    sniffWithPlaywright,
+    isM3U8,
+    isDirectVideo,
+    getYtDlpPath,
     getRotatedUserAgent,
-    AUTHOR 
+    AUTHOR,
 } = require('./local-video-api/server');
 
-// --- ENV BOSHQARISH (MANUAL .env PARSER) ---
-function loadEnv() {
+// ============================================================================
+// CONFIGURATION
+// ============================================================================
+
+const CONFIG = {
+    BOT_TOKEN: process.env.BOT_TOKEN || '8628132129:AAGuU0M2KaZJATpyINnh4xpGoQyXU6uuFso',
+    ADMIN_ID: parseInt(process.env.ADMIN_ID || '853691902', 10),
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+    DOWNLOAD_TIMEOUT: 180000, // 3 minutes
+    MAX_FILE_SIZE: 50 * 1024 * 1024, // 50MB
+    USERS_FILE: path.join(__dirname, 'data', 'users.json'),
+    TEMP_DIR: path.join(__dirname, 'local-video-api'),
+};
+
+const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-pro'];
+
+// ============================================================================
+// ENVIRONMENT LOADING
+// ============================================================================
+
+const loadEnv = () => {
     const envPath = path.join(__dirname, '.env');
     if (fs.existsSync(envPath)) {
         const envData = fs.readFileSync(envPath, 'utf8');
         envData.split('\n').forEach(line => {
             const [key, value] = line.split('=');
-            if (key && value) process.env[key.trim()] = value.trim();
+            if (key && value) {
+                process.env[key.trim()] = value.trim();
+            }
         });
     }
-}
+};
+
 loadEnv();
 
-// --- BOT SOZLAMALARI ---
-const BOT_TOKEN = '8628132129:AAGuU0M2KaZJATpyINnh4xpGoQyXU6uuFso';
-const ADMIN_ID = 853691902;
-// Gemini API Sozlamalari (Environmentdan olinadi)
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const USERS_FILE = path.join(__dirname, 'data', 'users.json');
-const bot = new Telegraf(BOT_TOKEN);
+// ============================================================================
+// USER MANAGEMENT
+// ============================================================================
 
-// Gemini Sozlamalari (Senior Architect Level)
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY || 'MISSING_KEY');
-
-// Gemini Modellarni Avtomatik Aniqlash (Senior Architect Style)
-let model = null;
-const modelsToTry = [
-    "gemini-2.5-flash"
-];
-
-async function ultimateSyncGemini() {
-    console.log("🔍 Gemini modellarini chuqur auto-discovery qilish boshlanmoqda...");
-    for (const name of modelsToTry) {
-        try {
-            console.log(` 🌀 Tekshirilmoqda: ${name}...`);
-            const testModel = genAI.getGenerativeModel({ model: name });
-            const result = await testModel.generateContent("ping");
-            await result.response; 
-            console.log(`✅ Mos model topildi va faollashtirildi: ${name}`);
-            model = testModel;
-            return;
-        } catch (e) {
-            const errorMsg = e.message.toLowerCase();
-            if (errorMsg.includes('429')) {
-                if (errorMsg.includes('limit: 0') || errorMsg.includes('quota')) {
-                    console.log(` ⚠️ ${name} topildi, lekin Quota 0 (Kalit bloklangan yoki oshkor bo'lgan!).`);
-                    continue; 
-                }
-                console.log(` ✅ ${name} topildi (Quota bor, lekin hozirda band).`);
-                model = genAI.getGenerativeModel({ model: name });
-                return;
-            } else if (errorMsg.includes('403')) {
-                console.log(` ❌ ${name} uchun ruxsat yo'q (403 Forbidden). Kalitda muammo bo'lishi mumkin.`);
-            } else if (errorMsg.includes('404')) {
-                console.log(` ⚠️ ${name} modeli ushbu API versiyasi yoki mintaqada topilmadi (404).`);
-            } else {
-                console.log(` ⚠️ ${name} xatosi: ${e.message.split('\n')[0]}`);
-            }
-            await new Promise(r => setTimeout(r, 1000));
-        }
-    }
-    console.error("❌ BIROTA MODEL ISHLAMADI!");
-    console.log("💡 MUHIM: AI Studio-da mutlaqo YANGI PROJECT oching va yangi API KEY oling.");
-}
-ultimateSyncGemini();
-
-// --- FOYDALANUVCHILARNI BOSHQARISH ---
 const loadUsers = () => {
     try {
-        if (!fs.existsSync(USERS_FILE)) return [];
-        const data = fs.readFileSync(USERS_FILE, 'utf8');
+        if (!fs.existsSync(CONFIG.USERS_FILE)) {
+            return [];
+        }
+        const data = fs.readFileSync(CONFIG.USERS_FILE, 'utf8');
         return JSON.parse(data);
-    } catch (e) { return []; }
+    } catch (error) {
+        console.error('[UserManager] Failed to load users:', error.message);
+        return [];
+    }
 };
 
 const saveUser = (id) => {
-    let users = loadUsers();
-    if (!users.includes(id)) {
-        users.push(id);
-        if (!fs.existsSync(path.dirname(USERS_FILE))) {
-            fs.mkdirSync(path.dirname(USERS_FILE), { recursive: true });
+    try {
+        let users = loadUsers();
+        if (!users.includes(id)) {
+            users.push(id);
+            
+            if (!fs.existsSync(path.dirname(CONFIG.USERS_FILE))) {
+                fs.mkdirSync(path.dirname(CONFIG.USERS_FILE), { recursive: true });
+            }
+            
+            fs.writeFileSync(CONFIG.USERS_FILE, JSON.stringify(users, null, 2));
         }
-        fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+    } catch (error) {
+        console.error('[UserManager] Failed to save user:', error.message);
     }
 };
 
-// --- YORDAMCHI FUNKSIYALAR (SENIOR LEVEL) ---
-const safeUnlink = (p) => {
-    try { if (fs.existsSync(p)) fs.unlinkSync(p); } catch (e) {}
+// ============================================================================
+// FILE UTILITIES
+// ============================================================================
+
+const safeUnlink = (filePath) => {
+    try {
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+            return true;
+        }
+        return false;
+    } catch (error) {
+        console.error('[FileSystem] Failed to delete:', filePath, error.message);
+        return false;
+    }
 };
 
-const fullCleanup = (outputPath) => {
-    safeUnlink(outputPath);
-    safeUnlink(outputPath + '.part');
-    safeUnlink(outputPath + '.ytdl');
+const cleanupDownloadArtifacts = (basePath) => {
+    const extensions = ['.part', '.ytdl', '.tmp', '.download'];
+    
+    safeUnlink(basePath);
+    extensions.forEach(ext => safeUnlink(basePath + ext));
 };
 
-console.log("🚀 Telegram Bot (v2.7 Deep Quota Fix) boshlanmoqda...");
+const sanitizeFilename = (filename, maxLength = 50) => {
+    return filename
+        .replace(/[/\\?%*:|"<>]/g, '-')
+        .replace(/\.\./g, '')
+        .substring(0, maxLength) || 'video';
+};
 
-// Startapda eski axlatlarni tozalash
-const startupCleanup = () => {
-    console.log("[Bot] Avvalgi seanslardan qolgan qoldiqlar tozalanmoqda...");
-    const dir = path.join(__dirname, 'local-video-api');
-    if (fs.existsSync(dir)) {
-        fs.readdirSync(dir).forEach(file => {
+const formatFileSize = (bytes) => {
+    const mb = bytes / (1024 * 1024);
+    return mb.toFixed(1) + ' MB';
+};
+
+// ============================================================================
+// STARTUP CLEANUP
+// ============================================================================
+
+const performStartupCleanup = () => {
+    console.log('[Bot] Cleaning up temporary files from previous sessions...');
+    
+    if (fs.existsSync(CONFIG.TEMP_DIR)) {
+        fs.readdirSync(CONFIG.TEMP_DIR).forEach(file => {
             if (file.startsWith('bot_download_')) {
-                fullCleanup(path.join(dir, file));
+                cleanupDownloadArtifacts(path.join(CONFIG.TEMP_DIR, file));
             }
         });
     }
 };
-startupCleanup();
 
-// Start buyrug'i
+performStartupCleanup();
+
+// ============================================================================
+// GEMINI AI SETUP
+// ============================================================================
+
+let geminiModel = null;
+
+const initializeGemini = async () => {
+    if (!CONFIG.GEMINI_API_KEY || CONFIG.GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY') {
+        console.warn('[Gemini] API key not configured. AI features disabled.');
+        return;
+    }
+    
+    const genAI = new GoogleGenerativeAI(CONFIG.GEMINI_API_KEY);
+    
+    console.log('[Gemini] Discovering available models...');
+    
+    for (const modelName of GEMINI_MODELS) {
+        try {
+            const testModel = genAI.getGenerativeModel({ model: modelName });
+            const result = await testModel.generateContent('ping');
+            await result.response;
+            
+            console.log(`[Gemini] ✅ Model ready: ${modelName}`);
+            geminiModel = testModel;
+            return;
+        } catch (error) {
+            const errorMsg = error.message.toLowerCase();
+            
+            if (errorMsg.includes('429') && (errorMsg.includes('limit: 0') || errorMsg.includes('quota'))) {
+                console.warn(`[Gemini] ⚠️ ${modelName}: Quota exceeded (API key may be blocked)`);
+                continue;
+            } else if (errorMsg.includes('429')) {
+                console.log(`[Gemini] ✅ ${modelName}: Available (rate limited)`);
+                geminiModel = genAI.getGenerativeModel({ model: modelName });
+                return;
+            } else if (errorMsg.includes('403')) {
+                console.warn(`[Gemini] ❌ ${modelName}: Access denied (403)`);
+            } else if (errorMsg.includes('404')) {
+                console.warn(`[Gemini] ⚠️ ${modelName}: Not found (404)`);
+            } else {
+                console.warn(`[Gemini] ⚠️ ${modelName}: ${error.message.split('\n')[0]}`);
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+    }
+    
+    console.error('[Gemini] ❌ No models available. AI features disabled.');
+    console.log('[Gemini] 💡 Tip: Create a new project in AI Studio and get a fresh API key.');
+};
+
+initializeGemini();
+
+// ============================================================================
+// BOT INITIALIZATION
+// ============================================================================
+
+console.log('🚀 Telegram Bot v2.0.0 starting...');
+
+const bot = new Telegraf(CONFIG.BOT_TOKEN);
+
+// ============================================================================
+// BOT COMMANDS
+// ============================================================================
+
 bot.start((ctx) => {
     saveUser(ctx.from.id);
-    ctx.reply(`Assalomu alaykum! Men Video Downloader va AI botman.\n\nSizga video yuklab berishim yoki Gemini AI yordamida savollaringizga javob berishim mumkin.\n\n🤖 Shunchaki savol yozing yoki video havolasini yuboring.`);
+    ctx.reply(
+        `Assalomu alaykum! Men Video Downloader va AI botman.\n\n` +
+        `Sizga video yuklab berishim yoki Gemini AI yordamida savollaringizga javob berishim mumkin.\n\n` +
+        `🤖 Shunchaki savol yozing yoki video havolasini yuboring.`
+    );
 });
 
-// ID ni bilish uchun yordamchi buyruq
 bot.command('myid', (ctx) => {
     ctx.reply(`Sizning Telegram ID raqamingiz: <code>${ctx.from.id}</code>`, { parse_mode: 'HTML' });
 });
 
-// Havolalarni tutib olish
+bot.command(['stats', 'stars'], (ctx) => {
+    if (ctx.from.id !== CONFIG.ADMIN_ID) return;
+    
+    const users = loadUsers();
+    ctx.reply(`📊 Bot statistikasi:\n\n👥 Foydalanuvchilar: ${users.length} ta`);
+});
+
+bot.command('send', async (ctx) => {
+    if (ctx.from.id !== CONFIG.ADMIN_ID) return;
+    
+    const message = ctx.message.text.split(' ').slice(1).join(' ');
+    if (!message) {
+        return ctx.reply('Iltimos, reklama matnini yozing. Masalan: /send Salom barchaga');
+    }
+    
+    const users = loadUsers();
+    let count = 0;
+    let blocked = 0;
+    
+    const waitMsg = await ctx.reply(`📣 Reklama ${users.length} ta foydalanuvchiga yuborilmoqda...`);
+    
+    for (const userId of users) {
+        try {
+            await bot.telegram.sendMessage(userId, message);
+            count++;
+        } catch (error) {
+            if (error.description && error.description.includes('bot was blocked')) {
+                blocked++;
+            }
+        }
+    }
+    
+    await bot.telegram.editMessageText(
+        ctx.chat.id,
+        waitMsg.message_id,
+        null,
+        `✅ Reklama yakunlandi!\n\n👤 Qabul qildi: ${count}\n🚫 Bloklagan: ${blocked}`
+    );
+});
+
+// ============================================================================
+// VIDEO DOWNLOAD HANDLER
+// ============================================================================
+
 bot.on('text', async (ctx, next) => {
     saveUser(ctx.from.id);
     const url = ctx.message.text.trim();
     
-    // Agar bu havola bo'lsa, yuklashni boshlaymiz
-    if (url.startsWith('http')) {
-
-    const waitMsg = await ctx.reply("🔍 Video ma'lumotlari olinmoqda, iltimos kuting...");
+    // Skip if not a URL
+    if (!url.startsWith('http')) {
+        return next();
+    }
+    
+    const waitMsg = await ctx.reply('🔍 Video ma\'lumotlari olinmoqda, iltimos kuting...');
     let outputPath = null;
-
+    let childProcess = null;
+    
     try {
         let videoData;
         let downloadUrl = url;
-
-        // 1. Meta-ma'lumotlarni olish
+        
+        // Get video info
         if (isDirectVideo(url) || isM3U8(url)) {
-            videoData = { url, title: "Video" };
+            videoData = { url, title: 'Video' };
         } else {
             try {
                 videoData = await downloadWithYtDlp(url);
-            } catch (e) {
+            } catch (ytdlpError) {
+                console.log('[Bot] yt-dlp failed, trying Playwright...');
                 videoData = await sniffWithPlaywright(url);
                 downloadUrl = videoData.url;
             }
         }
-
-        if (!videoData || !videoData.url) throw new Error("Video topilmadi.");
-
-        await bot.telegram.editMessageText(ctx.chat.id, waitMsg.message_id, null, "📥 Video yuklanmoqda...");
-
-        // 2. Yuklashni tayyorlash
-        const ytcmd = await getYtDlp();
+        
+        if (!videoData || !videoData.url) {
+            throw new Error('Video topilmadi');
+        }
+        
+        await bot.telegram.editMessageText(
+            ctx.chat.id,
+            waitMsg.message_id,
+            null,
+            '📥 Video yuklanmoqda...'
+        );
+        
+        // Prepare download
+        const ytcmd = getYtDlpPath();
         const userAgent = getRotatedUserAgent();
-        const fileName = `bot_download_${Date.now()}.mp4`;
-        outputPath = path.join(__dirname, 'local-video-api', fileName);
-
+        const safeTitle = sanitizeFilename(videoData.title || 'video');
+        const fileName = `bot_download_${Date.now()}_${Math.random().toString(36).substring(2, 9)}.mp4`;
+        outputPath = path.join(CONFIG.TEMP_DIR, fileName);
+        
         const args = [
             '--no-check-certificates',
             '--user-agent', userAgent,
@@ -181,153 +323,176 @@ bot.on('text', async (ctx, next) => {
             '--geo-bypass',
             '-f', 'best[ext=mp4]/best',
             '-o', outputPath,
-            downloadUrl
+            downloadUrl,
         ];
-
-        console.log(`[Bot] Download start: ${downloadUrl}`);
-        const child = spawn(ytcmd, args);
-
-        // 3. Timeout boshqaruvi
+        
+        console.log(`[Bot] Downloading: ${downloadUrl}`);
+        childProcess = spawn(ytcmd, args);
+        
+        // Timeout handler
         const timeout = setTimeout(() => {
-            child.kill('SIGKILL');
-            console.log(`[Bot] Download timeout: ${downloadUrl}`);
-        }, 180000); // 3 daqiqa limit
-
-        child.on('close', async (code) => {
+            childProcess.kill('SIGKILL');
+            console.log('[Bot] Download timeout');
+        }, CONFIG.DOWNLOAD_TIMEOUT);
+        
+        childProcess.on('close', async (code) => {
             clearTimeout(timeout);
             
             if (code === 0 && fs.existsSync(outputPath)) {
                 try {
                     const stats = fs.statSync(outputPath);
-                    const mb = (stats.size / (1024 * 1024)).toFixed(1);
-                    console.log(`[Bot] Yuklandi: ${mb} MB`);
-
-                    if (stats.size > 50 * 1024 * 1024) {
-                        await ctx.reply(`⚠️ Video hajmi ${mb} MB. Telegram cheklovi sababli yuborib bo'lmasligi mumkin, lekin urinib ko'raman...`);
-                    }
-
-                    await bot.telegram.editMessageText(ctx.chat.id, waitMsg.message_id, null, "✅ Yuklandi! Telegramga yuborilmoqda...");
+                    const fileSize = formatFileSize(stats.size);
+                    console.log(`[Bot] Downloaded: ${fileSize}`);
                     
-                    await ctx.replyWithVideo({ source: outputPath }, {
-                        caption: `🎬 ${videoData.title || 'Video'}\n📦 Hajmi: ${mb} MB\n\n🤖 @${ctx.botInfo.username} orqali yuklab olindi`,
-                    });
-                } catch (sendErr) {
-                    console.error("[Bot] Yuborishda xato:", sendErr.message);
-                    ctx.reply(`❌ Xatolik: Videoni yuborib bo'lmadi. ${sendErr.message.includes('Request Entity Too Large') ? 'Video hajmi juda katta.' : sendErr.message}`);
+                    // Check file size limit
+                    if (stats.size > CONFIG.MAX_FILE_SIZE) {
+                        await ctx.reply(
+                            `⚠️ Video hajmi ${fileSize}. Telegram cheklovi sababli yuborib bo'lmasligi mumkin, lekin urinib ko'raman...`
+                        );
+                    }
+                    
+                    await bot.telegram.editMessageText(
+                        ctx.chat.id,
+                        waitMsg.message_id,
+                        null,
+                        '✅ Yuklandi! Telegramga yuborilmoqda...'
+                    );
+                    
+                    await ctx.replyWithVideo(
+                        { source: outputPath },
+                        {
+                            caption: `🎬 ${videoData.title || 'Video'}\n📦 Hajmi: ${fileSize}\n\n🤖 @${ctx.botInfo.username} orqali yuklab olindi`,
+                        }
+                    );
+                } catch (sendError) {
+                    console.error('[Bot] Send failed:', sendError.message);
+                    
+                    let errorMessage = '❌ Xatolik: Videoni yuborib bo\'lmadi.';
+                    if (sendError.message.includes('Request Entity Too Large')) {
+                        errorMessage += ' Video hajmi juda katta.';
+                    } else if (sendError.message) {
+                        errorMessage += ' ' + sendError.message;
+                    }
+                    
+                    ctx.reply(errorMessage);
                 } finally {
-                    fullCleanup(outputPath);
+                    cleanupDownloadArtifacts(outputPath);
                 }
             } else {
-                fullCleanup(outputPath);
-                if (code !== null) { // Agar timeout bo'lmasa
-                    ctx.reply("❌ Videoni yuklab bo'lmadi yoki havola yaroqsiz.");
+                cleanupDownloadArtifacts(outputPath);
+                
+                if (code !== null) {
+                    ctx.reply('❌ Videoni yuklab bo\'lmadi yoki havola yaroqsiz.');
                 } else {
-                    ctx.reply("⚠️ Yuklash vaqti tugadi (Timeout).");
+                    ctx.reply('⚠️ Yuklash vaqti tugadi (Timeout).');
                 }
             }
         });
-
-    } catch (err) {
-        console.error("[Bot] Global Error:", err.message);
-        ctx.reply(`❌ Xatolik: ${err.message}`);
-        if (outputPath) fullCleanup(outputPath);
-    }
-    } else {
-        return next();
-    }
-});
-
-// Reklama yuborish (Admin buyrug'i)
-bot.command('send', async (ctx) => {
-    if (ctx.from.id !== ADMIN_ID) return;
-
-    const message = ctx.message.text.split(' ').slice(1).join(' ');
-    if (!message) return ctx.reply("Iltimos, reklama matnini yozing. Masalan: /send Salom barchaga");
-
-    const users = loadUsers();
-    let count = 0;
-    let blocked = 0;
-
-    const waitMsg = await ctx.reply(`📣 Reklama ${users.length} ta foydalanuvchiga yuborilmoqda...`);
-
-    for (const userId of users) {
-        try {
-            await bot.telegram.sendMessage(userId, message);
-            count++;
-        } catch (err) {
-            if (err.description && err.description.includes('bot was blocked')) {
-                blocked++;
-            }
+        
+    } catch (error) {
+        console.error('[Bot] Download error:', error.message);
+        
+        if (outputPath) {
+            cleanupDownloadArtifacts(outputPath);
         }
+        
+        ctx.reply(`❌ Xatolik: ${error.message}`);
     }
-
-    await bot.telegram.editMessageText(ctx.chat.id, waitMsg.message_id, null, `✅ Reklama yakunlandi!\n\n👤 Qabul qildi: ${count}\n🚫 Bloklagan: ${blocked}`);
 });
 
-bot.command(['stats', 'stars'], (ctx) => {
-    if (ctx.from.id !== ADMIN_ID) return;
-    const users = loadUsers();
-    ctx.reply(`📊 Bot statistikasi:\n\n👥 Foydalanuvchilar: ${users.length} ta`);
-});
+// ============================================================================
+// GEMINI AI HANDLER
+// ============================================================================
 
-// Gemini AI handler (Ultimate Stabilization)
-bot.on('text', async (ctx, next) => {
+bot.on('text', async (ctx) => {
     const text = ctx.message.text;
-    if (text.startsWith('/')) return next(); 
-
+    
+    // Skip commands
+    if (text.startsWith('/')) {
+        return;
+    }
+    
+    // Check if Gemini is available
+    if (!CONFIG.GEMINI_API_KEY || CONFIG.GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY') {
+        return ctx.reply('⚠️ Gemini AI kaliti o\'rnatilmagan. Iltimos, admin bilan bog\'laning.');
+    }
+    
+    if (!geminiModel) {
+        return ctx.reply('⏳ AI tizimi hali tayyor emas. Ozroq kuting yoki admin bilan bog\'laning.');
+    }
+    
     try {
-        if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY') {
-            return ctx.reply("⚠️ Gemini AI kaliti o'rnatilmagan. Iltimos, admin bilan bog'laning.");
-        }
-
-        if (!model) {
-            return ctx.reply("⏳ AI tizimi hali tayyor emas yoki birorta model ishlamadi. Ozroq kuting yoki admin bilan bog'laning.");
-        }
-
         await ctx.sendChatAction('typing');
-        const result = await model.generateContent(text);
+        
+        const result = await geminiModel.generateContent(text);
         const response = await result.response;
         const replyText = response.text();
-
+        
         try {
-            // Birinchi Markdown bilan ko'ramiz
+            // Try Markdown first
             await ctx.reply(replyText, { parse_mode: 'Markdown' });
-        } catch (formatErr) {
-            if (formatErr.message && formatErr.message.includes('can\'t parse entities')) {
-                console.warn("[Bot] Markdown xatosi, oddiy matn sifatida yuborilmoqda...");
-                await ctx.reply(replyText); // Formatsiz (plain text) yuborish
+        } catch (formatError) {
+            if (formatError.message && formatError.message.includes('can\'t parse entities')) {
+                console.warn('[Bot] Markdown parse error, sending as plain text...');
+                await ctx.reply(replyText);
             } else {
-                throw formatErr; // Boshqa turdagi xatolarni tashqariga uzatamiz
+                throw formatError;
             }
         }
-
-    } catch (err) {
-        console.error("[Gemini Global Error]:", err.message);
-        if (err.message.includes('can\'t parse entities')) {
-            // Bu holatda biz yuqorida fallback qildik, lekin mabodo boshqa joydan chiqsa:
-            ctx.reply(`❌ Formatlash xatosi yuz berdi. Javobni to'g'ri ko'rsatib bo'lmadi.`);
-        } else {
-            ctx.reply(`❌ AI xatosi: ${err.message}\n\n💡 Maslahat: Model yoki API kalit bilan muammo bo'lishi mumkin.`);
+        
+    } catch (error) {
+        console.error('[Gemini] Error:', error.message);
+        
+        let errorMessage = '❌ AI xatosi: ' + error.message;
+        
+        if (error.message.includes('can\'t parse entities')) {
+            errorMessage = '❌ Formatlash xatosi. Javobni to\'g\'ri ko\'rsatib bo\'lmadi.';
         }
+        
+        ctx.reply(errorMessage + '\n\n💡 Maslahat: Model yoki API kalit bilan muammo bo\'lishi mumkin.');
     }
 });
 
-// Botni ishga tushirish
-console.log("... Bot ma'lumotlari tekshirilmoqda");
+// ============================================================================
+// BOT LIFECYCLE
+// ============================================================================
+
+console.log('... Bot ma\'lumotlari tekshirilmoqda');
+
 bot.telegram.getMe().then((me) => {
-    console.log(`✅ Bot topildi: @${me.username}`);
-    bot.launch().then(() => {
-        console.log("✅ Polling boshlandi!");
-    }).catch((err) => {
-        console.error("❌ Botni ishga tushirishda xato:", err.message);
-        if (err.message.includes('409: Conflict')) {
-            console.error("❗️ Boshqa bot nusxasi allaqachon ishlamoqda. Iltimos, boshqa oynalarni yoping.");
-        }
-    });
-}).catch((err) => {
-    console.error("❌ Token hato yoki internet yo'q:", err.message);
+    console.log(`✅ Bot ready: @${me.username}`);
+    
+    bot.launch()
+        .then(() => {
+            console.log('✅ Polling started!');
+        })
+        .catch((error) => {
+            console.error('❌ Bot launch failed:', error.message);
+            
+            if (error.message.includes('409: Conflict')) {
+                console.error('❗ Another bot instance is already running. Please close other windows.');
+            }
+        });
+}).catch((error) => {
+    console.error('❌ Invalid token or no internet:', error.message);
 });
 
-// To'xtatish
-process.once('SIGINT', () => bot.stop('SIGINT'));
-process.once('SIGTERM', () => bot.stop('SIGTERM'));
+// Graceful shutdown
+process.once('SIGINT', () => {
+    console.log('[Bot] Shutting down (SIGINT)...');
+    bot.stop('SIGINT');
+});
+
+process.once('SIGTERM', () => {
+    console.log('[Bot] Shutting down (SIGTERM)...');
+    bot.stop('SIGTERM');
+});
+
+// Unhandled error handler
+process.on('uncaughtException', (error) => {
+    console.error('[Bot] Uncaught Exception:', error);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('[Bot] Unhandled Rejection at:', promise, 'reason:', reason);
+});

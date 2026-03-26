@@ -1,4 +1,9 @@
-import React, { useState, useEffect } from "react";
+/**
+ * Video Downloader Page - Senior-level Refactored Version
+ * Improved TypeScript, error handling, and state management
+ */
+
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   ArrowLeft,
   Download,
@@ -14,25 +19,31 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-interface Format {
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+interface VideoFormat {
   format_id: string;
   extension: string;
   resolution: string;
   filesize: number | null;
   quality: string;
+  tbr?: number;
 }
 
-interface DownloadResult {
+interface VideoData {
+  title: string;
   url: string;
-  thumbnail?: string;
-  title?: string;
-  type: "video" | "audio" | "unknown";
+  thumbnail?: string | null;
+  type: string;
+  duration?: number;
+  formats?: VideoFormat[];
   isM3U8?: boolean;
-  formats?: Format[];
 }
 
 interface DownloadProgress {
-  status: string;
+  status: "starting" | "downloading" | "completed" | "error" | "cancelled";
   percent: number;
   size?: string;
   speed?: string;
@@ -40,105 +51,239 @@ interface DownloadProgress {
   message?: string;
 }
 
-// API manzillari: avval lokal, keyin tunnel
-const API_ENDPOINTS = [
-  "http://localhost:3000/api/download",
-  "https://creative-video-api.loca.lt/api/download",
+type ServerStatus = "checking" | "online" | "offline";
+
+interface ApiEndpoint {
+  url: string;
+  priority: number;
+}
+
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+
+const API_ENDPOINTS: ApiEndpoint[] = [
+  { url: "http://localhost:3000/api/download", priority: 1 },
+  { url: "https://creative-video-api.loca.lt/api/download", priority: 2 },
 ];
 
-// Tez ulanish tekshiruvi
-const checkEndpoint = async (url: string): Promise<boolean> => {
+const REQUEST_TIMEOUT = 90000; // 90 seconds
+const HEALTH_CHECK_TIMEOUT = 3000;
+const PROGRESS_CLEAR_DELAY = 5000;
+
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+const isValidUrl = (string: string): boolean => {
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000);
-    const res = await fetch(url.replace("/api/download", ""), {
-      method: "HEAD",
-      signal: controller.signal,
-      headers: { "Bypass-Tunnel-Reminder": "true" },
-    });
-    clearTimeout(timeoutId);
-    return res.ok || res.status === 404; // 404 is ok — server is alive, just no GET route
+    new URL(string);
+    return true;
   } catch {
     return false;
   }
 };
 
+const sanitizeFilename = (filename: string): string => {
+  return filename
+    .replace(/[/\\?%*:|"<>]/g, "-")
+    .replace(/\.\./g, "")
+    .substring(0, 50) || "video";
+};
+
+const checkEndpointHealth = async (baseUrl: string): Promise<boolean> => {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), HEALTH_CHECK_TIMEOUT);
+    
+    const res = await fetch(baseUrl, {
+      method: "HEAD",
+      signal: controller.signal,
+      headers: { "Bypass-Tunnel-Reminder": "true" },
+    });
+    
+    clearTimeout(timeoutId);
+    return res.ok || res.status === 404;
+  } catch {
+    return false;
+  }
+};
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
 export const VideoDownloaderPage: React.FC = () => {
   const navigate = useNavigate();
-  const [url, setUrl] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  
+  // State
+  const [url, setUrl] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<DownloadResult | null>(null);
-  const [serverStatus, setServerStatus] = useState<"checking" | "online" | "offline">("checking");
+  const [result, setResult] = useState<VideoData | null>(null);
+  const [serverStatus, setServerStatus] = useState<ServerStatus>("checking");
   const [activeEndpoint, setActiveEndpoint] = useState<string | null>(null);
-  const [isDownloading, setIsDownloading] = useState(false);
+  const [isDownloading, setIsDownloading] = useState<boolean>(false);
   const [selectedFormat, setSelectedFormat] = useState<string>("best");
   const [downloadProgress, setDownloadProgress] = useState<DownloadProgress | null>(null);
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
+  
+  // Refs
+  const eventSourceRef = useRef<EventSource | null>(null);
+  const progressClearTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Videoni server orqali yuklab olish (yangi oyna ochmasdan, to'g'ridan-to'g'ri download)
-  const triggerDownload = async (videoUrl: string, title: string) => {
-    setIsDownloading(true);
-    setDownloadProgress({ status: 'starting', percent: 0 });
-    
-    const jobId = `job_${Date.now()}`;
-    setCurrentJobId(jobId);
-    const serverBase = activeEndpoint?.replace(/\/api\/(download|info)$/, "") || "http://localhost:3000";
+  // ============================================================================
+  // CLEANUP
+  // ============================================================================
 
-    // Progressni kuzatish (SSE)
-    const eventSource = new EventSource(`${serverBase}/api/progress/${jobId}`);
-    eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      setDownloadProgress(data);
-      if (data.status === 'completed' || data.status === 'error') {
-        eventSource.close();
+  useEffect(() => {
+    return () => {
+      // Cleanup EventSource on unmount
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+      // Clear progress timeout
+      if (progressClearTimeoutRef.current) {
+        clearTimeout(progressClearTimeoutRef.current);
       }
     };
-    eventSource.onerror = () => {
-      eventSource.close();
-    };
+  }, []);
 
-    try {
-      const proxyUrl = `${serverBase}/api/proxy-download?url=${encodeURIComponent(videoUrl)}&title=${encodeURIComponent(title)}&format=${selectedFormat}&jobId=${jobId}`;
+  // ============================================================================
+  // SERVER STATUS CHECK
+  // ============================================================================
+
+  const checkServerStatus = useCallback(async () => {
+    setServerStatus("checking");
+    
+    // Sort endpoints by priority
+    const sortedEndpoints = [...API_ENDPOINTS].sort((a, b) => a.priority - b.priority);
+    
+    for (const endpoint of sortedEndpoints) {
+      const baseUrl = endpoint.url.replace("/api/download", "");
+      const isAlive = await checkEndpointHealth(baseUrl);
       
+      if (isAlive) {
+        setActiveEndpoint(endpoint.url);
+        setServerStatus("online");
+        return;
+      }
+    }
+    
+    setActiveEndpoint(null);
+    setServerStatus("offline");
+  }, []);
+
+  useEffect(() => {
+    checkServerStatus();
+  }, [checkServerStatus]);
+
+  // ============================================================================
+  // DOWNLOAD HANDLERS
+  // ============================================================================
+
+  const handlePaste = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text) setUrl(text);
+    } catch (err) {
+      console.warn("Failed to read clipboard:", err);
+    }
+  };
+
+  const triggerDownload = async (videoUrl: string, title: string) => {
+    if (!activeEndpoint) {
+      setError("Server offline. Please start the server.");
+      return;
+    }
+
+    setIsDownloading(true);
+    setDownloadProgress({ status: "starting", percent: 0, speed: "", eta: "" });
+
+    const jobId = `job_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    setCurrentJobId(jobId);
+    
+    const serverBase = activeEndpoint.replace(/\/api\/(download|info)$/, "");
+    const safeTitle = sanitizeFilename(title);
+
+    // Setup SSE progress tracking
+    try {
+      eventSourceRef.current?.close();
+      
+      const eventSource = new EventSource(`${serverBase}/api/progress/${jobId}`);
+      eventSourceRef.current = eventSource;
+
+      eventSource.onmessage = (event) => {
+        const data: DownloadProgress = JSON.parse(event.data);
+        setDownloadProgress(data);
+        
+        if (data.status === "completed" || data.status === "error") {
+          eventSource.close();
+          eventSourceRef.current = null;
+        }
+      };
+
+      eventSource.onerror = () => {
+        eventSource.close();
+        eventSourceRef.current = null;
+      };
+
+      // Start proxy download
+      const proxyUrl = `${serverBase}/api/proxy-download?${new URLSearchParams({
+        url: videoUrl,
+        title: safeTitle,
+        format: selectedFormat,
+        jobId,
+      })}`;
+
       const response = await fetch(proxyUrl, {
         headers: { "Bypass-Tunnel-Reminder": "true" },
       });
-      
+
       if (!response.ok) {
-        throw new Error("Server yuklab bera olmadi");
+        throw new Error(`Server returned ${response.status}`);
       }
-      
+
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
-      
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = `${title || 'video'}.mp4`;
-      a.style.display = 'none';
-      document.body.appendChild(a);
-      a.click();
-      
+
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `${safeTitle}.mp4`;
+      link.style.display = "none";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Cleanup blob URL
       setTimeout(() => {
         URL.revokeObjectURL(blobUrl);
-        document.body.removeChild(a);
       }, 1000);
+
     } catch (err) {
       console.error("Proxy download failed:", err);
-      // Fallback
-      window.open(videoUrl, '_blank');
+      
+      // Fallback: open direct URL
+      window.open(videoUrl, "_blank");
     } finally {
       setIsDownloading(false);
       setCurrentJobId(null);
-      // Progressni bir ozdan keyin yashirish
-      setTimeout(() => setDownloadProgress(null), 5000);
+      
+      // Clear progress after delay
+      if (progressClearTimeoutRef.current) {
+        clearTimeout(progressClearTimeoutRef.current);
+      }
+      progressClearTimeoutRef.current = setTimeout(() => {
+        setDownloadProgress(null);
+      }, PROGRESS_CLEAR_DELAY);
     }
   };
 
   const handleCancelDownload = async () => {
     if (!currentJobId || !activeEndpoint) return;
+
+    const serverBase = activeEndpoint.replace(/\/api\/(download|info)$/, "");
     
-    const serverBase = activeEndpoint.replace(/\/api\/(download|info)$/, "") || "http://localhost:3000";
     try {
       await fetch(`${serverBase}/api/cancel/${currentJobId}`, {
         method: "POST",
@@ -150,48 +295,24 @@ export const VideoDownloaderPage: React.FC = () => {
       setIsDownloading(false);
       setCurrentJobId(null);
       setDownloadProgress(null);
-    }
-  };
-
-  // Server holatini tekshirish
-  const checkServerStatus = async () => {
-    setServerStatus("checking");
-    for (const endpoint of API_ENDPOINTS) {
-      const isAlive = await checkEndpoint(endpoint);
-      if (isAlive) {
-        setActiveEndpoint(endpoint);
-        setServerStatus("online");
-        return;
-      }
-    }
-    setActiveEndpoint(null);
-    setServerStatus("offline");
-  };
-
-  useEffect(() => {
-    checkServerStatus();
-  }, []);
-
-  const handlePaste = async () => {
-    try {
-      const text = await navigator.clipboard.readText();
-      if (text) setUrl(text);
-    } catch (err) {
-      console.log("Failed to read clipboard");
+      
+      // Close EventSource
+      eventSourceRef.current?.close();
+      eventSourceRef.current = null;
     }
   };
 
   const downloadVideo = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validation
     if (!url.trim()) {
-      setError("Iltimos, havolani kiriting");
+      setError("Please enter a URL");
       return;
     }
 
-    try {
-      new URL(url);
-    } catch {
-      setError("Iltimos, to'g'ri havola kiriting (https://...)");
+    if (!isValidUrl(url.trim())) {
+      setError("Please enter a valid URL (https://...)");
       return;
     }
 
@@ -199,18 +320,21 @@ export const VideoDownloaderPage: React.FC = () => {
     setError(null);
     setResult(null);
 
-    // Barcha endpointlarni sinash
-    let lastError = "";
+    // Determine endpoints to try
     const endpointsToTry = activeEndpoint
-      ? [activeEndpoint, ...API_ENDPOINTS.filter((e) => e !== activeEndpoint)]
-      : API_ENDPOINTS;
+      ? [activeEndpoint, ...API_ENDPOINTS.filter((ep) => ep.url !== activeEndpoint)]
+      : API_ENDPOINTS.map((ep) => ep.url);
+
+    let lastError = "";
 
     for (const endpoint of endpointsToTry) {
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 90000); // 90s timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
 
-        const response = await fetch(endpoint.replace("/download", "/info"), {
+      try {
+        const infoEndpoint = endpoint.replace("/download", "/info");
+        
+        const response = await fetch(infoEndpoint, {
           method: "POST",
           headers: {
             Accept: "application/json",
@@ -220,48 +344,53 @@ export const VideoDownloaderPage: React.FC = () => {
           body: JSON.stringify({ url: url.trim() }),
           signal: controller.signal,
         });
+        
         clearTimeout(timeoutId);
 
         const responseText = await response.text();
-        let data;
+        
+        let data: { status?: string; data?: VideoData; text?: string };
         try {
           data = JSON.parse(responseText);
         } catch {
-          console.error("Non-JSON response from", endpoint, responseText.substring(0, 200));
-          lastError = "Server javob bermadi. Qayta urinib ko'ring.";
-          continue; // Keyingi endpoint ga o'tish
+          console.error("Non-JSON response from", endpoint);
+          lastError = "Server returned invalid response";
+          continue;
         }
 
         if (data.status === "success" && data.data) {
-          setActiveEndpoint(endpoint); // Ishlaganni eslab qolish
+          setActiveEndpoint(endpoint);
           setServerStatus("online");
           setResult({
-            url: url.trim(), // Asl URL ni saqlaymiz, triggerDownload da ishlatish uchun
-            title: data.data.title || "Yuklab olingan video",
-            thumbnail: data.data.thumbnail,
-            type: "video",
-            formats: data.data.formats || [],
+            ...data.data,
+            url: data.data.url || url.trim(),
           });
           setIsLoading(false);
-          return; // Muvaffaqiyat!
+          return;
         } else {
-          lastError = data.text || "Video topilmadi. Havolani tekshirib qayta urinib ko'ring.";
+          lastError = data.text || "Video not found. Please check the URL.";
         }
       } catch (err: any) {
+        clearTimeout(timeoutId);
+        
         if (err.name === "AbortError") {
-          lastError = "So'rov vaqti tugadi. Internet aloqangizni tekshiring.";
+          lastError = "Request timeout. Please check your connection.";
         } else {
-          lastError = err.message || "Server bilan bog'lanib bo'lmadi.";
+          lastError = err.message || "Failed to connect to server";
         }
         continue;
       }
     }
 
-    // Hech bir endpoint ishlamadi
-    setError(lastError || "Server ishlamayapti. Serverni yoqib qayta urinib ko'ring.");
+    // All endpoints failed
+    setError(lastError || "Server is offline. Please start the server.");
     setServerStatus("offline");
     setIsLoading(false);
   };
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
 
   return (
     <div className="w-full min-h-screen bg-cream animate-fade-in pb-10 max-w-md mx-auto">
@@ -271,6 +400,7 @@ export const VideoDownloaderPage: React.FC = () => {
           <button
             onClick={() => navigate("/")}
             className="p-2 -ml-2 rounded-full hover:bg-stone-100 transition-colors text-stone-600 active:scale-95"
+            aria-label="Go back"
           >
             <ArrowLeft size={20} />
           </button>
@@ -289,11 +419,12 @@ export const VideoDownloaderPage: React.FC = () => {
               ? "bg-red-50 text-red-500 border border-red-100"
               : "bg-stone-50 text-stone-400 border border-stone-100 animate-pulse"
           }`}
+          aria-label={`Server status: ${serverStatus}`}
         >
           {serverStatus === "online" && <Wifi size={12} />}
           {serverStatus === "offline" && <WifiOff size={12} />}
           {serverStatus === "checking" && <Loader2 size={12} className="animate-spin" />}
-          {serverStatus === "online" ? "Server ON" : serverStatus === "offline" ? "Server OFF" : "Tekshirilmoqda"}
+          {serverStatus === "online" ? "Server ON" : serverStatus === "offline" ? "Server OFF" : "Checking"}
         </button>
       </div>
 
@@ -305,12 +436,11 @@ export const VideoDownloaderPage: React.FC = () => {
           </div>
           <div>
             <h3 className="font-semibold text-stone-800 text-sm mb-1">
-              Istagan videoni yuklang
+              Download Any Video
             </h3>
             <p className="text-xs text-stone-500 leading-relaxed">
-              Instagram, TikTok, YouTube, M3U8 streamlar va boshqa
-              platformalardan videolarni havolasi orqali bepul yuklab oling.
-              Barcha cheklovlardan avtomatik o'tadi.
+              Free video downloader for Instagram, TikTok, YouTube, M3U8 streams,
+              and more. Automatically bypasses geo and SSL restrictions.
             </p>
           </div>
         </div>
@@ -321,16 +451,16 @@ export const VideoDownloaderPage: React.FC = () => {
             <div className="flex items-start gap-3">
               <WifiOff size={18} className="text-amber-500 mt-0.5 shrink-0" />
               <div>
-                <p className="text-sm font-medium text-amber-800 mb-1">Server ishlamayapti</p>
+                <p className="text-sm font-medium text-amber-800 mb-1">Server is offline</p>
                 <p className="text-xs text-amber-600 leading-relaxed">
-                  Video serverini yoqish uchun <b>Serverni_Yoqish.bat</b> faylini ishga tushiring.
+                  Start <b>Serverni_Yoqish.bat</b> to run the video server.
                 </p>
                 <button
                   onClick={checkServerStatus}
                   className="mt-3 flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg text-xs font-medium transition-colors"
                 >
                   <RefreshCw size={12} />
-                  Qayta tekshirish
+                  Check Again
                 </button>
               </div>
             </div>
@@ -349,6 +479,7 @@ export const VideoDownloaderPage: React.FC = () => {
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://www.instagram.com/reel/..."
               className="w-full pl-11 pr-20 py-4 bg-white border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all text-stone-700 placeholder:text-stone-300 shadow-inner"
+              aria-label="Video URL"
             />
             <button
               type="button"
@@ -366,11 +497,14 @@ export const VideoDownloaderPage: React.FC = () => {
                 <span>{error}</span>
                 <button
                   type="button"
-                  onClick={() => { setError(null); downloadVideo(new Event("submit") as any); }}
+                  onClick={() => {
+                    setError(null);
+                    downloadVideo(new Event("submit") as any);
+                  }}
                   className="mt-2 flex items-center gap-1 text-red-500 hover:text-red-700 font-medium"
                 >
                   <RefreshCw size={12} />
-                  Qayta urinish
+                  Retry
                 </button>
               </div>
             </div>
@@ -384,12 +518,12 @@ export const VideoDownloaderPage: React.FC = () => {
             {isLoading ? (
               <>
                 <Loader2 size={18} className="animate-spin" />
-                Qidirilmoqda...
+                Searching...
               </>
             ) : (
               <>
                 <Download size={18} />
-                Videoni izlash
+                Search Video
               </>
             )}
           </button>
@@ -404,94 +538,103 @@ export const VideoDownloaderPage: React.FC = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <h4 className="font-semibold text-stone-800 text-sm truncate">
-                  {result.title || "Video topildi"}
+                  {result.title || "Video Found"}
                 </h4>
-                <p className="text-xs text-stone-500">Yuklab olishga tayyor</p>
+                <p className="text-xs text-stone-500">Ready to download</p>
               </div>
             </div>
 
             <div className="p-4 grid grid-cols-1 gap-3">
+              {/* Format Selection */}
               {result.formats && result.formats.length > 0 && (
                 <div className="mb-2">
                   <label className="block text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2">
-                    Video sifatini tanlang:
+                    Select Quality:
                   </label>
                   <select
                     value={selectedFormat}
                     onChange={(e) => setSelectedFormat(e.target.value)}
                     className="w-full p-3 bg-stone-50 border border-stone-100 rounded-xl text-sm text-stone-700 outline-none focus:ring-2 focus:ring-blue-100 transition-all"
                   >
-                    <option value="best">Eng yaxshi sifat (Auto)</option>
+                    <option value="best">Best Quality (Auto)</option>
                     {result.formats.map((f) => (
                       <option key={f.format_id} value={f.format_id}>
-                        {f.resolution} {f.quality && `(${f.quality})`} - {f.extension} 
-                        {f.filesize ? ` (~${(f.filesize / 1024 / 1024).toFixed(1)} MB)` : ''}
+                        {f.resolution} {f.quality && `(${f.quality})`} - {f.extension}
+                        {f.filesize ? ` (~${(f.filesize / 1024 / 1024).toFixed(1)} MB)` : ""}
                       </option>
                     ))}
                   </select>
                 </div>
               )}
 
+              {/* Progress Bar */}
               {downloadProgress && (
                 <div className="mb-4 animate-fade-in">
                   <div className="flex justify-between items-center mb-1.5">
                     <span className="text-xs font-medium text-stone-600">
-                      {downloadProgress.status === 'downloading' ? 'Yuklanmoqda...' : 
-                       downloadProgress.status === 'starting' ? 'Tayyorlanmoqda...' : 
-                       downloadProgress.status === 'completed' ? 'Tugallandi!' : 
-                       downloadProgress.status === 'error' ? 'Xatolik!' : 'Kutilmoqda...'}
+                      {downloadProgress.status === "downloading" ? "Downloading..." :
+                       downloadProgress.status === "starting" ? "Preparing..." :
+                       downloadProgress.status === "completed" ? "Complete!" :
+                       downloadProgress.status === "error" ? "Error!" : "Waiting..."}
                     </span>
                     <span className="text-xs font-bold text-blue-500">
                       {Math.round(downloadProgress.percent)}%
                     </span>
                   </div>
                   <div className="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-blue-500 transition-all duration-300" 
+                    <div
+                      className="h-full bg-blue-500 transition-all duration-300"
                       style={{ width: `${downloadProgress.percent}%` }}
                     />
                   </div>
-                  
+
                   {isDownloading && (
                     <button
                       onClick={handleCancelDownload}
                       className="mt-3 w-full py-2 bg-red-50 hover:bg-red-100 text-red-500 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors"
                     >
                       <XCircle size={14} />
-                      YUKLASHNI TO'XTATISH
+                      CANCEL DOWNLOAD
                     </button>
                   )}
-                  {downloadProgress.speed && (
+                  
+                  {downloadProgress.speed && downloadProgress.eta && (
                     <div className="flex justify-between mt-2 text-[10px] text-stone-400 font-medium">
-                      <span>Tezlik: {downloadProgress.speed}</span>
-                      <span>Qoldi: {downloadProgress.eta}</span>
+                      <span>Speed: {downloadProgress.speed}</span>
+                      <span>ETA: {downloadProgress.eta}</span>
                     </div>
                   )}
+                  
                   {downloadProgress.message && (
                     <p className="mt-1 text-[10px] text-red-500">{downloadProgress.message}</p>
                   )}
                 </div>
               )}
 
+              {/* M3U8 Warning */}
               {result.isM3U8 && (
                 <div className="px-3 py-2 bg-amber-50 border border-amber-100 rounded-lg text-[11px] text-amber-700 mb-1">
-                  ⚡ M3U8 stream — VLC yoki brauzerda ochish mumkin
+                  ⚡ M3U8 stream — Can be opened in VLC or browser
                 </div>
               )}
+              
+              {/* Download Button */}
               <button
-                onClick={() => triggerDownload(result.url, result.title || 'video')}
+                onClick={() => triggerDownload(result.url, result.title || "video")}
                 disabled={isDownloading}
                 className="w-full py-3.5 bg-stone-800 hover:bg-stone-900 text-white rounded-xl font-medium text-sm flex items-center justify-center gap-2 transition-colors disabled:opacity-70"
               >
                 {isDownloading ? (
                   <>
                     <Loader2 size={18} className="animate-spin" />
-                    {downloadProgress?.status === 'downloading' ? `Yuklanmoqda (${Math.round(downloadProgress.percent)}%)` : 'Yuklanmoqda...'}
+                    {downloadProgress?.status === "downloading" 
+                      ? `Downloading (${Math.round(downloadProgress.percent)}%)` 
+                      : "Downloading..."}
                   </>
                 ) : (
                   <>
                     <Video size={18} />
-                    {result.isM3U8 ? "Streamni ochish" : "Videoni yuklab olish"}
+                    {result.isM3U8 ? "Open Stream" : "Download Video"}
                   </>
                 )}
               </button>
@@ -499,12 +642,14 @@ export const VideoDownloaderPage: React.FC = () => {
           </div>
         )}
 
+        {/* Info Section */}
         <div className="mt-8 text-center px-4">
           <p className="text-[10px] text-stone-400 font-medium uppercase tracking-widest mb-2">
-            Qanday ishlaydi?
+            How it works?
           </p>
           <p className="text-xs text-stone-500 leading-relaxed max-w-[280px] mx-auto">
-            Ijtimoiy tarmoqlardagi videoning havolasini yoki M3U8 stream URL ni nusxalang, shu yerga tashlang va yuklab oling. Geo va SSL cheklovlardan avtomatik o'tadi.
+            Copy the video URL or M3U8 stream link from social media, paste it here,
+            and download. Automatically bypasses geo and SSL restrictions.
           </p>
         </div>
       </div>
