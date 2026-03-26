@@ -27,12 +27,13 @@ const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 // Gemini Modellarni Avtomatik Aniqlash (Senior Architect Style)
 let model = null;
 const modelsToTry = [
+    "gemini-1.5-flash-latest",
     "gemini-1.5-flash", 
+    "gemini-1.5-pro-latest",
     "gemini-1.5-pro", 
     "gemini-2.0-flash", 
     "gemini-1.5-flash-8b", 
-    "gemini-pro",
-    "gemini-1.0-pro"
+    "gemini-pro"
 ];
 
 async function ultimateSyncGemini() {
@@ -40,29 +41,34 @@ async function ultimateSyncGemini() {
     for (const name of modelsToTry) {
         try {
             console.log(` 🌀 Tekshirilmoqda: ${name}...`);
-            // Ba'zi hollarda apiVersion ko'rsatmaslik yaxshiroq ishlaydi
             const testModel = genAI.getGenerativeModel({ model: name });
-            await testModel.generateContent("ping");
+            const result = await testModel.generateContent("ping");
+            await result.response; 
             console.log(`✅ Mos model topildi va faollashtirildi: ${name}`);
             model = testModel;
             return;
         } catch (e) {
-            // Agar 429 bo'lsa, lekin limit: 0 bo'lsa, demak bu model o'chirilgan!
-            if (e.message.includes('429')) {
-                if (e.message.includes('limit: 0')) {
-                    console.log(` ⚠️ ${name} topildi, lekin unda Quota 0 (O'chirilgan). Navbatdagisi...`);
-                    continue; // Keyingisiga o'tamiz
+            const errorMsg = e.message.toLowerCase();
+            if (errorMsg.includes('429')) {
+                if (errorMsg.includes('limit: 0') || errorMsg.includes('quota')) {
+                    console.log(` ⚠️ ${name} topildi, lekin Quota 0 (Kalit bloklangan yoki oshkor bo'lgan!).`);
+                    continue; 
                 }
-                console.log(` ✅ ${name} modeli topildi (Hozirda band, lekin ulanish muvaffaqiyatli).`);
+                console.log(` ✅ ${name} topildi (Quota bor, lekin hozirda band).`);
                 model = genAI.getGenerativeModel({ model: name });
                 return;
+            } else if (errorMsg.includes('403')) {
+                console.log(` ❌ ${name} uchun ruxsat yo'q (403 Forbidden). Kalitda muammo bo'lishi mumkin.`);
+            } else if (errorMsg.includes('404')) {
+                console.log(` ⚠️ ${name} modeli ushbu API versiyasi yoki mintaqada topilmadi (404).`);
+            } else {
+                console.log(` ⚠️ ${name} xatosi: ${e.message.split('\n')[0]}`);
             }
-            console.log(` ⚠️ ${name} ishlamadi: ${e.message.split('\n')[0]}`);
             await new Promise(r => setTimeout(r, 1000));
         }
     }
     console.error("❌ BIROTA MODEL ISHLAMADI!");
-    console.log("💡 Tavsiya: AI Studio-da mutlaqo YANGI PROJECT va yangi API KEY oching.");
+    console.log("💡 MUHIM: AI Studio-da mutlaqo YANGI PROJECT oching va yangi API KEY oling.");
 }
 ultimateSyncGemini();
 
