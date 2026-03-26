@@ -20,10 +20,32 @@ app.use(cors());
 
 // Progress tracking
 const progressMap = new Map();
+const activeJobs = new Map(); // Aktiv yuklash jarayonlarini saqlash uchun
+
+// ========== ESKI FAYLLARNI TOZALASH ==========
+const cleanupOldFiles = () => {
+    console.log("[Cleanup] Eski vaqtincha fayllar tozalanmoqda...");
+    const files = fs.readdirSync(__dirname);
+    let count = 0;
+    files.forEach(file => {
+        if (file.endsWith(".mp4") || file.endsWith(".part") || file.endsWith(".ytdl")) {
+            try {
+                fs.unlinkSync(path.join(__dirname, file));
+                count++;
+            } catch (e) {}
+        }
+    });
+    if (count > 0) console.log(`[Cleanup] ${count} ta fayl o'chirildi.`);
+};
+
+// Startapda tozalash
+if (require.main === module) {
+    cleanupOldFiles();
+}
 
 // Yt-dlp yo'li
 const getYtDlp = async () => {
-    return ".\\yt-dlp.exe";
+    return path.join(__dirname, "yt-dlp.exe");
 };
 
 const AUTHOR = "G'ulomov Akmal";
@@ -633,6 +655,9 @@ app.get("/api/proxy-download", async (req, res) => {
 
         console.log("[Proxy Download] yt-dlp spawn qilinmoqda...");
         const child = spawn(ytcmd, args);
+        
+        // Jarayonni saqlash (bekor qilish uchun)
+        activeJobs.set(jobId, { child, outputPath, title });
 
         child.stdout.on('data', (data) => {
             const line = data.toString();
@@ -655,6 +680,7 @@ app.get("/api/proxy-download", async (req, res) => {
         });
 
         child.on('close', async (code) => {
+            activeJobs.delete(jobId); // Jarayon tugadi
             if (code === 0 && fs.existsSync(outputPath)) {
                 const stat = fs.statSync(outputPath);
                 console.log(`[Proxy Download] ✅ Tayyor! Hajmi: ${(stat.size / 1024 / 1024).toFixed(1)} MB`);
@@ -672,10 +698,22 @@ app.get("/api/proxy-download", async (req, res) => {
                 
                 stream.on('end', () => {
                     setTimeout(() => {
-                        try { fs.unlinkSync(outputPath); } catch(e) {}
+                        try { 
+                            if (fs.existsSync(outputPath)) {
+                                fs.unlinkSync(outputPath); 
+                                console.log(`[Proxy Download] Fayl o'chirildi: ${fileName}`);
+                            }
+                        } catch(e) {
+                            console.error("[Proxy Download] Faylni o'chirishda xato:", e.message);
+                        }
                         progressMap.delete(jobId);
-                    }, 10000); // 10 soniyadan keyin o'chirish
-                    console.log("[Proxy Download] Temp fayl o'chirildi");
+                    }, 5000); // 5 soniyadan keyin o'chirish (avval 10 edi)
+                });
+
+                stream.on('error', (err) => {
+                    console.error("[Proxy Download] Stream xatosi:", err.message);
+                    try { if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath); } catch(e) {}
+                    progressMap.delete(jobId);
                 });
             } else {
                 progressMap.set(jobId, { status: 'error', message: 'Yuklashda xatolik yuz berdi' });
@@ -687,10 +725,48 @@ app.get("/api/proxy-download", async (req, res) => {
 
     } catch (err) {
         console.error("[Proxy Download] Xatolik:", err.message);
+        activeJobs.delete(jobId);
         progressMap.set(jobId, { status: 'error', message: err.message });
         if (!res.headersSent) {
             res.status(500).json({ status: "error", text: "Video yuklab bo'lmadi: " + err.message });
         }
+    }
+});
+
+// ========== BEKOR QILISH ENDPOINT ==========
+app.post("/api/cancel/:jobId", (req, res) => {
+    const { jobId } = req.params;
+    const job = activeJobs.get(jobId);
+
+    if (job) {
+        console.log(`[Cancel] Job bekor qilinmoqda: ${jobId}`);
+        
+        // Jarayonni o'ldirish
+        try {
+            job.child.kill('SIGKILL');
+        } catch (e) {
+            console.error("[Cancel] Jarayonni o'ldirishda xato:", e.message);
+        }
+
+        // Fayllarni tozalash
+        setTimeout(() => {
+            try {
+                if (fs.existsSync(job.outputPath)) fs.unlinkSync(job.outputPath);
+                const partFile = job.outputPath + ".part";
+                const ytdlFile = job.outputPath + ".ytdl";
+                if (fs.existsSync(partFile)) fs.unlinkSync(partFile);
+                if (fs.existsSync(ytdlFile)) fs.unlinkSync(ytdlFile);
+            } catch (e) {
+                console.error("[Cancel] Fayllarni o'chirishda xato:", e.message);
+            }
+        }, 1000);
+
+        activeJobs.delete(jobId);
+        progressMap.set(jobId, { status: 'error', message: 'Yuklash bekor qilindi' });
+
+        return res.json({ status: "success", message: "Yuklash bekor qilindi" });
+    } else {
+        return res.status(404).json({ status: "error", message: "Jarayon topilmadi" });
     }
 });
 
@@ -699,48 +775,62 @@ app.get("/", (req, res) => {
     res.json({ status: "ok", author: AUTHOR, features: ["yt-dlp", "m3u8", "playwright", "bypass", "proxy-download"] });
 });
 
-const PORT = 3000;
-const SUBDOMAIN = "creative-video-api";
+// ========== SERVER STARTUP ==========
+if (require.main === module) {
+    const PORT = process.env.PORT || 3000;
+    const SUBDOMAIN = "creative-video-api";
 
-app.listen(PORT, async () => {
-    console.log(`\n================================`);
-    console.log(`🚀 Universal Video Server Ishga Tushdi (Port: ${PORT})`);
-    console.log(`📥 Qo'llab-quvvatlanadi: YouTube, TikTok, Instagram, M3U8, MP4, va boshqalar`);
-    console.log(`🔓 Cheklovlardan o'tish: GEO-bypass, SSL-bypass, UA rotation`);
-    console.log(`Muallif: ${AUTHOR}`);
-    console.log(`================================`);
-    console.log(`🌐 API manzili: http://localhost:${PORT}/api/download`);
-    
-    // Tunnellni avtomatik yoqish
-    const setupTunnel = async () => {
-        try {
-            console.log(`\n[Tunnel] Internetga ulanishga harakat qilinmoqda (${SUBDOMAIN}.loca.lt)...`);
-            const tunnel = await localtunnel({ 
-                port: PORT, 
-                subdomain: SUBDOMAIN 
-            });
+    app.listen(PORT, async () => {
+        console.log(`\n================================`);
+        console.log(`🚀 Universal Video Server Ishga Tushdi (Port: ${PORT})`);
+        console.log(`📥 Qo'llab-quvvatlanadi: YouTube, TikTok, Instagram, M3U8, MP4, va boshqalar`);
+        console.log(`🔓 Cheklovlardan o'tish: GEO-bypass, SSL-bypass, UA rotation`);
+        console.log(`Muallif: ${AUTHOR}`);
+        console.log(`================================`);
+        console.log(`🌐 API manzili: http://localhost:${PORT}/api/download`);
+        
+        // Tunnellni avtomatik yoqish
+        const setupTunnel = async () => {
+            try {
+                console.log(`\n[Tunnel] Internetga ulanishga harakat qilinmoqda (${SUBDOMAIN}.loca.lt)...`);
+                const tunnel = await localtunnel({ 
+                    port: PORT, 
+                    subdomain: SUBDOMAIN 
+                });
 
-            console.log(`\n✅ TUNNEL TAYYOR!`);
-            console.log(`🔗 Tashqi havola: ${tunnel.url}`);
-            console.log(`--------------------------------`);
-            console.log(`(Ushbu oynani yopmang, video yuklash uchun server yoniq turishi kerak)\n`);
+                console.log(`\n✅ TUNNEL TAYYOR!`);
+                console.log(`🔗 Tashqi havola: ${tunnel.url}`);
+                console.log(`--------------------------------`);
+                console.log(`(Ushbu oynani yopmang, video yuklash uchun server yoniq turishi kerak)\n`);
 
-            tunnel.on('close', () => {
-                console.log("\n[!] Tunnel yopildi. Qayta ulanishga harakat qilinmoqda...");
+                tunnel.on('close', () => {
+                    console.log("\n[!] Tunnel yopildi. Qayta ulanishga harakat qilinmoqda...");
+                    setTimeout(setupTunnel, 5000);
+                });
+
+                tunnel.on('error', (err) => {
+                    console.error("\n[Xato] Tunnelda xatolik:", err.message);
+                    tunnel.close();
+                });
+
+            } catch (e) {
+                console.error("\n[Xato] Tunnelni yoqishda xatolik:", e.message);
+                console.log("5 soniyadan so'ng qayta uriniladi...");
                 setTimeout(setupTunnel, 5000);
-            });
+            }
+        };
 
-            tunnel.on('error', (err) => {
-                console.error("\n[Xato] Tunnelda xatolik:", err.message);
-                tunnel.close();
-            });
+        setupTunnel();
+    });
+}
 
-        } catch (e) {
-            console.error("\n[Xato] Tunnelni yoqishda xatolik:", e.message);
-            console.log("5 soniyadan so'ng qayta uriniladi...");
-            setTimeout(setupTunnel, 5000);
-        }
-    };
-
-    setupTunnel();
-});
+// ========== EXPORTS برای استفاده در BOT ==========
+module.exports = {
+    downloadWithYtDlp,
+    sniffWithPlaywright,
+    isM3U8,
+    isDirectVideo,
+    getYtDlp,
+    getRotatedUserAgent,
+    AUTHOR
+};

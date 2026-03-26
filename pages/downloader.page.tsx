@@ -10,6 +10,7 @@ import {
   RefreshCw,
   Wifi,
   WifiOff,
+  XCircle,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -73,6 +74,7 @@ export const VideoDownloaderPage: React.FC = () => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState<string>("best");
   const [downloadProgress, setDownloadProgress] = useState<DownloadProgress | null>(null);
+  const [currentJobId, setCurrentJobId] = useState<string | null>(null);
 
   // Videoni server orqali yuklab olish (yangi oyna ochmasdan, to'g'ridan-to'g'ri download)
   const triggerDownload = async (videoUrl: string, title: string) => {
@@ -80,6 +82,7 @@ export const VideoDownloaderPage: React.FC = () => {
     setDownloadProgress({ status: 'starting', percent: 0 });
     
     const jobId = `job_${Date.now()}`;
+    setCurrentJobId(jobId);
     const serverBase = activeEndpoint?.replace(/\/api\/(download|info)$/, "") || "http://localhost:3000";
 
     // Progressni kuzatish (SSE)
@@ -126,8 +129,27 @@ export const VideoDownloaderPage: React.FC = () => {
       window.open(videoUrl, '_blank');
     } finally {
       setIsDownloading(false);
+      setCurrentJobId(null);
       // Progressni bir ozdan keyin yashirish
       setTimeout(() => setDownloadProgress(null), 5000);
+    }
+  };
+
+  const handleCancelDownload = async () => {
+    if (!currentJobId || !activeEndpoint) return;
+    
+    const serverBase = activeEndpoint.replace(/\/api\/(download|info)$/, "") || "http://localhost:3000";
+    try {
+      await fetch(`${serverBase}/api/cancel/${currentJobId}`, {
+        method: "POST",
+        headers: { "Bypass-Tunnel-Reminder": "true" },
+      });
+    } catch (err) {
+      console.error("Cancel failed:", err);
+    } finally {
+      setIsDownloading(false);
+      setCurrentJobId(null);
+      setDownloadProgress(null);
     }
   };
 
@@ -429,6 +451,16 @@ export const VideoDownloaderPage: React.FC = () => {
                       style={{ width: `${downloadProgress.percent}%` }}
                     />
                   </div>
+                  
+                  {isDownloading && (
+                    <button
+                      onClick={handleCancelDownload}
+                      className="mt-3 w-full py-2 bg-red-50 hover:bg-red-100 text-red-500 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors"
+                    >
+                      <XCircle size={14} />
+                      YUKLASHNI TO'XTATISH
+                    </button>
+                  )}
                   {downloadProgress.speed && (
                     <div className="flex justify-between mt-2 text-[10px] text-stone-400 font-medium">
                       <span>Tezlik: {downloadProgress.speed}</span>
