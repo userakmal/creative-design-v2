@@ -13,16 +13,29 @@ const {
     AUTHOR 
 } = require('./local-video-api/server');
 
+// --- ENV BOSHQARISH (MANUAL .env PARSER) ---
+function loadEnv() {
+    const envPath = path.join(__dirname, '.env');
+    if (fs.existsSync(envPath)) {
+        const envData = fs.readFileSync(envPath, 'utf8');
+        envData.split('\n').forEach(line => {
+            const [key, value] = line.split('=');
+            if (key && value) process.env[key.trim()] = value.trim();
+        });
+    }
+}
+loadEnv();
+
 // --- BOT SOZLAMALARI ---
 const BOT_TOKEN = '8628132129:AAGuU0M2KaZJATpyINnh4xpGoQyXU6uuFso';
 const ADMIN_ID = 853691902;
-// Gemini API Sozlamalari
-const GEMINI_API_KEY = 'AIzaSyDRmZsTqYldrXRpxTXD6Sa2cZzRmijpCgc';
+// Gemini API Sozlamalari (Environmentdan olinadi)
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const USERS_FILE = path.join(__dirname, 'data', 'users.json');
 const bot = new Telegraf(BOT_TOKEN);
 
 // Gemini Sozlamalari (Senior Architect Level)
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY || 'MISSING_KEY');
 
 // Gemini Modellarni Avtomatik Aniqlash (Senior Architect Style)
 let model = null;
