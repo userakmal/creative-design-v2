@@ -13,8 +13,30 @@ const {
 } = require('./local-video-api/server');
 
 // --- BOT SOZLAMALARI ---
-const BOT_TOKEN = '8628132129:AAGuU0M2KaZJATpyINnh4xpGoQyXU6uuFso'; // @BotFather orqali olingan token
+const BOT_TOKEN = '8628132129:AAGuU0M2KaZJATpyINnh4xpGoQyXU6uuFso';
+const ADMIN_ID = 0; // ⚠️ O'zingizning Telegram ID'ingizni bu yerga yozing (masalan: 12345678)
+const USERS_FILE = path.join(__dirname, 'data', 'users.json');
 const bot = new Telegraf(BOT_TOKEN);
+
+// --- FOYDALANUVCHILARNI BOSHQARISH ---
+const loadUsers = () => {
+    try {
+        if (!fs.existsSync(USERS_FILE)) return [];
+        const data = fs.readFileSync(USERS_FILE, 'utf8');
+        return JSON.parse(data);
+    } catch (e) { return []; }
+};
+
+const saveUser = (id) => {
+    let users = loadUsers();
+    if (!users.includes(id)) {
+        users.push(id);
+        if (!fs.existsSync(path.dirname(USERS_FILE))) {
+            fs.mkdirSync(path.dirname(USERS_FILE), { recursive: true });
+        }
+        fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+    }
+};
 
 // --- YORDAMCHI FUNKSIYALAR (SENIOR LEVEL) ---
 const safeUnlink = (p) => {
@@ -45,13 +67,15 @@ startupCleanup();
 
 // Start buyrug'i
 bot.start((ctx) => {
+    saveUser(ctx.from.id);
     ctx.reply(`Assalomu alaykum! Men Video Downloader botman.\n\nSizga YouTube, TikTok, Instagram va boshqa saytlardan video yuklab berishim mumkin.\n\nMenga shunchaki video havolasini yuboring.`);
 });
 
 // Havolalarni tutib olish
-bot.on('text', async (ctx) => {
+bot.on('text', async (ctx, next) => {
+    saveUser(ctx.from.id);
     const url = ctx.message.text.trim();
-    if (!url.startsWith('http')) return;
+    if (!url.startsWith('http')) return next();
 
     const waitMsg = await ctx.reply("🔍 Video ma'lumotlari olinmoqda, iltimos kuting...");
     let outputPath = null;
@@ -140,6 +164,39 @@ bot.on('text', async (ctx) => {
         ctx.reply(`❌ Xatolik: ${err.message}`);
         if (outputPath) fullCleanup(outputPath);
     }
+});
+
+// Reklama yuborish (Admin buyrug'i)
+bot.command('send', async (ctx) => {
+    if (ctx.from.id !== ADMIN_ID) return;
+
+    const message = ctx.message.text.split(' ').slice(1).join(' ');
+    if (!message) return ctx.reply("Iltimos, reklama matnini yozing. Masalan: /send Salom barchaga");
+
+    const users = loadUsers();
+    let count = 0;
+    let blocked = 0;
+
+    const waitMsg = await ctx.reply(`📣 Reklama ${users.length} ta foydalanuvchiga yuborilmoqda...`);
+
+    for (const userId of users) {
+        try {
+            await bot.telegram.sendMessage(userId, message);
+            count++;
+        } catch (err) {
+            if (err.description && err.description.includes('bot was blocked')) {
+                blocked++;
+            }
+        }
+    }
+
+    await bot.telegram.editMessageText(ctx.chat.id, waitMsg.message_id, null, `✅ Reklama yakunlandi!\n\n👤 Qabul qildi: ${count}\n🚫 Bloklagan: ${blocked}`);
+});
+
+bot.command('stats', (ctx) => {
+    if (ctx.from.id !== ADMIN_ID) return;
+    const users = loadUsers();
+    ctx.reply(`📊 Bot statistikasi:\n\n👥 Foydalanuvchilar: ${users.length} ta`);
 });
 
 // Botni ishga tushirish
