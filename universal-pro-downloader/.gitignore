@@ -1,0 +1,73 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+*.log
+
+# Application specific
+*.log
+universal_downloader.log
+downloads/
+temp/
+*.mp4
+*.mkv
+*.avi
+*.webm
+*.mp3
+*.m4a
+*.part
+*.ytdl
+*.ts
+*.m3u8
+*.jpg
+*.png
+*.webp
+
+# Cookies (IMPORTANT: Never commit!)
+cookies.txt
+*.txt.bak
+
+# Environment
+.env
+.env.local
+
+# OS
+Thumbs.db
+.DS_Store
