@@ -23,7 +23,7 @@ const bot = new Telegraf(BOT_TOKEN);
 // Gemini Sozlamalari (Senior Architect Level)
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 // Standart model: gemini-1.5-flash (v1 barqaror)
-let model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: 'v1' });
+let model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }, { apiVersion: 'v1' });
 
 // Modellarni tekshirish va terminalda ko'rsatish
 async function syncGeminiModels() {
