@@ -27,14 +27,13 @@ const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 // Gemini Modellarni Avtomatik Aniqlash (Senior Architect Style)
 let model = null;
 const modelsToTry = [
-    "gemini-3-flash", 
     "gemini-2.0-flash", 
-    "gemini-2.0-flash-exp", 
     "gemini-1.5-flash", 
+    "gemini-2.0-flash-exp", 
     "gemini-1.5-flash-8b", 
     "gemini-1.5-pro", 
-    "gemini-1.5-flash-latest", 
-    "gemini-pro"
+    "gemini-pro",
+    "gemini-3-flash"
 ];
 
 async function ultimateSyncGemini() {
@@ -43,13 +42,21 @@ async function ultimateSyncGemini() {
         try {
             console.log(` 🌀 Tekshirilmoqda: ${name}...`);
             const testModel = genAI.getGenerativeModel({ model: name }, { apiVersion: 'v1' });
-            // Oddiy ping testi
+            // Ping testi
             await testModel.generateContent("Salom");
             console.log(`✅ Mos model topildi va faollashtirildi: ${name}`);
             model = testModel;
             return;
         } catch (e) {
+            // Agar 429 (Rate Limit) bo'lsa, demak model mavjud va ishlaydi!
+            if (e.message.includes('429')) {
+                console.log(` ✅ ${name} modeli topildi (Hozirda band, lekin ulanish muvaffaqiyatli).`);
+                model = genAI.getGenerativeModel({ model: name }, { apiVersion: 'v1' });
+                return;
+            }
             console.log(` ⚠️ ${name} ishlamadi: ${e.message.split('\n')[0]}`);
+            // Har bir test orasida 1 soniya kutamiz (Quota xatosi olmaslik uchun)
+            await new Promise(r => setTimeout(r, 1000));
         }
     }
     console.error("❌ BIROTA MODEL ISHLAMADI! Iltimos, API kalit va mintaqani tekshiring.");
