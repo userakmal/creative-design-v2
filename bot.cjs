@@ -27,13 +27,7 @@ const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 // Gemini Modellarni Avtomatik Aniqlash (Senior Architect Style)
 let model = null;
 const modelsToTry = [
-    "gemini-1.5-flash-latest",
-    "gemini-1.5-flash", 
-    "gemini-1.5-pro-latest",
-    "gemini-1.5-pro", 
-    "gemini-2.0-flash", 
-    "gemini-1.5-flash-8b", 
-    "gemini-pro"
+    "gemini-2.5-flash"
 ];
 
 async function ultimateSyncGemini() {
