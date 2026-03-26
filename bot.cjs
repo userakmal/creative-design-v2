@@ -1,4 +1,5 @@
 const { Telegraf } = require('telegraf');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
@@ -14,9 +15,14 @@ const {
 
 // --- BOT SOZLAMALARI ---
 const BOT_TOKEN = '8628132129:AAGuU0M2KaZJATpyINnh4xpGoQyXU6uuFso';
-const ADMIN_ID = 0; // ⚠️ O'zingizning Telegram ID'ingizni bu yerga yozing (masalan: 12345678)
+const ADMIN_ID = 0; // ⚠️ /myid orqali ID'ingizni bilib olib, bu yerga yozing
+const GEMINI_API_KEY = 'AIzaSyD3sEfK9mIzWjOEkO5ykxQLr5zTb7R1LUQ';
 const USERS_FILE = path.join(__dirname, 'data', 'users.json');
 const bot = new Telegraf(BOT_TOKEN);
+
+// Gemini Sozlamalari
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 // --- FOYDALANUVCHILARNI BOSHQARISH ---
 const loadUsers = () => {
@@ -68,14 +74,21 @@ startupCleanup();
 // Start buyrug'i
 bot.start((ctx) => {
     saveUser(ctx.from.id);
-    ctx.reply(`Assalomu alaykum! Men Video Downloader botman.\n\nSizga YouTube, TikTok, Instagram va boshqa saytlardan video yuklab berishim mumkin.\n\nMenga shunchaki video havolasini yuboring.`);
+    ctx.reply(`Assalomu alaykum! Men Video Downloader va AI botman.\n\nSizga video yuklab berishim yoki Gemini AI yordamida savollaringizga javob berishim mumkin.\n\n🤖 Shunchaki savol yozing yoki video havolasini yuboring.`);
+});
+
+// ID ni bilish uchun yordamchi buyruq
+bot.command('myid', (ctx) => {
+    ctx.reply(`Sizning Telegram ID raqamingiz: <code>${ctx.from.id}</code>`, { parse_mode: 'HTML' });
 });
 
 // Havolalarni tutib olish
 bot.on('text', async (ctx, next) => {
     saveUser(ctx.from.id);
     const url = ctx.message.text.trim();
-    if (!url.startsWith('http')) return next();
+    
+    // Agar bu havola bo'lsa, yuklashni boshlaymiz
+    if (url.startsWith('http')) {
 
     const waitMsg = await ctx.reply("🔍 Video ma'lumotlari olinmoqda, iltimos kuting...");
     let outputPath = null;
@@ -163,6 +176,31 @@ bot.on('text', async (ctx, next) => {
         console.error("[Bot] Global Error:", err.message);
         ctx.reply(`❌ Xatolik: ${err.message}`);
         if (outputPath) fullCleanup(outputPath);
+    }
+    } else {
+        return next();
+    }
+});
+
+// Gemini AI handler (Agarda matn havola bo'lmasa)
+bot.on('text', async (ctx) => {
+    const text = ctx.message.text;
+    if (text.startsWith('/')) return; // Buyruqlarni e'tiborsiz qoldiramiz
+
+    try {
+        if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY') {
+            return ctx.reply("⚠️ Gemini AI kaliti o'rnatilmagan. Iltimos, admin bilan bog'laning.");
+        }
+
+        await ctx.sendChatAction('typing');
+        const result = await model.generateContent(text);
+        const response = await result.response;
+        const aiText = response.text();
+        
+        await ctx.reply(aiText, { parse_mode: 'Markdown' });
+    } catch (err) {
+        console.error("[Gemini Error]:", err.message);
+        ctx.reply("❌ AI bilan bog'lanishda xato yuz berdi.");
     }
 });
 
