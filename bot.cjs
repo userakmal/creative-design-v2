@@ -27,12 +27,13 @@ const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 // Gemini Modellarni Avtomatik Aniqlash (Senior Architect Style)
 let model = null;
 const modelsToTry = [
-    "gemini-2.0-flash", 
     "gemini-1.5-flash", 
-    "gemini-2.0-flash-exp", 
     "gemini-1.5-flash-8b", 
+    "gemini-2.0-flash", 
     "gemini-1.5-pro", 
     "gemini-pro",
+    "gemini-1.0-pro",
+    "gemini-2.0-flash-exp",
     "gemini-3-flash"
 ];
 
@@ -43,23 +44,23 @@ async function ultimateSyncGemini() {
             console.log(` 🌀 Tekshirilmoqda: ${name}...`);
             const testModel = genAI.getGenerativeModel({ model: name }, { apiVersion: 'v1' });
             // Ping testi
-            await testModel.generateContent("Salom");
+            await testModel.generateContent("ping");
             console.log(`✅ Mos model topildi va faollashtirildi: ${name}`);
             model = testModel;
             return;
         } catch (e) {
-            // Agar 429 (Rate Limit) bo'lsa, demak model mavjud va ishlaydi!
+            // Agar 429 bo'lsa, demak model bor, lekin kuta turish kerak
             if (e.message.includes('429')) {
-                console.log(` ✅ ${name} modeli topildi (Hozirda band, lekin ulanish muvaffaqiyatli).`);
+                console.log(` ✅ ${name} modeli topildi (Ammo hozirda Quota Limitda). Uni baribir tanlaymiz.`);
                 model = genAI.getGenerativeModel({ model: name }, { apiVersion: 'v1' });
                 return;
             }
             console.log(` ⚠️ ${name} ishlamadi: ${e.message.split('\n')[0]}`);
-            // Har bir test orasida 1 soniya kutamiz (Quota xatosi olmaslik uchun)
             await new Promise(r => setTimeout(r, 1000));
         }
     }
-    console.error("❌ BIROTA MODEL ISHLAMADI! Iltimos, API kalit va mintaqani tekshiring.");
+    console.error("❌ BIROTA MODEL ISHLAMADI!");
+    console.log("💡 Maslahat: Google AI Studio-da yangi 'Project' ochib ko'ring yoki mintaqani (VPN) o'zgartiring.");
 }
 ultimateSyncGemini();
 
@@ -94,7 +95,7 @@ const fullCleanup = (outputPath) => {
     safeUnlink(outputPath + '.ytdl');
 };
 
-console.log("🚀 Telegram Bot (v2.4 Ultimate Discovery) boshlanmoqda...");
+console.log("🚀 Telegram Bot (v2.6 Auto-Repair) boshlanmoqda...");
 
 // Startapda eski axlatlarni tozalash
 const startupCleanup = () => {
