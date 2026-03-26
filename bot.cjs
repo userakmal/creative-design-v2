@@ -16,7 +16,32 @@ const {
 const BOT_TOKEN = '8628132129:AAGuU0M2KaZJATpyINnh4xpGoQyXU6uuFso'; // @BotFather orqali olingan token
 const bot = new Telegraf(BOT_TOKEN);
 
+// --- YORDAMCHI FUNKSIYALAR (SENIOR LEVEL) ---
+const safeUnlink = (p) => {
+    try { if (fs.existsSync(p)) fs.unlinkSync(p); } catch (e) {}
+};
+
+const fullCleanup = (outputPath) => {
+    safeUnlink(outputPath);
+    safeUnlink(outputPath + '.part');
+    safeUnlink(outputPath + '.ytdl');
+};
+
 console.log("🚀 Telegram Bot boshlanmoqda...");
+
+// Startapda eski axlatlarni tozalash
+const startupCleanup = () => {
+    console.log("[Bot] Avvalgi seanslardan qolgan qoldiqlar tozalanmoqda...");
+    const dir = path.join(__dirname, 'local-video-api');
+    if (fs.existsSync(dir)) {
+        fs.readdirSync(dir).forEach(file => {
+            if (file.startsWith('bot_download_')) {
+                fullCleanup(path.join(dir, file));
+            }
+        });
+    }
+};
+startupCleanup();
 
 // Start buyrug'i
 bot.start((ctx) => {
@@ -26,47 +51,37 @@ bot.start((ctx) => {
 // Havolalarni tutib olish
 bot.on('text', async (ctx) => {
     const url = ctx.message.text.trim();
-    
-    // URL ekanligini tekshirish
-    if (!url.startsWith('http')) {
-        return;
-    }
+    if (!url.startsWith('http')) return;
 
     const waitMsg = await ctx.reply("🔍 Video ma'lumotlari olinmoqda, iltimos kuting...");
+    let outputPath = null;
 
     try {
         let videoData;
-        let downloadUrl = url; // Asl havola
-        
-        // 1. Direct Video yoki M3U8 tekshirish
+        let downloadUrl = url;
+
+        // 1. Meta-ma'lumotlarni olish
         if (isDirectVideo(url) || isM3U8(url)) {
             videoData = { url, title: "Video" };
-            downloadUrl = url;
         } else {
-            // 2. Yt-Dlp orqali ma'lumot olish (faqat title va meta uchun)
             try {
                 videoData = await downloadWithYtDlp(url);
-                // downloadUrl o'zgarishsiz qoladi (url), chunki yt-dlp original havola bilan yaxshi ishlaydi
             } catch (e) {
-                // 3. Fallback: Playwright
                 videoData = await sniffWithPlaywright(url);
-                downloadUrl = videoData.url; // Snifferdan olingan URL
+                downloadUrl = videoData.url;
             }
         }
 
-        if (!videoData || !videoData.url) {
-            throw new Error("Video topilmadi.");
-        }
+        if (!videoData || !videoData.url) throw new Error("Video topilmadi.");
 
         await bot.telegram.editMessageText(ctx.chat.id, waitMsg.message_id, null, "📥 Video yuklanmoqda...");
 
-        // Fayl nomi va yo'li
+        // 2. Yuklashni tayyorlash
         const ytcmd = await getYtDlp();
         const userAgent = getRotatedUserAgent();
         const fileName = `bot_download_${Date.now()}.mp4`;
-        const outputPath = path.join(__dirname, 'local-video-api', fileName);
+        outputPath = path.join(__dirname, 'local-video-api', fileName);
 
-        // yt-dlp orqali yuklash
         const args = [
             '--no-check-certificates',
             '--user-agent', userAgent,
@@ -77,48 +92,53 @@ bot.on('text', async (ctx) => {
             downloadUrl
         ];
 
-        console.log(`[Bot] Yuklanmoqda: ${downloadUrl}`);
+        console.log(`[Bot] Download start: ${downloadUrl}`);
         const child = spawn(ytcmd, args);
 
+        // 3. Timeout boshqaruvi
         const timeout = setTimeout(() => {
-            child.kill();
-            ctx.reply("⚠️ Yuklash juda uzoq davom etdi (timeout). Havola yaroqsiz bo'lishi mumkin.");
-        }, 120000); // 2 daqiqa limit
+            child.kill('SIGKILL');
+            console.log(`[Bot] Download timeout: ${downloadUrl}`);
+        }, 180000); // 3 daqiqa limit
 
         child.on('close', async (code) => {
             clearTimeout(timeout);
+            
             if (code === 0 && fs.existsSync(outputPath)) {
                 try {
                     const stats = fs.statSync(outputPath);
-                    console.log(`[Bot] Fayl hajmi: ${(stats.size / 1024 / 1024).toFixed(1)} MB`);
-                    
+                    const mb = (stats.size / (1024 * 1024)).toFixed(1);
+                    console.log(`[Bot] Yuklandi: ${mb} MB`);
+
                     if (stats.size > 50 * 1024 * 1024) {
-                        ctx.reply("⚠️ Eslatma: Video hajmi 50MB dan katta. Telegram botlar uchun bu cheklov bo'lishi mumkin, lekin urinib ko'raman...");
+                        await ctx.reply(`⚠️ Video hajmi ${mb} MB. Telegram cheklovi sababli yuborib bo'lmasligi mumkin, lekin urinib ko'raman...`);
                     }
-                    
+
                     await bot.telegram.editMessageText(ctx.chat.id, waitMsg.message_id, null, "✅ Yuklandi! Telegramga yuborilmoqda...");
                     
-                    // Videoni yuborish
                     await ctx.replyWithVideo({ source: outputPath }, {
-                        caption: `🎬 ${videoData.title || 'Video'}\n\n🤖 @${ctx.botInfo.username} orqali yuklab olindi`,
+                        caption: `🎬 ${videoData.title || 'Video'}\n📦 Hajmi: ${mb} MB\n\n🤖 @${ctx.botInfo.username} orqali yuklab olindi`,
                     });
-
-                    // Tozalash
-                    setTimeout(() => {
-                        try { fs.unlinkSync(outputPath); } catch(e) {}
-                    }, 5000);
                 } catch (sendErr) {
-                    console.error("Yuborishda xato:", sendErr.message);
-                    ctx.reply("❌ Videoni yuborishda xatolik yuz berdi. Fayl hajmi juda katta bo'lishi mumkin.");
+                    console.error("[Bot] Yuborishda xato:", sendErr.message);
+                    ctx.reply(`❌ Xatolik: Videoni yuborib bo'lmadi. ${sendErr.message.includes('Request Entity Too Large') ? 'Video hajmi juda katta.' : sendErr.message}`);
+                } finally {
+                    fullCleanup(outputPath);
                 }
             } else {
-                ctx.reply("❌ Videoni yuklab bo'lmadi.");
+                fullCleanup(outputPath);
+                if (code !== null) { // Agar timeout bo'lmasa
+                    ctx.reply("❌ Videoni yuklab bo'lmadi yoki havola yaroqsiz.");
+                } else {
+                    ctx.reply("⚠️ Yuklash vaqti tugadi (Timeout).");
+                }
             }
         });
 
     } catch (err) {
-        console.error("Xato:", err.message);
+        console.error("[Bot] Global Error:", err.message);
         ctx.reply(`❌ Xatolik: ${err.message}`);
+        if (outputPath) fullCleanup(outputPath);
     }
 });
 
