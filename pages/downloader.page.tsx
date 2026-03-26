@@ -202,8 +202,9 @@ export const VideoDownloaderPage: React.FC = () => {
 
     const jobId = `job_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
     setCurrentJobId(jobId);
-    
-    const serverBase = activeEndpoint.replace(/\/api\/(download|info)$/, "");
+
+    // Safe endpoint handling
+    const serverBase = activeEndpoint ? activeEndpoint.replace(/\/api\/(download|info)$/, "") : "http://localhost:3000";
     const safeTitle = sanitizeFilename(title);
 
     // Setup SSE progress tracking
@@ -282,7 +283,7 @@ export const VideoDownloaderPage: React.FC = () => {
   const handleCancelDownload = async () => {
     if (!currentJobId || !activeEndpoint) return;
 
-    const serverBase = activeEndpoint.replace(/\/api\/(download|info)$/, "");
+    const serverBase = activeEndpoint ? activeEndpoint.replace(/\/api\/(download|info)$/, "") : "http://localhost:3000";
     
     try {
       await fetch(`${serverBase}/api/cancel/${currentJobId}`, {
@@ -304,7 +305,7 @@ export const VideoDownloaderPage: React.FC = () => {
 
   const downloadVideo = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validation
     if (!url.trim()) {
       setError("Please enter a URL");
@@ -333,7 +334,7 @@ export const VideoDownloaderPage: React.FC = () => {
 
       try {
         const infoEndpoint = endpoint.replace("/download", "/info");
-        
+
         const response = await fetch(infoEndpoint, {
           method: "POST",
           headers: {
@@ -344,16 +345,28 @@ export const VideoDownloaderPage: React.FC = () => {
           body: JSON.stringify({ url: url.trim() }),
           signal: controller.signal,
         });
-        
+
         clearTimeout(timeoutId);
 
+        // Check response status
+        if (!response.ok) {
+          lastError = `Server error: ${response.status} ${response.statusText}`;
+          continue;
+        }
+
         const responseText = await response.text();
-        
+
+        // Handle empty response
+        if (!responseText || responseText.trim() === "") {
+          lastError = "Server returned empty response";
+          continue;
+        }
+
         let data: { status?: string; data?: VideoData; text?: string };
         try {
           data = JSON.parse(responseText);
         } catch {
-          console.error("Non-JSON response from", endpoint);
+          console.error("Non-JSON response from", endpoint, responseText.substring(0, 200));
           lastError = "Server returned invalid response";
           continue;
         }
@@ -368,11 +381,11 @@ export const VideoDownloaderPage: React.FC = () => {
           setIsLoading(false);
           return;
         } else {
-          lastError = data.text || "Video not found. Please check the URL.";
+          lastError = data.text || data.error || data.message || "Video not found. Please check the URL.";
         }
       } catch (err: any) {
         clearTimeout(timeoutId);
-        
+
         if (err.name === "AbortError") {
           lastError = "Request timeout. Please check your connection.";
         } else {
