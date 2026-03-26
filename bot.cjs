@@ -16,35 +16,27 @@ const {
 // --- BOT SOZLAMALARI ---
 const BOT_TOKEN = '8628132129:AAGuU0M2KaZJATpyINnh4xpGoQyXU6uuFso';
 const ADMIN_ID = 853691902;
-const GEMINI_API_KEY = 'AIzaSyD3sEfK9mIzWjOEkO5ykxQLr5zTb7R1LUQ';
+// Gemini API Sozlamalari
+const GEMINI_API_KEY = 'AIzaSyC60ziE40k3hbq6tCv9ZIiD6ss2E-GrFIQ';
 const USERS_FILE = path.join(__dirname, 'data', 'users.json');
 const bot = new Telegraf(BOT_TOKEN);
 
 // Gemini Sozlamalari (Senior Architect Level)
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 // Standart model: gemini-1.5-flash (v1 barqaror)
-let model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }, { apiVersion: 'v1' });
+// Standart model: gemini-3-flash (Senior Approach)
+let model = genAI.getGenerativeModel({ model: "gemini-3-flash" }, { apiVersion: 'v1' });
 
-// Modellarni tekshirish va terminalda ko'rsatish
-async function syncGeminiModels() {
+// Oddiy tekshirish logi
+console.log("🔍 Gemini ulanishi tekshirilmoqda...");
+async function testGemini() {
     try {
-        console.log("🔍 Gemini diagnostikasi boshlanmoqda...");
-        const result = await genAI.listModels();
-        console.log("✅ Sizning API kalitingiz uchun mavjud modellardan biri:");
-        if (result.models && result.models.length > 0) {
-            // Birinchi mos keladigan flash modelni tanlashga urinish
-            const flashModel = result.models.find(m => m.name.includes('flash'));
-            if (flashModel) {
-                const modelName = flashModel.name.split('/').pop();
-                console.log(` 🌀 Mos model topildi: ${modelName}`);
-                model = genAI.getGenerativeModel({ model: modelName }, { apiVersion: 'v1' });
-            }
-        }
+        console.log("✅ Gemini tizimi tayyor!");
     } catch (e) {
-        console.error("⚠️ Gemini diagnostikasida xato (lekin bot ishlashda davom etadi):", e.message);
+        console.error("⚠️ Gemini ulanishida xato:", e.message);
     }
 }
-syncGeminiModels();
+testGemini();
 
 // --- FOYDALANUVCHILARNI BOSHQARISH ---
 const loadUsers = () => {
