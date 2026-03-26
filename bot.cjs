@@ -36,17 +36,21 @@ bot.on('text', async (ctx) => {
 
     try {
         let videoData;
+        let downloadUrl = url; // Asl havola
         
         // 1. Direct Video yoki M3U8 tekshirish
         if (isDirectVideo(url) || isM3U8(url)) {
             videoData = { url, title: "Video" };
+            downloadUrl = url;
         } else {
-            // 2. Yt-Dlp orqali ma'lumot olish
+            // 2. Yt-Dlp orqali ma'lumot olish (faqat title va meta uchun)
             try {
                 videoData = await downloadWithYtDlp(url);
+                // downloadUrl o'zgarishsiz qoladi (url), chunki yt-dlp original havola bilan yaxshi ishlaydi
             } catch (e) {
                 // 3. Fallback: Playwright
                 videoData = await sniffWithPlaywright(url);
+                downloadUrl = videoData.url; // Snifferdan olingan URL
             }
         }
 
@@ -66,16 +70,32 @@ bot.on('text', async (ctx) => {
         const args = [
             '--no-check-certificates',
             '--user-agent', userAgent,
+            '--no-playlist',
+            '--geo-bypass',
             '-f', 'best[ext=mp4]/best',
             '-o', outputPath,
-            videoData.url
+            downloadUrl
         ];
 
+        console.log(`[Bot] Yuklanmoqda: ${downloadUrl}`);
         const child = spawn(ytcmd, args);
 
+        const timeout = setTimeout(() => {
+            child.kill();
+            ctx.reply("⚠️ Yuklash juda uzoq davom etdi (timeout). Havola yaroqsiz bo'lishi mumkin.");
+        }, 120000); // 2 daqiqa limit
+
         child.on('close', async (code) => {
+            clearTimeout(timeout);
             if (code === 0 && fs.existsSync(outputPath)) {
                 try {
+                    const stats = fs.statSync(outputPath);
+                    console.log(`[Bot] Fayl hajmi: ${(stats.size / 1024 / 1024).toFixed(1)} MB`);
+                    
+                    if (stats.size > 50 * 1024 * 1024) {
+                        ctx.reply("⚠️ Eslatma: Video hajmi 50MB dan katta. Telegram botlar uchun bu cheklov bo'lishi mumkin, lekin urinib ko'raman...");
+                    }
+                    
                     await bot.telegram.editMessageText(ctx.chat.id, waitMsg.message_id, null, "✅ Yuklandi! Telegramga yuborilmoqda...");
                     
                     // Videoni yuborish
