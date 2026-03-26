@@ -17,7 +17,7 @@ const {
 const BOT_TOKEN = '8628132129:AAGuU0M2KaZJATpyINnh4xpGoQyXU6uuFso';
 const ADMIN_ID = 853691902;
 // Gemini API Sozlamalari
-const GEMINI_API_KEY = 'AIzaSyC60ziE40k3hbq6tCv9ZIiD6ss2E-GrFIQ';
+const GEMINI_API_KEY = 'AIzaSyC4o45Etr9cTdEP-hGMNu2FNpnR9Lf01eg';
 const USERS_FILE = path.join(__dirname, 'data', 'users.json');
 const bot = new Telegraf(BOT_TOKEN);
 
