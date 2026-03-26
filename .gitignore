@@ -23,3 +23,10 @@ dist-ssr
 *.sln
 *.sw?
 
+# Video Downloader Files
+local-video-api/*.mp4
+local-video-api/*.part
+local-video-api/*.ytdl
+local-video-api/*.log
+local-video-api/*.exe
+
