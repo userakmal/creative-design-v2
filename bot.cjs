@@ -26,7 +26,16 @@ const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
 // Gemini Modellarni Avtomatik Aniqlash (Senior Architect Style)
 let model = null;
-const modelsToTry = ["gemini-3-flash", "gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro", "gemini-1.0-pro"];
+const modelsToTry = [
+    "gemini-3-flash", 
+    "gemini-2.0-flash", 
+    "gemini-2.0-flash-exp", 
+    "gemini-1.5-flash", 
+    "gemini-1.5-flash-8b", 
+    "gemini-1.5-pro", 
+    "gemini-1.5-flash-latest", 
+    "gemini-pro"
+];
 
 async function ultimateSyncGemini() {
     console.log("🔍 Gemini modellarini auto-discovery qilish boshlanmoqda...");
@@ -78,7 +87,7 @@ const fullCleanup = (outputPath) => {
     safeUnlink(outputPath + '.ytdl');
 };
 
-console.log("🚀 Telegram Bot (v2.1 Updated) boshlanmoqda...");
+console.log("🚀 Telegram Bot (v2.4 Ultimate Discovery) boshlanmoqda...");
 
 // Startapda eski axlatlarni tozalash
 const startupCleanup = () => {
