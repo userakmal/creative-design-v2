@@ -278,57 +278,103 @@ bot.command('send', async (ctx) => {
 });
 
 // ============================================================================
-// VIDEO DOWNLOAD HANDLER
+// VIDEO DOWNLOAD HANDLER - Enhanced with Auto-Fix
 // ============================================================================
 
 bot.on('text', async (ctx, next) => {
     saveUser(ctx.from.id);
     const url = ctx.message.text.trim();
-    
+
     // Skip if not a URL
     if (!url.startsWith('http')) {
         return next();
     }
-    
+
     const waitMsg = await ctx.reply('🔍 Video ma\'lumotlari olinmoqda, iltimos kuting...');
     let outputPath = null;
     let childProcess = null;
-    
+    let downloadAttempted = false;
+
     try {
+        // Validate yt-dlp first
+        const ytcmd = getYtDlpPath();
+        let ytDlpWorking = false;
+        
+        try {
+            const { execSync } = require('child_process');
+            execSync(`"${ytcmd}" --version`, { stdio: 'pipe' });
+            ytDlpWorking = true;
+            console.log('[Bot] ✅ yt-dlp verified');
+        } catch (err) {
+            console.error('[Bot] ❌ yt-dlp not working!');
+            await bot.telegram.editMessageText(
+                ctx.chat.id,
+                waitMsg.message_id,
+                null,
+                '❌ yt-dlp o\'rnatilmagan!\n\n' +
+                'Yechim:\n' +
+                '1. Python o\'rnating: https://python.org\n' +
+                '2. Terminalda yozing: pip install yt-dlp\n\n' +
+                'Yoki: https://github.com/yt-dlp/yt-dlp/releases dan .exe faylni yuklab oling'
+            );
+            return;
+        }
+
         let videoData;
         let downloadUrl = url;
-        
-        // Get video info
+
+        // Get video info - try multiple methods
         if (isDirectVideo(url) || isM3U8(url)) {
-            videoData = { url, title: 'Video' };
+            console.log('[Bot] Direct video URL detected');
+            videoData = { url, title: 'Video', type: 'direct' };
         } else {
-            try {
-                videoData = await downloadWithYtDlp(url);
-            } catch (ytdlpError) {
-                console.log('[Bot] yt-dlp failed, trying Playwright...');
-                videoData = await sniffWithPlaywright(url);
-                downloadUrl = videoData.url;
+            // Method 1: Try yt-dlp
+            if (ytDlpWorking) {
+                try {
+                    console.log('[Bot] Trying yt-dlp...');
+                    videoData = await downloadWithYtDlp(url);
+                    console.log('[Bot] ✅ yt-dlp succeeded:', videoData.title);
+                } catch (ytdlpError) {
+                    console.log('[Bot] yt-dlp failed:', ytdlpError.message);
+                    
+                    // Method 2: Try Playwright
+                    try {
+                        console.log('[Bot] Trying Playwright...');
+                        videoData = await sniffWithPlaywright(url);
+                        downloadUrl = videoData.url;
+                        console.log('[Bot] ✅ Playwright succeeded:', videoData.url.substring(0, 80));
+                    } catch (playwrightError) {
+                        console.log('[Bot] Playwright also failed:', playwrightError.message);
+                        throw new Error('Video topilmadi. Ikkala usul ham ishlamadi.');
+                    }
+                }
             }
         }
-        
+
         if (!videoData || !videoData.url) {
-            throw new Error('Video topilmadi');
+            throw new Error('Video ma\'lumotlari topilmadi');
         }
-        
+
         await bot.telegram.editMessageText(
             ctx.chat.id,
             waitMsg.message_id,
             null,
-            '📥 Video yuklanmoqda...'
+            '📥 Video yuklanmoqda...\n\n' +
+            `🎬 Nomi: ${videoData.title || 'Noma\'lum'}\n` +
+            `🔗 Manba: ${url.substring(0, 50)}...`
         );
-        
+
         // Prepare download
-        const ytcmd = getYtDlpPath();
         const userAgent = getRotatedUserAgent();
         const safeTitle = sanitizeFilename(videoData.title || 'video');
         const fileName = `bot_download_${Date.now()}_${Math.random().toString(36).substring(2, 9)}.mp4`;
         outputPath = path.join(CONFIG.TEMP_DIR, fileName);
-        
+
+        // Ensure temp directory exists
+        if (!fs.existsSync(CONFIG.TEMP_DIR)) {
+            fs.mkdirSync(CONFIG.TEMP_DIR, { recursive: true });
+        }
+
         const args = [
             '--no-check-certificates',
             '--user-agent', userAgent,
@@ -336,6 +382,8 @@ bot.on('text', async (ctx, next) => {
             '--geo-bypass',
             '-f', 'best[ext=mp4]/best',
             '-o', outputPath,
+            '--no-continue',
+            '--force-overwrites',
         ];
 
         // Add referer
@@ -349,90 +397,162 @@ bot.on('text', async (ctx, next) => {
         // Cookie support
         const cookiesPath = path.join(__dirname, 'cookies.txt');
         const apiCookiesPath = path.join(__dirname, 'local-video-api', 'cookies.txt');
-        
+
         if (fs.existsSync(cookiesPath)) {
             args.push('--cookies', cookiesPath);
+            console.log('[Bot] Using cookies from:', cookiesPath);
         } else if (fs.existsSync(apiCookiesPath)) {
             args.push('--cookies', apiCookiesPath);
+            console.log('[Bot] Using cookies from:', apiCookiesPath);
         }
 
         args.push(downloadUrl);
-        
-        console.log(`[Bot] Downloading: ${downloadUrl}`);
-        childProcess = spawn(ytcmd, args);
-        
+
+        console.log(`[Bot] Starting download: ${downloadUrl.substring(0, 100)}...`);
+        console.log(`[Bot] Output: ${outputPath}`);
+        console.log(`[Bot] Command: ${ytcmd} ${args.join(' ').substring(0, 200)}`);
+
+        downloadAttempted = true;
+        childProcess = spawn(ytcmd, args, {
+            stdio: ['ignore', 'pipe', 'pipe'],
+            detached: false,
+        });
+
+        let downloadProgress = '';
+        let errorMessage = '';
+
+        // Capture stdout for progress
+        childProcess.stdout.on('data', (data) => {
+            const line = data.toString();
+            downloadProgress += line;
+            
+            // Extract progress percentage
+            const progressMatch = line.match(/\[download\]\s+(\d+\.?\d*)%/);
+            if (progressMatch) {
+                console.log(`[Bot] Progress: ${progressMatch[1]}%`);
+            }
+        });
+
+        // Capture stderr for errors
+        childProcess.stderr.on('data', (data) => {
+            const line = data.toString();
+            errorMessage += line;
+            console.log(`[Bot] yt-dlp: ${line.trim()}`);
+        });
+
         // Timeout handler
         const timeout = setTimeout(() => {
-            childProcess.kill('SIGKILL');
-            console.log('[Bot] Download timeout');
+            if (childProcess && !childProcess.killed) {
+                childProcess.kill('SIGKILL');
+                console.log('[Bot] ⏰ Download timeout (5 min)');
+            }
         }, CONFIG.DOWNLOAD_TIMEOUT);
-        
+
         childProcess.on('close', async (code) => {
             clearTimeout(timeout);
-            
+            console.log(`[Bot] Download process exited with code: ${code}`);
+
             if (code === 0 && fs.existsSync(outputPath)) {
                 try {
                     const stats = fs.statSync(outputPath);
                     const fileSize = formatFileSize(stats.size);
-                    console.log(`[Bot] Downloaded: ${fileSize}`);
-                    
+                    console.log(`[Bot] ✅ Downloaded: ${fileSize}`);
+
                     // Check file size limit
                     if (stats.size > CONFIG.MAX_FILE_SIZE) {
                         await ctx.reply(
-                            `⚠️ Video hajmi ${fileSize}. Telegram cheklovi sababli yuborib bo'lmasligi mumkin, lekin urinib ko'raman...`
+                            `⚠️ Video hajmi ${fileSize}. Telegram cheklovi (50MB) dan oshadi, lekin urinib ko'raman...`
                         );
                     }
-                    
+
                     await bot.telegram.editMessageText(
                         ctx.chat.id,
                         waitMsg.message_id,
                         null,
                         '✅ Yuklandi! Telegramga yuborilmoqda...'
                     );
-                    
+
                     await ctx.replyWithVideo(
                         { source: outputPath },
                         {
                             caption: `🎬 ${videoData.title || 'Video'}\n📦 Hajmi: ${fileSize}\n\n🤖 @${ctx.botInfo.username} orqali yuklab olindi`,
                         }
                     );
+
+                    console.log('[Bot] ✅ Video sent successfully');
                 } catch (sendError) {
-                    console.error('[Bot] Send failed:', sendError.message);
-                    
+                    console.error('[Bot] ❌ Send failed:', sendError.message);
+
                     let errorMessage = '❌ Xatolik: Videoni yuborib bo\'lmadi.';
-                    if (sendError.message.includes('Request Entity Too Large')) {
-                        errorMessage += ' Video hajmi juda katta.';
-                    } else if (sendError.message) {
-                        errorMessage += ' ' + sendError.message;
-                    }
                     
-                    ctx.reply(errorMessage);
+                    if (sendError.message.includes('Request Entity Too Large') || 
+                        sendError.message.includes('FILE_TOO_LARGE')) {
+                        errorMessage += ' Video hajmi juda katta (50MB dan oshdi).';
+                    } else if (sendError.message.includes('invalid file')) {
+                        errorMessage += ' Fayl noto\'g\'ri yuklandi.';
+                    } else if (sendError.message) {
+                        errorMessage += ' ' + sendError.message.split('\n')[0];
+                    }
+
+                    await ctx.reply(errorMessage);
                 } finally {
-                    cleanupDownloadArtifacts(outputPath);
+                    // Cleanup
+                    setTimeout(() => {
+                        cleanupDownloadArtifacts(outputPath);
+                        console.log('[Bot] 🧹 Cleaned up temp files');
+                    }, 60000); // Delete after 1 minute
                 }
             } else {
+                // Download failed
                 cleanupDownloadArtifacts(outputPath);
+                console.log(`[Bot] ❌ Download failed. Code: ${code}, Error: ${errorMessage.substring(0, 200)}`);
+
+                let failMsg = '❌ Videoni yuklab bo\'lmadi yoki havola yaroqsiz.';
                 
-                if (code !== null) {
-                    let failMsg = '❌ Videoni yuklab bo\'lmadi yoki havola yaroqsiz.';
-                    if (url.includes('instagram.com') || url.includes('tiktok.com')) {
-                        failMsg += '\n\n💡 Maslahat: Instagram va TikTok ba\'zan ruxsat (cookies) talab qiladi. /cookies buyrug\'ini ko\'ring.';
-                    }
-                    ctx.reply(failMsg);
-                } else {
-                    ctx.reply('⚠️ Yuklash vaqti tugadi (Timeout).');
+                if (errorMessage.includes('HTTP Error 403')) {
+                    failMsg += '\n\n⚠️ 403 Forbidden - Sayt ruxsat bermadi.';
+                    failMsg += '\n💡 /cookies buyrug\'ini ko\'ring.';
+                } else if (errorMessage.includes('HTTP Error 404')) {
+                    failMsg += '\n\n⚠️ 404 Not Found - Video topilmadi.';
+                } else if (errorMessage.includes('timeout')) {
+                    failMsg += '\n\n⏰ Vaqt tugadi - Katta fayl yoki sekin internet.';
+                } else if (errorMessage.includes('cookies')) {
+                    failMsg += '\n\n🍪 Cookies kerak. /cookies buyrug\'ini ko\'ring.';
                 }
+
+                if (url.includes('instagram.com') || url.includes('tiktok.com')) {
+                    failMsg += '\n\n💡 Maslahat: Instagram va TikTok uchun cookies kerak. /cookies buyrug\'ini ko\'ring.';
+                }
+
+                await ctx.reply(failMsg);
             }
         });
-        
+
     } catch (error) {
-        console.error('[Bot] Download error:', error.message);
-        
+        console.error('[Bot] ❌ Download error:', error.message);
+
         if (outputPath) {
             cleanupDownloadArtifacts(outputPath);
         }
+
+        let userMessage = `❌ Xatolik: ${error.message}`;
         
-        ctx.reply(`❌ Xatolik: ${error.message}`);
+        if (error.message.includes('Video topilmadi')) {
+            userMessage = '❌ Video topilmadi. Boshqa manbadan urinib ko\'ring.';
+        } else if (error.message.includes('timeout')) {
+            userMessage = '⏰ Yuklash vaqti tugadi. Kichikroq video tanlang.';
+        }
+
+        try {
+            await bot.telegram.editMessageText(
+                ctx.chat.id,
+                waitMsg.message_id,
+                null,
+                userMessage
+            );
+        } catch (editError) {
+            await ctx.reply(userMessage);
+        }
     }
 });
 
