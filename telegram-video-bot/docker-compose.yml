@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  telegram-bot-api:
+    image: botfather/telegram-bot-api:latest
+    container_name: telegram-bot-api
+    environment:
+      - TELEGRAM_API_ID=${TELEGRAM_API_ID:-25312826}
+      - TELEGRAM_API_HASH=${TELEGRAM_API_HASH:-b4432c8746904c09d8668fa1cdc4149f}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_LOCAL=true
+      - TELEGRAM_PORT=8081
+    ports:
+      - "${BOT_API_PORT:-8081}:8081"
+    volumes:
+      - telegram-bot-api-data:/var/lib/telegram-bot-api
+    restart: unless-stopped
+    networks:
+      - bot-network
+
+networks:
+  bot-network:
+    driver: bridge
+
+volumes:
+  telegram-bot-api-data:
