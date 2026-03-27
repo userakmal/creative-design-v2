@@ -248,33 +248,204 @@ const performStartupCleanup = () => {
 // VIDEO DOWNLOADERS
 // ============================================================================
 
-const downloadWithYtDlp = async (url) => {
+/**
+ * Get video formats with quality information
+ * @param {string} url - Video URL
+ * @returns {Promise<{title: string, duration: number, formats: Array, thumbnail: string}>}
+ */
+const getVideoFormats = async (url) => {
     const ytcmd = getYtDlpPath();
     const userAgent = getRotatedUserAgent();
     const command = buildYtDlpInfoCommand(url, userAgent);
-    
-    console.log(`[YtDlp] Fetching info: ${url.substring(0, 80)}...`);
-    
+
+    console.log(`[Formats] Fetching: ${url.substring(0, 80)}...`);
+
     try {
         const { stdout, stderr } = await execPromise(command, {
             maxBuffer: 1024 * 1024 * 50,
             timeout: CONFIG.DOWNLOAD_TIMEOUT,
         });
-        
-        if (stderr) console.log('[YtDlp STDERR]:', stderr.substring(0, 300));
-        
+
+        if (stderr) console.log('[Formats STDERR]:', stderr.substring(0, 200));
+
         const videoData = safeJsonParse(stdout, null);
         if (!videoData) {
             throw new Error('Invalid response from yt-dlp');
         }
-        
+
+        // Process and filter formats
+        const formats = [];
+        const seenResolutions = new Set();
+
+        // Group formats by resolution
+        const formatGroups = new Map();
+
+        (videoData.formats || []).forEach(f => {
+            // Skip formats without video or audio
+            if (f.vcodec === 'none' && f.acodec === 'none') return;
+
+            // Determine resolution
+            let resolution = 'Audio Only';
+            if (f.vcodec !== 'none') {
+                resolution = f.resolution || (f.width ? `${f.height}p` : 'Unknown');
+                
+                // Normalize resolution labels
+                if (resolution.includes('x')) {
+                    resolution = `${f.height}p`;
+                }
+            }
+
+            // Calculate file size
+            const filesize = f.filesize || f.filesize_approx || 0;
+            const filesizeMB = filesize ? (filesize / (1024 * 1024)).toFixed(1) : '?';
+
+            // Get quality info
+            const quality = f.format_note || f.quality_label || '';
+            const fps = f.fps ? `${f.fps}fps` : '';
+            const vcodec = f.vcodec !== 'none' ? f.vcodec : '';
+            const acodec = f.acodec !== 'none' ? f.acodec : '';
+
+            const formatInfo = {
+                format_id: f.format_id,
+                resolution,
+                extension: f.ext || 'unknown',
+                filesize: filesizeMB,
+                filesize_bytes: filesize,
+                quality,
+                fps,
+                vcodec,
+                acodec,
+                tbr: f.tbr || 0,
+                hasVideo: f.vcodec !== 'none',
+                hasAudio: f.acodec !== 'none',
+            };
+
+            // Group by resolution
+            if (!formatGroups.has(resolution)) {
+                formatGroups.set(resolution, []);
+            }
+            formatGroups.get(resolution).push(formatInfo);
+        });
+
+        // Select best format for each resolution
+        formatGroups.forEach((group, resolution) => {
+            // Sort by bitrate (tbr) descending
+            group.sort((a, b) => b.tbr - a.tbr);
+            
+            // Take the best format (highest bitrate)
+            const best = group[0];
+            
+            // For video with audio, prefer formats that have both
+            const withBoth = group.find(f => f.hasVideo && f.hasAudio);
+            if (withBoth) {
+                formats.push(withBoth);
+            } else if (best) {
+                formats.push(best);
+            }
+        });
+
+        // Sort formats: video with audio first (by resolution), then audio only
+        formats.sort((a, b) => {
+            if (a.hasVideo && b.hasVideo) {
+                // Sort by resolution (height)
+                const aHeight = parseInt(a.resolution) || 0;
+                const bHeight = parseInt(b.resolution) || 0;
+                return bHeight - aHeight;
+            }
+            if (a.hasVideo && !b.hasVideo) return -1;
+            if (!a.hasVideo && b.hasVideo) return 1;
+            return 0;
+        });
+
+        // Limit to top 12 formats
+        const limitedFormats = formats.slice(0, 12).map((f, index) => ({
+            ...f,
+            order: index,
+        }));
+
         return {
             title: videoData.title || 'Video',
-            url: videoData.url || videoData.requested_downloads?.[0]?.url || '',
-            thumbnail: videoData.thumbnail || null,
+            duration: videoData.duration,
+            thumbnail: videoData.thumbnail || videoData.thumbnail_url,
+            formats: limitedFormats,
+            webpage_url: videoData.webpage_url || url,
+            uploader: videoData.uploader || videoData.channel || '',
+        };
+    } catch (error) {
+        console.error('[Formats] Error:', error.message);
+        throw error;
+    }
+};
+
+const downloadWithYtDlp = async (url) => {
+    const ytcmd = getYtDlpPath();
+    const userAgent = getRotatedUserAgent();
+    const command = buildYtDlpInfoCommand(url, userAgent);
+
+    console.log(`[YtDlp] Fetching info: ${url.substring(0, 80)}...`);
+
+    try {
+        const { stdout, stderr } = await execPromise(command, {
+            maxBuffer: 1024 * 1024 * 50,
+            timeout: CONFIG.DOWNLOAD_TIMEOUT,
+        });
+
+        if (stderr) console.log('[YtDlp STDERR]:', stderr.substring(0, 300));
+
+        const videoData = safeJsonParse(stdout, null);
+        if (!videoData) {
+            throw new Error('Invalid response from yt-dlp');
+        }
+
+        console.log('[YtDlp] Raw response keys:', Object.keys(videoData).slice(0, 20).join(', '));
+
+        // Extract video URL - try multiple methods for different sites
+        let videoUrl = '';
+
+        // Method 1: Direct URL field
+        if (videoData.url) {
+            videoUrl = videoData.url;
+            console.log('[YtDlp] URL from videoData.url');
+        }
+        // Method 2: requested_downloads array
+        else if (videoData.requested_downloads && videoData.requested_downloads.length > 0) {
+            videoUrl = videoData.requested_downloads[0].url || videoData.requested_downloads[0].manifest_url;
+            console.log('[YtDlp] URL from requested_downloads');
+        }
+        // Method 3: formats array (for Instagram, TikTok, etc.)
+        else if (videoData.formats && videoData.formats.length > 0) {
+            // Find best video format with both video and audio
+            const bestFormat = videoData.formats.find(f =>
+                f.vcodec !== 'none' && f.acodec !== 'none' && f.url
+            ) || videoData.formats.find(f => f.url);
+
+            if (bestFormat) {
+                videoUrl = bestFormat.url;
+                console.log('[YtDlp] URL from formats array');
+            }
+        }
+        // Method 4: entries array (for playlists)
+        else if (videoData.entries && videoData.entries.length > 0) {
+            const firstEntry = videoData.entries[0];
+            videoUrl = firstEntry.url || firstEntry.requested_downloads?.[0]?.url;
+            console.log('[YtDlp] URL from entries');
+        }
+
+        if (!videoUrl) {
+            console.log('[YtDlp] Warning: No direct URL found, video may need direct download');
+            // For Instagram and similar sites, we may need to download directly
+            // Return the original URL and let the bot handle it with yt-dlp download
+            videoUrl = url;
+        }
+
+        return {
+            title: videoData.title || videoData.fullname || 'Video',
+            url: videoUrl,
+            thumbnail: videoData.thumbnail || videoData.thumbnail_url || null,
             type: 'yt-dlp',
             duration: videoData.duration,
-            isM3U8: isM3U8(videoData.url || ''),
+            isM3U8: isM3U8(videoUrl),
+            extractor: videoData.extractor,
         };
     } catch (error) {
         if (error.message && error.message.includes('timeout')) {
@@ -797,6 +968,7 @@ const startServer = async () => {
 module.exports = {
     downloadWithYtDlp,
     sniffWithPlaywright,
+    getVideoFormats,
     isM3U8,
     isDirectVideo,
     getYtDlpPath,

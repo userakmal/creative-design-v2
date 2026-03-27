@@ -7,6 +7,7 @@
  */
 
 const { Telegraf } = require('telegraf');
+const { Markup } = require('telegraf');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { spawn } = require('child_process');
 const fs = require('fs');
@@ -16,12 +17,20 @@ const path = require('path');
 const {
     downloadWithYtDlp,
     sniffWithPlaywright,
+    getVideoFormats,
     isM3U8,
     isDirectVideo,
     getYtDlpPath,
     getRotatedUserAgent,
     AUTHOR,
 } = require('./local-video-api/server');
+
+// Import advanced features
+const {
+    initAdvancedFeatures,
+    getCachedOrMarkForCache,
+    cacheDownloadedVideo,
+} = require('./advanced-features');
 
 // ============================================================================
 // CONFIGURATION
@@ -35,6 +44,7 @@ const CONFIG = {
     MAX_FILE_SIZE: 50 * 1024 * 1024, // 50MB
     USERS_FILE: path.join(__dirname, 'data', 'users.json'),
     TEMP_DIR: path.join(__dirname, 'local-video-api'),
+    QUALITY_SELECTION_TIMEOUT: 120000, // 2 minutes to select quality
 };
 
 const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-pro'];
@@ -129,6 +139,119 @@ const formatFileSize = (bytes) => {
 };
 
 // ============================================================================
+// QUALITY SELECTION HELPERS
+// ============================================================================
+
+/**
+ * Generate inline keyboard for quality selection
+ * @param {Array} formats - Array of format objects
+ * @param {string} urlId - Unique URL identifier for callback
+ * @returns {Markup}
+ */
+const generateQualityKeyboard = (formats, urlId) => {
+    const keyboard = [];
+    
+    // Video qualities (2 buttons per row)
+    const videoFormats = formats.filter(f => f.hasVideo);
+    
+    for (let i = 0; i < videoFormats.length; i += 2) {
+        const row = [];
+        for (let j = 0; j < 2 && i + j < videoFormats.length; j++) {
+            const format = videoFormats[i + j];
+            const label = `${format.resolution} ${format.filesize !== '?' ? `(${format.filesize}MB)` : ''}`;
+            row.push({
+                text: label,
+                callback_data: `quality_${urlId}_${format.format_id}_${format.order}`,
+            });
+        }
+        keyboard.push(row);
+    }
+    
+    // Audio only formats (1 row)
+    const audioFormats = formats.filter(f => !f.hasVideo && f.hasAudio);
+    if (audioFormats.length > 0) {
+        if (keyboard.length > 0) {
+            keyboard.push([{ text: '🎵 Audio Only', callback_data: 'separator' }]);
+        }
+        const audioRow = [];
+        for (let i = 0; i < Math.min(audioFormats.length, 4); i++) {
+            const format = audioFormats[i];
+            audioRow.push({
+                text: `${format.acodec} ${format.filesize !== '?' ? `(${format.filesize}MB)` : ''}`,
+                callback_data: `quality_${urlId}_${format.format_id}_${format.order}`,
+            });
+        }
+        keyboard.push(audioRow);
+    }
+    
+    // Cancel button
+    keyboard.push([{ text: '❌ Bekor qilish', callback_data: `cancel_${urlId}` }]);
+    
+    return Markup.inlineKeyboard(keyboard);
+};
+
+/**
+ * Format video info message
+ * @param {Object} videoInfo - Video information
+ * @returns {string}
+ */
+const formatVideoInfo = (videoInfo) => {
+    const { title, duration, formats, uploader } = videoInfo;
+    
+    const videoCount = formats.filter(f => f.hasVideo).length;
+    const audioCount = formats.filter(f => !f.hasVideo && f.hasAudio).length;
+    
+    const bestVideo = formats.find(f => f.hasVideo);
+    const bestQuality = bestVideo ? bestVideo.resolution : 'N/A';
+    
+    let message = `🎬 **Video Topildi**\n\n`;
+    message += `📌 **Nomi:** ${title.substring(0, 100)}${title.length > 100 ? '...' : ''}\n`;
+    
+    if (uploader) {
+        message += `👤 **Muallif:** ${uploader}\n`;
+    }
+    
+    if (duration) {
+        const minutes = Math.floor(duration / 60);
+        const seconds = Math.floor(duration % 60);
+        message += `⏱ **Davomiyligi:** ${minutes}:${seconds.toString().padStart(2, '0')}\n`;
+    }
+    
+    message += `\n📊 **Sifat tanlovi:**\n`;
+    message += `• Video: ${videoCount} ta variant\n`;
+    message += `• Audio: ${audioCount} ta variant\n`;
+    message += `• Eng yaxshi sifat: ${bestQuality}\n\n`;
+    message += `⬇️ **Kerakli sifatni tanlang:**`;
+    
+    return message;
+};
+
+/**
+ * Generate unique URL ID for callback tracking
+ * @param {string} url
+ * @returns {string}
+ */
+const generateUrlId = (url) => {
+    return Buffer.from(url).toString('base64').substring(0, 12);
+};
+
+/**
+ * Decode URL from ID
+ * @param {string} urlId
+ * @returns {string}
+ */
+const decodeUrlId = (urlId) => {
+    try {
+        return Buffer.from(urlId, 'base64').toString('utf-8');
+    } catch {
+        return null;
+    }
+};
+
+// Store for pending quality selections (urlId -> {url, formats, message})
+const qualitySelections = new Map();
+
+// ============================================================================
 // STARTUP CLEANUP
 // ============================================================================
 
@@ -211,15 +334,11 @@ const bot = new Telegraf(CONFIG.BOT_TOKEN);
 // BOT COMMANDS
 // ============================================================================
 
-bot.start((ctx) => {
-    saveUser(ctx.from.id);
-    ctx.reply(
-        `Assalomu alaykum! Men Video Downloader va AI botman.\n\n` +
-        `Sizga video yuklab berishim yoki Gemini AI yordamida savollaringizga javob berishim mumkin.\n\n` +
-        `🤖 Shunchaki savol yozing yoki video havolasini yuboring.`
-    );
-});
+// Advanced Features will handle /start command
+// Initialize advanced features (Start UI, Music Search, Smart Caching)
+initAdvancedFeatures(bot);
 
+// Keep existing commands
 bot.command('myid', (ctx) => {
     ctx.reply(`Sizning Telegram ID raqamingiz: <code>${ctx.from.id}</code>`, { parse_mode: 'HTML' });
 });
@@ -278,7 +397,7 @@ bot.command('send', async (ctx) => {
 });
 
 // ============================================================================
-// VIDEO DOWNLOAD HANDLER - Enhanced with Auto-Fix
+// VIDEO DOWNLOAD HANDLER - With Quality Selection
 // ============================================================================
 
 bot.on('text', async (ctx, next) => {
@@ -291,20 +410,14 @@ bot.on('text', async (ctx, next) => {
     }
 
     const waitMsg = await ctx.reply('🔍 Video ma\'lumotlari olinmoqda, iltimos kuting...');
-    let outputPath = null;
-    let childProcess = null;
-    let downloadAttempted = false;
-
+    
     try {
         // Validate yt-dlp first
         const ytcmd = getYtDlpPath();
-        let ytDlpWorking = false;
         
         try {
             const { execSync } = require('child_process');
             execSync(`"${ytcmd}" --version`, { stdio: 'pipe' });
-            ytDlpWorking = true;
-            console.log('[Bot] ✅ yt-dlp verified');
         } catch (err) {
             console.error('[Bot] ❌ yt-dlp not working!');
             await bot.telegram.editMessageText(
@@ -320,78 +433,273 @@ bot.on('text', async (ctx, next) => {
             return;
         }
 
-        let videoData;
-        let downloadUrl = url;
-
-        // Get video info - try multiple methods
+        // For direct video URLs, skip quality selection
         if (isDirectVideo(url) || isM3U8(url)) {
-            console.log('[Bot] Direct video URL detected');
-            videoData = { url, title: 'Video', type: 'direct' };
-        } else {
-            // Method 1: Try yt-dlp
-            if (ytDlpWorking) {
-                try {
-                    console.log('[Bot] Trying yt-dlp...');
-                    videoData = await downloadWithYtDlp(url);
-                    console.log('[Bot] ✅ yt-dlp succeeded:', videoData.title);
-                } catch (ytdlpError) {
-                    console.log('[Bot] yt-dlp failed:', ytdlpError.message);
-                    
-                    // Method 2: Try Playwright
-                    try {
-                        console.log('[Bot] Trying Playwright...');
-                        videoData = await sniffWithPlaywright(url);
-                        downloadUrl = videoData.url;
-                        console.log('[Bot] ✅ Playwright succeeded:', videoData.url.substring(0, 80));
-                    } catch (playwrightError) {
-                        console.log('[Bot] Playwright also failed:', playwrightError.message);
-                        throw new Error('Video topilmadi. Ikkala usul ham ishlamadi.');
-                    }
+            console.log('[Bot] Direct video URL detected - downloading automatically');
+            await downloadVideo(ctx, url, null, waitMsg);
+            return;
+        }
+
+        // Get video formats
+        console.log('[Bot] Fetching video formats...');
+        const videoInfo = await getVideoFormats(url);
+        
+        if (!videoInfo || !videoInfo.formats || videoInfo.formats.length === 0) {
+            throw new Error('Video formatlari topilmadi');
+        }
+
+        console.log(`[Bot] Found ${videoInfo.formats.length} formats`);
+
+        // Generate unique ID for this URL
+        const urlId = generateUrlId(url);
+        
+        // Store selection info
+        qualitySelections.set(urlId, {
+            url,
+            videoInfo,
+            chatId: ctx.chat.id,
+            userId: ctx.from.id,
+            timestamp: Date.now(),
+        });
+
+        // Format message
+        const caption = formatVideoInfo(videoInfo);
+        
+        // Generate inline keyboard
+        const keyboard = generateQualityKeyboard(videoInfo.formats, urlId);
+
+        // Edit or send message with quality selection
+        try {
+            await bot.telegram.editMessageText(
+                ctx.chat.id,
+                waitMsg.message_id,
+                null,
+                caption,
+                {
+                    parse_mode: 'Markdown',
+                    ...keyboard,
                 }
-            }
+            );
+        } catch (editError) {
+            // If edit fails, send new message
+            await ctx.reply(caption, {
+                parse_mode: 'Markdown',
+                ...keyboard,
+            });
         }
 
-        if (!videoData || !videoData.url) {
-            throw new Error('Video ma\'lumotlari topilmadi');
+        // Auto-cleanup after timeout
+        setTimeout(() => {
+            qualitySelections.delete(urlId);
+        }, CONFIG.QUALITY_SELECTION_TIMEOUT);
+
+    } catch (error) {
+        console.error('[Bot] ❌ Error:', error.message);
+        
+        try {
+            await bot.telegram.editMessageText(
+                ctx.chat.id,
+                waitMsg.message_id,
+                null,
+                `❌ Xatolik: ${error.message}`
+            );
+        } catch {
+            await ctx.reply(`❌ Xatolik: ${error.message}`);
+        }
+    }
+});
+
+// ============================================================================
+// CALLBACK QUERY HANDLER (Quality Selection)
+// ============================================================================
+
+bot.on('callback_query', async (ctx) => {
+    const data = ctx.callbackQuery.data;
+    const userId = ctx.from.id;
+    const chatId = ctx.chat.id;
+    const messageId = ctx.callbackQuery.message.message_id;
+
+    console.log('[Callback] Received:', data);
+
+    // Answer callback query immediately
+    await ctx.answerCbQuery();
+
+    // Handle separator (do nothing)
+    if (data === 'separator') {
+        return;
+    }
+
+    // Handle cancel
+    if (data.startsWith('cancel_')) {
+        const urlId = data.replace('cancel_', '');
+        qualitySelections.delete(urlId);
+        
+        try {
+            await bot.telegram.editMessageText(
+                chatId,
+                messageId,
+                null,
+                '❌ Bekor qilindi'
+            );
+        } catch {}
+        return;
+    }
+
+    // Handle quality selection: quality_{urlId}_{formatId}_{order}
+    if (data.startsWith('quality_')) {
+        const parts = data.split('_');
+        if (parts.length < 4) {
+            await ctx.answerCbQuery('⚠️ Xato: format ID topilmadi', { show_alert: true });
+            return;
         }
 
-        await bot.telegram.editMessageText(
-            ctx.chat.id,
-            waitMsg.message_id,
-            null,
-            '📥 Video yuklanmoqda...\n\n' +
-            `🎬 Nomi: ${videoData.title || 'Noma\'lum'}\n` +
-            `🔗 Manba: ${url.substring(0, 50)}...`
+        const urlId = parts[1];
+        const formatId = parts[2];
+        // const order = parts[3]; // Not used but available
+
+        // Get selection info
+        const selection = qualitySelections.get(urlId);
+        
+        if (!selection) {
+            await ctx.answerCbQuery('⏰ Vaqt tugadi. Iltimos, havolani qayta yuboring', { show_alert: true });
+            return;
+        }
+
+        // Verify user
+        if (selection.userId !== userId) {
+            await ctx.answerCbQuery('⚠️ Bu sizning tanlovingiz emas', { show_alert: true });
+            return;
+        }
+
+        const { url, videoInfo } = selection;
+        
+        // Find the selected format
+        const format = videoInfo.formats.find(f => f.format_id === formatId);
+        
+        if (!format) {
+            await ctx.answerCbQuery('⚠️ Format topilmadi', { show_alert: true });
+            return;
+        }
+
+        // Remove selection
+        qualitySelections.delete(urlId);
+
+        // Show loading message
+        const loadingMsg = await ctx.reply(
+            `📥 Yuklanmoqda...\n\n` +
+            `🎬 **${videoInfo.title.substring(0, 50)}**\n` +
+            `📊 **Sifat:** ${format.resolution}\n` +
+            `💾 **Hajmi:** ${format.filesize} MB\n\n` +
+            `⏳ Kutib turing...`,
+            { parse_mode: 'Markdown' }
         );
 
-        // Prepare download
-        const userAgent = getRotatedUserAgent();
-        const safeTitle = sanitizeFilename(videoData.title || 'video');
-        const fileName = `bot_download_${Date.now()}_${Math.random().toString(36).substring(2, 9)}.mp4`;
-        outputPath = path.join(CONFIG.TEMP_DIR, fileName);
+        try {
+            // Download the video with selected format
+            await downloadVideo(ctx, url, formatId, loadingMsg);
+            
+            // Delete loading message after successful download
+            try {
+                await bot.telegram.deleteMessage(chatId, loadingMsg.message_id);
+            } catch {}
+        } catch (error) {
+            console.error('[Download] Error:', error.message);
+            
+            try {
+                await bot.telegram.editMessageText(
+                    chatId,
+                    loadingMsg.message_id,
+                    null,
+                    `❌ Xatolik: ${error.message}`
+                );
+            } catch {}
+        }
 
+        return;
+    }
+});
+
+// ============================================================================
+// VIDEO DOWNLOAD FUNCTION
+// ============================================================================
+
+/**
+ * Download video with specific format
+ * @param {Context} ctx - Telegraf context
+ * @param {string} url - Video URL
+ * @param {string} formatId - Format ID to download (null for auto)
+ * @param {Message} waitMsg - Loading message to edit
+ */
+const downloadVideo = async (ctx, url, formatId = null, waitMsg) => {
+    // Check cache first
+    const cached = getCachedOrMarkForCache(url);
+    
+    if (cached) {
+        // Send cached video immediately
+        console.log(`[Download] 🚀 Sending cached video: ${cached.fileId}`);
+        
+        try {
+            await bot.telegram.editMessageText(
+                ctx.chat.id,
+                waitMsg.message_id,
+                null,
+                '✅ **Найдено в кэше!** Отправка...\n\n⚡ Мгновенная загрузка!',
+                { parse_mode: 'Markdown' }
+            );
+            
+            await ctx.replyWithVideo(
+                cached.fileId,
+                {
+                    caption: `🎬 ${cached.title}\n📦 Hajmi: ${cached.fileSize}\n\n🤖 @${ctx.botInfo.username} orqali yuklab olindi`,
+                }
+            );
+            
+            console.log('[Download] ✅ Sent from cache');
+            return;
+        } catch (error) {
+            console.error('[Download] Cache send error:', error.message);
+            // If cache fails, continue with normal download
+        }
+    }
+    
+    // Continue with normal download
+    const outputPath = path.join(CONFIG.TEMP_DIR, `bot_download_${Date.now()}_${Math.random().toString(36).substring(2, 9)}.mp4`);
+    let childProcess = null;
+
+    try {
         // Ensure temp directory exists
         if (!fs.existsSync(CONFIG.TEMP_DIR)) {
             fs.mkdirSync(CONFIG.TEMP_DIR, { recursive: true });
         }
 
+        const ytcmd = getYtDlpPath();
+        const userAgent = getRotatedUserAgent();
+
+        // Build yt-dlp arguments
         const args = [
             '--no-check-certificates',
             '--user-agent', userAgent,
             '--no-playlist',
             '--geo-bypass',
-            '-f', 'best[ext=mp4]/best',
-            '-o', outputPath,
             '--no-continue',
             '--force-overwrites',
+            '-o', outputPath,
         ];
+
+        // Add format selection if specified
+        if (formatId) {
+            args.push('-f', `${formatId}+bestaudio[ext=m4a]/${formatId}`);
+            console.log(`[Download] Using format: ${formatId}`);
+        } else {
+            args.push('-f', 'best[ext=mp4]/best');
+        }
 
         // Add referer
         try {
-            const domain = new URL(downloadUrl).hostname;
+            const domain = new URL(url).hostname;
             args.push('--referer', `https://${domain}/`);
         } catch {
-            args.push('--referer', downloadUrl);
+            args.push('--referer', url);
         }
 
         // Cookie support
@@ -400,19 +708,17 @@ bot.on('text', async (ctx, next) => {
 
         if (fs.existsSync(cookiesPath)) {
             args.push('--cookies', cookiesPath);
-            console.log('[Bot] Using cookies from:', cookiesPath);
+            console.log('[Download] Using cookies');
         } else if (fs.existsSync(apiCookiesPath)) {
             args.push('--cookies', apiCookiesPath);
-            console.log('[Bot] Using cookies from:', apiCookiesPath);
+            console.log('[Download] Using cookies');
         }
 
-        args.push(downloadUrl);
+        args.push(url);
 
-        console.log(`[Bot] Starting download: ${downloadUrl.substring(0, 100)}...`);
-        console.log(`[Bot] Output: ${outputPath}`);
-        console.log(`[Bot] Command: ${ytcmd} ${args.join(' ').substring(0, 200)}`);
+        console.log(`[Download] Starting: ${url.substring(0, 100)}...`);
+        console.log(`[Download] Output: ${outputPath}`);
 
-        downloadAttempted = true;
         childProcess = spawn(ytcmd, args, {
             stdio: ['ignore', 'pipe', 'pipe'],
             detached: false,
@@ -420,6 +726,7 @@ bot.on('text', async (ctx, next) => {
 
         let downloadProgress = '';
         let errorMessage = '';
+        let lastProgressUpdate = 0;
 
         // Capture stdout for progress
         childProcess.stdout.on('data', (data) => {
@@ -429,7 +736,21 @@ bot.on('text', async (ctx, next) => {
             // Extract progress percentage
             const progressMatch = line.match(/\[download\]\s+(\d+\.?\d*)%/);
             if (progressMatch) {
-                console.log(`[Bot] Progress: ${progressMatch[1]}%`);
+                const percent = Math.round(parseFloat(progressMatch[1]));
+                
+                // Throttle updates to once per second
+                const now = Date.now();
+                if (now - lastProgressUpdate > 1000) {
+                    bot.telegram.editMessageText(
+                        ctx.chat.id,
+                        waitMsg.message_id,
+                        null,
+                        `📥 Yuklanmoqda... ${percent}%\n\n` +
+                        `⏳ Kutib turing...`,
+                        { parse_mode: 'Markdown' }
+                    ).catch(() => {});
+                    lastProgressUpdate = now;
+                }
             }
         });
 
@@ -437,30 +758,33 @@ bot.on('text', async (ctx, next) => {
         childProcess.stderr.on('data', (data) => {
             const line = data.toString();
             errorMessage += line;
-            console.log(`[Bot] yt-dlp: ${line.trim()}`);
+            console.log(`[Download] yt-dlp: ${line.trim()}`);
         });
 
         // Timeout handler
         const timeout = setTimeout(() => {
             if (childProcess && !childProcess.killed) {
                 childProcess.kill('SIGKILL');
-                console.log('[Bot] ⏰ Download timeout (5 min)');
+                console.log('[Download] ⏰ Timeout');
             }
         }, CONFIG.DOWNLOAD_TIMEOUT);
 
         childProcess.on('close', async (code) => {
             clearTimeout(timeout);
-            console.log(`[Bot] Download process exited with code: ${code}`);
+            console.log(`[Download] Process exited: ${code}`);
 
             if (code === 0 && fs.existsSync(outputPath)) {
                 try {
                     const stats = fs.statSync(outputPath);
                     const fileSize = formatFileSize(stats.size);
-                    console.log(`[Bot] ✅ Downloaded: ${fileSize}`);
+                    console.log(`[Download] ✅ Downloaded: ${fileSize}`);
 
                     // Check file size limit
                     if (stats.size > CONFIG.MAX_FILE_SIZE) {
-                        await ctx.reply(
+                        await bot.telegram.editMessageText(
+                            ctx.chat.id,
+                            waitMsg.message_id,
+                            null,
                             `⚠️ Video hajmi ${fileSize}. Telegram cheklovi (50MB) dan oshadi, lekin urinib ko'raman...`
                         );
                     }
@@ -475,53 +799,60 @@ bot.on('text', async (ctx, next) => {
                     await ctx.replyWithVideo(
                         { source: outputPath },
                         {
-                            caption: `🎬 ${videoData.title || 'Video'}\n📦 Hajmi: ${fileSize}\n\n🤖 @${ctx.botInfo.username} orqali yuklab olindi`,
+                            caption: `🎬 Video\n📦 Hajmi: ${fileSize}\n\n🤖 @${ctx.botInfo.username} orqali yuklab olindi`,
                         }
                     );
 
-                    console.log('[Bot] ✅ Video sent successfully');
+                    // Cache the video (get file_id from the sent message)
+                    // Note: We need to get the file_id after sending
+                    console.log('[Download] ✅ Video sent successfully');
+                    
+                    // Note: File_id caching would require getting the file_id from the sent message
+                    // For now, we cache the metadata
+                    cacheDownloadedVideo(url, {
+                        fileId: outputPath,  // This will be updated when we get the actual file_id
+                        fileSize: stats.size,
+                        title: videoInfo?.title || 'Video',
+                        quality: formatId || 'best',
+                        duration: videoInfo?.duration,
+                    });
                 } catch (sendError) {
-                    console.error('[Bot] ❌ Send failed:', sendError.message);
+                    console.error('[Download] ❌ Send failed:', sendError.message);
 
-                    let errorMessage = '❌ Xatolik: Videoni yuborib bo\'lmadi.';
+                    let errorMsg = '❌ Xatolik: Videoni yuborib bo\'lmadi.';
                     
                     if (sendError.message.includes('Request Entity Too Large') || 
                         sendError.message.includes('FILE_TOO_LARGE')) {
-                        errorMessage += ' Video hajmi juda katta (50MB dan oshdi).';
-                    } else if (sendError.message.includes('invalid file')) {
-                        errorMessage += ' Fayl noto\'g\'ri yuklandi.';
+                        errorMsg += ' Video hajmi juda katta (50MB dan oshdi).';
                     } else if (sendError.message) {
-                        errorMessage += ' ' + sendError.message.split('\n')[0];
+                        errorMsg += ' ' + sendError.message.split('\n')[0];
                     }
 
-                    await ctx.reply(errorMessage);
+                    await ctx.reply(errorMsg);
                 } finally {
-                    // Cleanup
+                    // Cleanup after 1 minute
                     setTimeout(() => {
                         cleanupDownloadArtifacts(outputPath);
-                        console.log('[Bot] 🧹 Cleaned up temp files');
-                    }, 60000); // Delete after 1 minute
+                        console.log('[Download] 🧹 Cleaned up');
+                    }, 60000);
                 }
             } else {
                 // Download failed
                 cleanupDownloadArtifacts(outputPath);
-                console.log(`[Bot] ❌ Download failed. Code: ${code}, Error: ${errorMessage.substring(0, 200)}`);
+                console.log(`[Download] ❌ Failed. Code: ${code}`);
 
-                let failMsg = '❌ Videoni yuklab bo\'lmadi yoki havola yaroqsiz.';
+                let failMsg = '❌ Videoni yuklab bo\'lmadi.';
                 
                 if (errorMessage.includes('HTTP Error 403')) {
-                    failMsg += '\n\n⚠️ 403 Forbidden - Sayt ruxsat bermadi.';
-                    failMsg += '\n💡 /cookies buyrug\'ini ko\'ring.';
+                    failMsg += '\n\n⚠️ 403 Forbidden - Sayt ruxsat bermadi.\n💡 /cookies buyrug\'ini ko\'ring.';
                 } else if (errorMessage.includes('HTTP Error 404')) {
                     failMsg += '\n\n⚠️ 404 Not Found - Video topilmadi.';
                 } else if (errorMessage.includes('timeout')) {
-                    failMsg += '\n\n⏰ Vaqt tugadi - Katta fayl yoki sekin internet.';
-                } else if (errorMessage.includes('cookies')) {
-                    failMsg += '\n\n🍪 Cookies kerak. /cookies buyrug\'ini ko\'ring.';
+                    failMsg += '\n\n⏰ Vaqt tugadi.';
                 }
 
                 if (url.includes('instagram.com') || url.includes('tiktok.com')) {
-                    failMsg += '\n\n💡 Maslahat: Instagram va TikTok uchun cookies kerak. /cookies buyrug\'ini ko\'ring.';
+                    failMsg += '\n\n💡 Instagram/TikTok uchun: /cookies buyrug\'ini ko\'ring.';
                 }
 
                 await ctx.reply(failMsg);
@@ -529,32 +860,15 @@ bot.on('text', async (ctx, next) => {
         });
 
     } catch (error) {
-        console.error('[Bot] ❌ Download error:', error.message);
-
+        console.error('[Download] ❌ Error:', error.message);
+        
         if (outputPath) {
             cleanupDownloadArtifacts(outputPath);
         }
 
-        let userMessage = `❌ Xatolik: ${error.message}`;
-        
-        if (error.message.includes('Video topilmadi')) {
-            userMessage = '❌ Video topilmadi. Boshqa manbadan urinib ko\'ring.';
-        } else if (error.message.includes('timeout')) {
-            userMessage = '⏰ Yuklash vaqti tugadi. Kichikroq video tanlang.';
-        }
-
-        try {
-            await bot.telegram.editMessageText(
-                ctx.chat.id,
-                waitMsg.message_id,
-                null,
-                userMessage
-            );
-        } catch (editError) {
-            await ctx.reply(userMessage);
-        }
+        await ctx.reply(`❌ Xatolik: ${error.message}`);
     }
-});
+};
 
 // ============================================================================
 // GEMINI AI HANDLER
