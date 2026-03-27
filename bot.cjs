@@ -436,16 +436,28 @@ bot.on('text', async (ctx, next) => {
         // For direct video URLs, skip quality selection
         if (isDirectVideo(url) || isM3U8(url)) {
             console.log('[Bot] Direct video URL detected - downloading automatically');
-            await downloadVideo(ctx, url, null, waitMsg);
+            await downloadVideo(ctx, url, null, waitMsg, null);
             return;
         }
 
-        // Get video formats
+        // For Instagram, TikTok, Facebook - auto-download without quality selection
+        const isSocialMedia = url.includes('instagram.com') || url.includes('tiktok.com') || url.includes('facebook.com') || url.includes('fb.watch');
+        
+        if (isSocialMedia) {
+            console.log('[Bot] Social media detected - auto-downloading...');
+            await downloadVideo(ctx, url, null, waitMsg, null);
+            return;
+        }
+
+        // Get video formats for other sites (YouTube, etc.)
         console.log('[Bot] Fetching video formats...');
         const videoInfo = await getVideoFormats(url);
-        
+
         if (!videoInfo || !videoInfo.formats || videoInfo.formats.length === 0) {
-            throw new Error('Video formatlari topilmadi');
+            // Fallback: try direct download
+            console.log('[Bot] No formats found, trying direct download...');
+            await downloadVideo(ctx, url, null, waitMsg, null);
+            return;
         }
 
         console.log(`[Bot] Found ${videoInfo.formats.length} formats`);
@@ -596,15 +608,15 @@ bot.on('callback_query', async (ctx) => {
 
         try {
             // Download the video with selected format
-            await downloadVideo(ctx, url, formatId, loadingMsg);
-            
+            await downloadVideo(ctx, url, formatId, loadingMsg, videoInfo);
+
             // Delete loading message after successful download
             try {
                 await bot.telegram.deleteMessage(chatId, loadingMsg.message_id);
             } catch {}
         } catch (error) {
             console.error('[Download] Error:', error.message);
-            
+
             try {
                 await bot.telegram.editMessageText(
                     chatId,
@@ -629,8 +641,9 @@ bot.on('callback_query', async (ctx) => {
  * @param {string} url - Video URL
  * @param {string} formatId - Format ID to download (null for auto)
  * @param {Message} waitMsg - Loading message to edit
+ * @param {Object} videoInfo - Video info object (optional, for caching)
  */
-const downloadVideo = async (ctx, url, formatId = null, waitMsg) => {
+const downloadVideo = async (ctx, url, formatId = null, waitMsg, videoInfo = null) => {
     // Check cache first
     const cached = getCachedOrMarkForCache(url);
     
@@ -803,14 +816,11 @@ const downloadVideo = async (ctx, url, formatId = null, waitMsg) => {
                         }
                     );
 
-                    // Cache the video (get file_id from the sent message)
-                    // Note: We need to get the file_id after sending
+                    // Cache the video
                     console.log('[Download] ✅ Video sent successfully');
                     
-                    // Note: File_id caching would require getting the file_id from the sent message
-                    // For now, we cache the metadata
                     cacheDownloadedVideo(url, {
-                        fileId: outputPath,  // This will be updated when we get the actual file_id
+                        fileId: outputPath,
                         fileSize: stats.size,
                         title: videoInfo?.title || 'Video',
                         quality: formatId || 'best',
