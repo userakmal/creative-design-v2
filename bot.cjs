@@ -31,7 +31,7 @@ const CONFIG = {
     BOT_TOKEN: process.env.BOT_TOKEN || '8628132129:AAGuU0M2KaZJATpyINnh4xpGoQyXU6uuFso',
     ADMIN_ID: parseInt(process.env.ADMIN_ID || '853691902', 10),
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
-    DOWNLOAD_TIMEOUT: 180000, // 3 minutes
+    DOWNLOAD_TIMEOUT: 300000, // 5 minutes (increased from 3 minutes)
     MAX_FILE_SIZE: 50 * 1024 * 1024, // 50MB
     USERS_FILE: path.join(__dirname, 'data', 'users.json'),
     TEMP_DIR: path.join(__dirname, 'local-video-api'),
@@ -495,22 +495,54 @@ bot.on('text', async (ctx) => {
 
 console.log('... Bot ma\'lumotlari tekshirilmoqda');
 
+// Validate yt-dlp installation
+const validateYtDlp = () => {
+    const ytcmd = getYtDlpPath();
+    try {
+        const { execSync } = require('child_process');
+        execSync(`"${ytcmd}" --version`, { stdio: 'ignore' });
+        console.log('[Bot] ✅ yt-dlp installed');
+        return true;
+    } catch (error) {
+        console.error('[Bot] ❌ yt-dlp NOT FOUND! Please install:');
+        console.error('       pip install yt-dlp');
+        console.error('       OR download from: https://github.com/yt-dlp/yt-dlp/releases');
+        return false;
+    }
+};
+
+const ytDlpReady = validateYtDlp();
+
 bot.telegram.getMe().then((me) => {
     console.log(`✅ Bot ready: @${me.username}`);
-    
+
+    if (!ytDlpReady) {
+        console.warn('[Bot] ⚠️ Bot will start but video downloads will FAIL without yt-dlp!');
+    }
+
     bot.launch()
         .then(() => {
             console.log('✅ Polling started!');
         })
         .catch((error) => {
             console.error('❌ Bot launch failed:', error.message);
-            
+
             if (error.message.includes('409: Conflict')) {
                 console.error('❗ Another bot instance is already running. Please close other windows.');
+                console.error('   Solution: Stop other bot processes or restart your computer.');
+            } else if (error.message.includes('403: Forbidden')) {
+                console.error('❗ Bot token is invalid or bot was deactivated by Telegram.');
+                console.error('   Solution: Get a new token from @BotFather on Telegram.');
+            } else if (error.message.includes('ENOTFOUND') || error.message.includes('ECONNREFUSED')) {
+                console.error('❗ No internet connection or Telegram API is unreachable.');
+                console.error('   Solution: Check your internet connection.');
             }
         });
 }).catch((error) => {
     console.error('❌ Invalid token or no internet:', error.message);
+    if (error.message.includes('403')) {
+        console.error('   Solution: Verify BOT_TOKEN in .env file or get new token from @BotFather');
+    }
 });
 
 // Graceful shutdown

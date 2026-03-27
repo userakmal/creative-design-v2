@@ -25,7 +25,7 @@ const execPromise = util.promisify(exec);
 const CONFIG = {
     PORT: parseInt(process.env.PORT || '3000', 10),
     SUBDOMAIN: process.env.TUNNEL_SUBDOMAIN || 'creative-video-api',
-    DOWNLOAD_TIMEOUT: parseInt(process.env.DOWNLOAD_TIMEOUT || '90000', 10),
+    DOWNLOAD_TIMEOUT: parseInt(process.env.DOWNLOAD_TIMEOUT || '300000', 10), // 5 minutes
     CLEANUP_INTERVAL: parseInt(process.env.CLEANUP_INTERVAL || '300000', 10),
     MAX_CONCURRENT_DOWNLOADS: parseInt(process.env.MAX_CONCURRENT_DOWNLOADS || '10', 10),
 };
