@@ -30,7 +30,7 @@ const {
     initAdvancedFeatures,
     getCachedOrMarkForCache,
     cacheDownloadedVideo,
-} = require('./advanced-features');
+} = require('./advanced-features.cjs');
 
 // ============================================================================
 // CONFIGURATION
@@ -353,12 +353,12 @@ bot.command(['stats', 'stars'], (ctx) => {
 bot.command('cookies', (ctx) => {
     ctx.reply(
         `🍪 <b>Instagram va ijtimoiy tarmoqlar uchun Cookies sozlash</b>\n\n` +
-        `Agar videolar yuklanmasa, quyidagi amallarni bajaring:\n\n` +
-        `1. Brauzeringizga (Chrome/Edge) <b>"Get cookies.txt LOCALLY"</b> kengaytmasini o'rnating.\n` +
-        `2. Instagram.com saytiga kiring va profilingizga kiring.\n` +
+        `Agar videolar yuklanmasa (ayniqsa Instagram), quyidagi amallarni bajaring:\n\n` +
+        `1. Kompyuter brauzeriga (Chrome/Edge) <b>"Get cookies.txt LOCALLY"</b> kengaytmasini o'rnating.\n` +
+        `2. Instagram.com saytiga kiring va o'z hisobingizga kiring.\n` +
         `3. Kengaytma orqali kukilarni <b>Netscape</b> formatida eksport qiling.\n` +
-        `4. Faylni <code>cookies.txt</code> deb nomlang va bot papkasiga tashlang.\n\n` +
-        `💡 Bu amallar botga sizning nomingizdan video ko'rish va yuklash imkonini beradi.`,
+        `4. Faylni <code>cookies.txt</code> deb nomlang va ushbu botga fayl ko'rinishida yuboring yoki bot papkasiga tashlang.\n\n` +
+        `💡 Bu amallar botga sizning nomingizdan videoni ko'rish va yuklash imkonini beradi. Bu xavfsiz va faqat yuklash uchun ishlatiladi.`,
         { parse_mode: 'HTML' }
     );
 });
@@ -394,6 +394,33 @@ bot.command('send', async (ctx) => {
         null,
         `✅ Reklama yakunlandi!\n\n👤 Qabul qildi: ${count}\n🚫 Bloklagan: ${blocked}`
     );
+});
+
+bot.on('document', async (ctx) => {
+    const doc = ctx.message.document;
+    if (doc.file_name === 'cookies.txt') {
+        const waitMsg = await ctx.reply('🔍 Cookies fayli qabul qilindi, saqlanmoqda...');
+        try {
+            const fileLink = await ctx.telegram.getFileLink(doc.file_id);
+            const response = await fetch(fileLink.href);
+            const buffer = await response.arrayBuffer();
+            
+            // Save to both root and local-video-api
+            fs.writeFileSync(path.join(__dirname, 'cookies.txt'), Buffer.from(buffer));
+            fs.writeFileSync(path.join(__dirname, 'local-video-api', 'cookies.txt'), Buffer.from(buffer));
+            
+            await ctx.telegram.editMessageText(
+                ctx.chat.id,
+                waitMsg.message_id,
+                null,
+                '✅ <b>Cookies muvaffaqiyatli saqlandi!</b>\n\nEndi Instagram va boshqa yopiq videolarni yuklab ko\'rishingiz mumkin.',
+                { parse_mode: 'HTML' }
+            );
+        } catch (error) {
+            console.error('[Bot] Cookies save error:', error.message);
+            await ctx.reply('❌ Cookies saqlashda xatolik yuz berdi: ' + error.message);
+        }
+    }
 });
 
 // ============================================================================
@@ -642,8 +669,9 @@ bot.on('callback_query', async (ctx) => {
  * @param {string} formatId - Format ID to download (null for auto)
  * @param {Message} waitMsg - Loading message to edit
  * @param {Object} videoInfo - Video info object (optional, for caching)
+ * @param {boolean} isFallback - Is this a fallback attempt
  */
-const downloadVideo = async (ctx, url, formatId = null, waitMsg, videoInfo = null) => {
+const downloadVideo = async (ctx, url, formatId = null, waitMsg, videoInfo = null, isFallback = false) => {
     // Check cache first
     const cached = getCachedOrMarkForCache(url);
     
@@ -851,6 +879,31 @@ const downloadVideo = async (ctx, url, formatId = null, waitMsg, videoInfo = nul
                 cleanupDownloadArtifacts(outputPath);
                 console.log(`[Download] ❌ Failed. Code: ${code}`);
 
+                // Check for fallback to Playwright for social media (if not already a fallback)
+                const isSocial = url.includes('instagram.com') || url.includes('tiktok.com') || url.includes('facebook.com');
+                
+                if (isSocial && !isFallback) {
+                    console.log('[Download] yt-dlp failed, attempting Playwright fallback...');
+                    
+                    try {
+                        await bot.telegram.editMessageText(
+                            ctx.chat.id,
+                            waitMsg.message_id,
+                            null,
+                            '⚠️ Oddiy yuklash o\'xshamadi. Browser orqali qidirilmoqda...'
+                        );
+                        
+                        const sniffed = await sniffWithPlaywright(url);
+                        
+                        if (sniffed && sniffed.url) {
+                            console.log('[Download] Playwright found URL:', sniffed.url);
+                            return downloadVideo(ctx, sniffed.url, null, waitMsg, sniffed, true);
+                        }
+                    } catch (fallbackError) {
+                        console.error('[Download] Fallback error:', fallbackError.message);
+                    }
+                }
+
                 let failMsg = '❌ Videoni yuklab bo\'lmadi.';
                 
                 if (errorMessage.includes('HTTP Error 403')) {
@@ -859,6 +912,8 @@ const downloadVideo = async (ctx, url, formatId = null, waitMsg, videoInfo = nul
                     failMsg += '\n\n⚠️ 404 Not Found - Video topilmadi.';
                 } else if (errorMessage.includes('timeout')) {
                     failMsg += '\n\n⏰ Vaqt tugadi.';
+                } else if (errorMessage.includes('empty media response')) {
+                    failMsg += '\n\n⚠️ Instagram ruxsat bermadi (Empty media response).\n💡 Hisobingiz orqali /cookies sozlang.';
                 }
 
                 if (url.includes('instagram.com') || url.includes('tiktok.com')) {

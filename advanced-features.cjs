@@ -17,7 +17,7 @@ const {
     getHelpMessage,
     handleStartCallback,
     BOT_USERNAME,
-} = require('./start-ui');
+} = require('./start-ui.cjs');
 
 const {
     searchMusic,
@@ -27,7 +27,7 @@ const {
     generateQueryId,
     storeMusicSearch,
     getMusicSearch,
-} = require('./music-search');
+} = require('./music-search.cjs');
 
 const {
     cacheVideo,
@@ -36,7 +36,7 @@ const {
     getCacheStats,
     updateUserStats,
     getUserStats,
-} = require('./database');
+} = require('./database.cjs');
 
 // ============================================================================
 // START COMMAND HANDLER
@@ -457,7 +457,7 @@ const setupCacheCommands = (bot) => {
             return;
         }
         
-        const { clearAllCache } = require('./database');
+        const { clearAllCache } = require('./database.cjs');
         clearAllCache();
         
         await ctx.reply('✅ Кэш очищен');
