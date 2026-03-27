@@ -128,25 +128,71 @@ const getYtDlpPath = () => {
     return 'yt-dlp';
 };
 
-const buildYtDlpArgs = (url, outputPath, format = 'best', userAgent) => [
-    '--no-check-certificates',
-    '--user-agent', userAgent || getRotatedUserAgent(),
-    '--geo-bypass',
-    '--prefer-insecure',
-    '--legacy-server-connect',
-    '--extractor-retries', '5',
-    '--socket-timeout', '30',
-    '--no-warnings',
-    '-f', format,
-    '--newline',
-    '-o', outputPath,
-    url,
-];
+const buildYtDlpArgs = (url, outputPath, format = 'best', userAgent) => {
+    const ua = userAgent || getRotatedUserAgent();
+    const args = [
+        '--no-check-certificates',
+        '--user-agent', ua,
+        '--geo-bypass',
+        '--prefer-insecure',
+        '--legacy-server-connect',
+        '--extractor-retries', '5',
+        '--socket-timeout', '30',
+        '--no-warnings',
+        '-f', format,
+        '--newline',
+        '-o', outputPath,
+    ];
+
+    // Add referer based on domain
+    try {
+        const domain = new URL(url).hostname;
+        args.push('--referer', `https://${domain}/`);
+    } catch {
+        args.push('--referer', url);
+    }
+
+    // Support cookies
+    const cookiesPath = path.join(__dirname, 'cookies.txt');
+    const rootCookiesPath = path.join(process.cwd(), 'cookies.txt');
+    
+    if (fs.existsSync(cookiesPath)) {
+        args.push('--cookies', cookiesPath);
+    } else if (fs.existsSync(rootCookiesPath)) {
+        args.push('--cookies', rootCookiesPath);
+    } else {
+        // Fallback: try to get cookies from common browsers if on local machine
+        // Note: This might not work on headless/server environments without proper setup
+        // args.push('--cookies-from-browser', 'chrome'); 
+    }
+
+    args.push(url);
+    return args;
+};
 
 const buildYtDlpInfoCommand = (url, userAgent) => {
     const ytcmd = getYtDlpPath();
     const ua = userAgent || getRotatedUserAgent();
-    return `${ytcmd} --dump-json --no-check-certificates --user-agent "${ua}" "${url}"`;
+    let cmd = `"${ytcmd}" --dump-json --no-check-certificates --user-agent "${ua}"`;
+    
+    // Add referer
+    try {
+        const domain = new URL(url).hostname;
+        cmd += ` --referer "https://${domain}/"`;
+    } catch {}
+
+    // Support cookies
+    const cookiesPath = path.join(__dirname, 'cookies.txt');
+    const rootCookiesPath = path.join(process.cwd(), 'cookies.txt');
+    
+    if (fs.existsSync(cookiesPath)) {
+        cmd += ` --cookies "${cookiesPath}"`;
+    } else if (fs.existsSync(rootCookiesPath)) {
+        cmd += ` --cookies "${rootCookiesPath}"`;
+    }
+
+    cmd += ` "${url}"`;
+    return cmd;
 };
 
 const safeJsonParse = (data, fallback) => {
@@ -356,6 +402,19 @@ const sniffWithPlaywright = async (url) => {
         }
         
         if (foundVideos.length === 0) {
+            // Instagram-specific login or overlay handling
+            if (url.includes('instagram.com')) {
+                const loginCloseBtn = await page.$('div[role="dialog"] button:has-text("Close")').catch(() => null);
+                if (loginCloseBtn) await loginCloseBtn.click().catch(() => {});
+                
+                // Try clicking the video to trigger playback if needed
+                const instagramVideo = await page.$('video').catch(() => null);
+                if (instagramVideo) {
+                    await instagramVideo.click().catch(() => {});
+                    await page.waitForTimeout(2000);
+                }
+            }
+
             const playSelectors = ['video', '.play-button', '[class*="play"]', '.vjs-big-play-button', '.jw-icon-display', '.plyr__control--overlaid'];
             for (const sel of playSelectors) {
                 try {
