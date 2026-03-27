@@ -150,7 +150,7 @@ const recognizeWithACRCloud = async (audioPath, apiKey = null) => {
 // MUSIC SEARCH WITH CACHING
 // ============================================================================
 
-const { cacheMusicSearch, getCachedMusicSearch } = require('./database');
+const { cacheMusicSearch, getCachedMusicSearch } = require('./database.cjs');
 
 /**
  * Search for music with caching

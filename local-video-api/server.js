@@ -502,6 +502,7 @@ const sniffWithPlaywright = async (url) => {
                 '--disable-web-security',
                 '--disable-features=IsolateOrigins,site-per-process',
                 '--allow-running-insecure-content',
+                '--disable-blink-features=AutomationControlled',
             ],
         });
         
@@ -514,8 +515,11 @@ const sniffWithPlaywright = async (url) => {
                 'Accept': '*/*',
                 'Accept-Language': 'en-US,en;q=0.9',
                 'Referer': url,
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Site': 'none',
             },
-            viewport: { width: 1280, height: 720 },
+            viewport: { width: 1920, height: 1080 },
         });
         
         const foundVideos = [];
@@ -523,12 +527,16 @@ const sniffWithPlaywright = async (url) => {
         const checkVideoUrl = (reqUrl, contentType = '') => {
             if (!reqUrl || reqUrl.startsWith('data:') || reqUrl.includes('advertisement')) return;
             
+            // Skip tracking/analytics URLs
+            if (reqUrl.includes('analytics') || reqUrl.includes('tracking') || reqUrl.includes('pixel')) return;
+            
             if (reqUrl.includes('.m3u8') || contentType.includes('mpegurl')) {
-                const isMaster = reqUrl.includes('master') || reqUrl.includes('index');
+                const isMaster = reqUrl.includes('master') || reqUrl.includes('index') || reqUrl.includes('playlist');
                 foundVideos.push({ url: reqUrl, type: 'm3u8', priority: isMaster ? 25 : 10 });
                 console.log('[Playwright] M3U8 found:', reqUrl.substring(0, 120));
             } else if (/\.mp4(\?|$|#)/i.test(reqUrl) || contentType.includes('video/mp4')) {
-                foundVideos.push({ url: reqUrl, type: 'mp4', priority: 20 });
+                const priority = reqUrl.includes('preview') || reqUrl.includes('thumb') ? 5 : 20;
+                foundVideos.push({ url: reqUrl, type: 'mp4', priority });
                 console.log('[Playwright] MP4 found:', reqUrl.substring(0, 120));
             } else if (/\.(webm|flv|ts|mkv|avi|mov)(\?|$|#)/i.test(reqUrl)) {
                 foundVideos.push({ url: reqUrl, type: 'video', priority: 5 });
@@ -537,6 +545,10 @@ const sniffWithPlaywright = async (url) => {
         };
         
         const page = await context.newPage();
+        
+        // Block unnecessary resources to speed up loading
+        await page.route('**/*.{png,jpg,jpeg,gif,svg,css,woff,woff2,ttf,eot}', route => route.abort());
+        
         page.on('response', async (response) => {
             try {
                 const reqUrl = response.url();

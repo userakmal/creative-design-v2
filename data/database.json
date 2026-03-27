@@ -1,0 +1,9 @@
+{
+  "cachedVideos": {},
+  "musicSearches": {},
+  "userStats": {},
+  "settings": {
+    "cacheExpiry": 604800000,
+    "maxCacheSize": 1000
+  }
+}
