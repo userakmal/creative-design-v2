@@ -10,8 +10,8 @@ async function testDownload() {
     // Test URLs
     const testCases = [
         {
-            name: 'YouTube (common)',
-            url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+            name: 'Instagram Reel',
+            url: 'https://www.instagram.com/reel/DWVbyIliop7/?igsh=MWhjeTZ2Z2U4NWhybA==',
             expectSuccess: true
         },
         {
@@ -30,7 +30,9 @@ async function testDownload() {
             const result = await downloadWithYtDlp(testCase.url);
             console.log('   ✅ SUCCESS');
             console.log(`   Title: ${result.title}`);
-            console.log(`   URL: ${result.url?.substring(0, 100) || 'N/A'}`);
+            console.log(`   URL: ${result.url?.substring(0, 100) || 'N/A'}...`);
+            console.log(`   Duration: ${result.duration || 'N/A'}s`);
+            console.log(`   Type: ${result.type}`);
         } catch (error) {
             console.log('   ❌ FAILED:', error.message);
             
@@ -38,7 +40,7 @@ async function testDownload() {
                 console.log('   Method 2: Playwright...');
                 const pwResult = await sniffWithPlaywright(testCase.url);
                 console.log('   ✅ SUCCESS');
-                console.log(`   URL: ${pwResult.url?.substring(0, 100) || 'N/A'}`);
+                console.log(`   URL: ${pwResult.url?.substring(0, 100) || 'N/A'}...`);
             } catch (pwError) {
                 console.log('   ❌ Playwright also failed:', pwError.message);
             }
