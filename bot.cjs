@@ -34,10 +34,6 @@ const {
     cacheDownloadedVideo,
 } = require('./advanced-features.cjs');
 
-const {
-    initWebsiteIntegration,
-} = require('./website-integration.cjs');
-
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
@@ -343,9 +339,6 @@ const bot = new Telegraf(CONFIG.BOT_TOKEN);
 // Advanced Features will handle /start command
 // Initialize advanced features (Start UI, Music Search, Smart Caching)
 initAdvancedFeatures(bot);
-
-// Initialize website integration (Templates & Music from config.ts)
-initWebsiteIntegration(bot);
 
 // Keep existing commands
 bot.command('myid', (ctx) => {
