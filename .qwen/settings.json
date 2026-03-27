@@ -4,7 +4,23 @@
       "Bash(curl *)",
       "Bash(netstat *)",
       "Bash(findstr *)",
-      "Bash(node *)"
+      "Bash(node *)",
+      "Bash(del *)",
+      "Bash(rmdir *)",
+      "Bash(mkdir *)",
+      "Bash(pip install *)",
+      "Bash(python *)",
+      "Bash(\"c:\\users\\acer\\appdata\\local\\programs\\python\\python312\\python.exe\" *)",
+      "Bash(tasklist)",
+      "Bash(\"c:\\program files\\git\\cmd\\git.exe\" *)",
+      "Bash(docker compose up *)",
+      "Bash(\"c:\\program files\\docker\\docker\\docker desktop.exe\")",
+      "Bash(powershell *)",
+      "Bash(\"c:\\program files\\docker\\docker\\resources\\bin\\docker.exe\" *)",
+      "Bash(taskkill *)",
+      "Bash(timeout *)",
+      "Bash(start *)",
+      "Bash(type *)"
     ]
   },
   "$version": 3
