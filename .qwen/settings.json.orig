@@ -6,6 +6,5 @@
       "Bash(findstr *)",
       "Bash(node *)"
     ]
-  },
-  "$version": 3
+  }
 }
