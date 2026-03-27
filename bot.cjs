@@ -22,6 +22,8 @@ const {
     isDirectVideo,
     getYtDlpPath,
     getRotatedUserAgent,
+    buildYtDlpArgs,
+    buildYtDlpInfoCommand,
     AUTHOR,
 } = require('./local-video-api/server');
 
@@ -31,6 +33,10 @@ const {
     getCachedOrMarkForCache,
     cacheDownloadedVideo,
 } = require('./advanced-features.cjs');
+
+const {
+    initWebsiteIntegration,
+} = require('./website-integration.cjs');
 
 // ============================================================================
 // CONFIGURATION
@@ -337,6 +343,9 @@ const bot = new Telegraf(CONFIG.BOT_TOKEN);
 // Advanced Features will handle /start command
 // Initialize advanced features (Start UI, Music Search, Smart Caching)
 initAdvancedFeatures(bot);
+
+// Initialize website integration (Templates & Music from config.ts)
+initWebsiteIntegration(bot);
 
 // Keep existing commands
 bot.command('myid', (ctx) => {
@@ -716,49 +725,12 @@ const downloadVideo = async (ctx, url, formatId = null, waitMsg, videoInfo = nul
         const ytcmd = getYtDlpPath();
         const userAgent = getRotatedUserAgent();
 
-        // Build yt-dlp arguments
-        const args = [
-            '--no-check-certificates',
-            '--user-agent', userAgent,
-            '--no-playlist',
-            '--geo-bypass',
-            '--no-continue',
-            '--force-overwrites',
-            '-o', outputPath,
-        ];
-
-        // Add format selection if specified
-        if (formatId) {
-            args.push('-f', `${formatId}+bestaudio[ext=m4a]/${formatId}`);
-            console.log(`[Download] Using format: ${formatId}`);
-        } else {
-            args.push('-f', 'best[ext=mp4]/best');
-        }
-
-        // Add referer
-        try {
-            const domain = new URL(url).hostname;
-            args.push('--referer', `https://${domain}/`);
-        } catch {
-            args.push('--referer', url);
-        }
-
-        // Cookie support
-        const cookiesPath = path.join(__dirname, 'cookies.txt');
-        const apiCookiesPath = path.join(__dirname, 'local-video-api', 'cookies.txt');
-
-        if (fs.existsSync(cookiesPath)) {
-            args.push('--cookies', cookiesPath);
-            console.log('[Download] Using cookies');
-        } else if (fs.existsSync(apiCookiesPath)) {
-            args.push('--cookies', apiCookiesPath);
-            console.log('[Download] Using cookies');
-        }
-
-        args.push(url);
-
+        // Build yt-dlp arguments using unified configuration from server.js
+        const args = buildYtDlpArgs(url, outputPath, formatId || 'best', userAgent);
+        
         console.log(`[Download] Starting: ${url.substring(0, 100)}...`);
         console.log(`[Download] Output: ${outputPath}`);
+        console.log(`[Download] Args: ${args.join(' ')}`);
 
         childProcess = spawn(ytcmd, args, {
             stdio: ['ignore', 'pipe', 'pipe'],

@@ -985,6 +985,8 @@ module.exports = {
     isDirectVideo,
     getYtDlpPath,
     getRotatedUserAgent,
+    buildYtDlpArgs,
+    buildYtDlpInfoCommand,
     AUTHOR,
 };
 
