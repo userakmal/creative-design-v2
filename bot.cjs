@@ -231,6 +231,19 @@ bot.command(['stats', 'stars'], (ctx) => {
     ctx.reply(`📊 Bot statistikasi:\n\n👥 Foydalanuvchilar: ${users.length} ta`);
 });
 
+bot.command('cookies', (ctx) => {
+    ctx.reply(
+        `🍪 <b>Instagram va ijtimoiy tarmoqlar uchun Cookies sozlash</b>\n\n` +
+        `Agar videolar yuklanmasa, quyidagi amallarni bajaring:\n\n` +
+        `1. Brauzeringizga (Chrome/Edge) <b>"Get cookies.txt LOCALLY"</b> kengaytmasini o'rnating.\n` +
+        `2. Instagram.com saytiga kiring va profilingizga kiring.\n` +
+        `3. Kengaytma orqali kukilarni <b>Netscape</b> formatida eksport qiling.\n` +
+        `4. Faylni <code>cookies.txt</code> deb nomlang va bot papkasiga tashlang.\n\n` +
+        `💡 Bu amallar botga sizning nomingizdan video ko'rish va yuklash imkonini beradi.`,
+        { parse_mode: 'HTML' }
+    );
+});
+
 bot.command('send', async (ctx) => {
     if (ctx.from.id !== CONFIG.ADMIN_ID) return;
     
@@ -323,8 +336,27 @@ bot.on('text', async (ctx, next) => {
             '--geo-bypass',
             '-f', 'best[ext=mp4]/best',
             '-o', outputPath,
-            downloadUrl,
         ];
+
+        // Add referer
+        try {
+            const domain = new URL(downloadUrl).hostname;
+            args.push('--referer', `https://${domain}/`);
+        } catch {
+            args.push('--referer', downloadUrl);
+        }
+
+        // Cookie support
+        const cookiesPath = path.join(__dirname, 'cookies.txt');
+        const apiCookiesPath = path.join(__dirname, 'local-video-api', 'cookies.txt');
+        
+        if (fs.existsSync(cookiesPath)) {
+            args.push('--cookies', cookiesPath);
+        } else if (fs.existsSync(apiCookiesPath)) {
+            args.push('--cookies', apiCookiesPath);
+        }
+
+        args.push(downloadUrl);
         
         console.log(`[Bot] Downloading: ${downloadUrl}`);
         childProcess = spawn(ytcmd, args);
@@ -382,7 +414,11 @@ bot.on('text', async (ctx, next) => {
                 cleanupDownloadArtifacts(outputPath);
                 
                 if (code !== null) {
-                    ctx.reply('❌ Videoni yuklab bo\'lmadi yoki havola yaroqsiz.');
+                    let failMsg = '❌ Videoni yuklab bo\'lmadi yoki havola yaroqsiz.';
+                    if (url.includes('instagram.com') || url.includes('tiktok.com')) {
+                        failMsg += '\n\n💡 Maslahat: Instagram va TikTok ba\'zan ruxsat (cookies) talab qiladi. /cookies buyrug\'ini ko\'ring.';
+                    }
+                    ctx.reply(failMsg);
                 } else {
                     ctx.reply('⚠️ Yuklash vaqti tugadi (Timeout).');
                 }
