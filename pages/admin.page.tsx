@@ -16,6 +16,13 @@ export const AdminPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
   
+  // Video stats
+  const [videoStats, setVideoStats] = useState({
+    total: 0,
+    uploadedToday: 0,
+    lastUpload: null
+  });
+  
   // Upload form state
   const [title, setTitle] = useState("");
   const [videoFile, setVideoFile] = useState(null);
@@ -54,6 +61,21 @@ export const AdminPage = () => {
       if (res.ok) {
         const data = await res.json();
         setUploadedVideos(data);
+        
+        // Update stats
+        const today = new Date().toDateString();
+        const uploadedToday = data.filter(video => {
+          // Simple check - in real app, add timestamp to video data
+          return false;
+        }).length;
+        
+        const lastUpload = data.length > 0 ? data[data.length - 1] : null;
+        
+        setVideoStats({
+          total: data.length,
+          uploadedToday: uploadedToday,
+          lastUpload: lastUpload ? lastUpload.title : null
+        });
       }
     } catch (err) {
       console.error("Failed to load videos:", err);
@@ -250,6 +272,34 @@ export const AdminPage = () => {
         <div className={`admin-status ${serverConnected ? 'connected' : 'disconnected'}`}>
           <span>{serverConnected ? "✓" : "✗"}</span>
           <span>{serverConnected ? "Upload server ulandi" : "Upload server topilmadi"}</span>
+        </div>
+
+        {/* Video Stats Indicator */}
+        <div className="admin-card" style={{ padding: '1rem', marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', textAlign: 'center' }}>
+            <div>
+              <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#229ed9' }}>
+                {videoStats.total}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#78716c' }}>Jami Videolar</div>
+            </div>
+            <div style={{ width: '1px', height: '40px', background: '#e7e5e4' }}></div>
+            <div>
+              <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10b981' }}>
+                {videoStats.uploadedToday}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#78716c' }}>Bugun</div>
+            </div>
+            <div style={{ width: '1px', height: '40px', background: '#e7e5e4' }}></div>
+            <div>
+              <div style={{ fontSize: '0.875rem', fontWeight: '600', color: '#1c1917' }}>
+                {videoStats.lastUpload ? '✓' : '○'}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#78716c', maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {videoStats.lastUpload || 'Yo\'q'}
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Message */}

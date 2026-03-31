@@ -78,6 +78,43 @@
   color: #991b1b;
 }
 
+.admin-video-indicator {
+  background: white;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid #f5f5f4;
+  margin-bottom: 1rem;
+}
+
+.video-stat-item {
+  text-align: center;
+}
+
+.video-stat-number {
+  font-size: 2rem;
+  font-weight: bold;
+  display: block;
+}
+
+.video-stat-label {
+  font-size: 0.75rem;
+  color: #78716c;
+}
+
+.video-stat-number.total {
+  color: #229ed9;
+}
+
+.video-stat-number.today {
+  color: #10b981;
+}
+
+.video-stat-divider {
+  width: 1px;
+  height: 40px;
+  background: #e7e5e4;
+}
+
 .admin-card {
   background: white;
   padding: 1.5rem;
