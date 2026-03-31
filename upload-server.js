@@ -294,7 +294,7 @@ app.post('/api/auto-download', async (req, res) => {
       return res.status(400).json({ error: 'URL kiriting' });
     }
     
-    console.log(`📥 Auto download started: ${url}`);
+    console.log(`[INFO] Auto download started: ${url}`);
     
     // Run Python script
     const scriptPath = path.join(__dirname, 'telegram-video-bot', 'auto_template_downloader.py');
@@ -304,8 +304,10 @@ app.post('/api/auto-download', async (req, res) => {
       return res.status(500).json({ error: 'Auto downloader script topilmadi' });
     }
     
-    // Execute Python script
-    const pythonProcess = spawn('python', [scriptPath, url]);
+    // Execute Python script with UTF-8 encoding
+    const pythonProcess = spawn('python', [scriptPath, url], {
+      env: { ...process.env, PYTHONIOENCODING: 'utf-8' }
+    });
     
     let output = '';
     let errorOutput = '';
@@ -322,13 +324,13 @@ app.post('/api/auto-download', async (req, res) => {
     
     pythonProcess.on('close', (code) => {
       if (code === 0) {
-        console.log('✅ Auto download completed');
+        console.log('[SUCCESS] Auto download completed');
         res.json({ 
           success: true, 
           message: 'Video muvaffaqiyatli yuklandi va templatesga qo\'shildi' 
         });
       } else {
-        console.error('❌ Auto download failed');
+        console.error('[ERROR] Auto download failed');
         res.status(500).json({ 
           error: 'Video yuklashda xatolik', 
           details: errorOutput 

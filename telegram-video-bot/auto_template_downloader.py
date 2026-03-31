@@ -1,5 +1,5 @@
 """
-Instagram Reels & YouTube Auto-Downloader
+Simple Instagram/YouTube Auto-Downloader
 Link orqali video yuklab, avtomatik templatesga qo'shadi
 """
 
@@ -7,25 +7,21 @@ import os
 import sys
 import json
 import requests
+import yt_dlp
 from pathlib import Path
-from downloader import VideoDownloader, VideoInfo
-from config import config
 
 # ============================================================================
 # CONFIGURATION
 # ============================================================================
 
-# Creative Design upload server
 UPLOAD_SERVER = "http://localhost:3001"
 UPLOAD_PASSWORD = "creative2026"
 
-# Output directory
 OUTPUT_DIR = Path(__file__).parent.parent / "public"
 VIDEOS_DIR = OUTPUT_DIR / "videos"
 IMAGES_DIR = OUTPUT_DIR / "image"
 DATA_FILE = OUTPUT_DIR / "data" / "videos.json"
 
-# Ensure directories exist
 VIDEOS_DIR.mkdir(parents=True, exist_ok=True)
 IMAGES_DIR.mkdir(parents=True, exist_ok=True)
 DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
@@ -38,47 +34,48 @@ class AutoTemplateDownloader:
     """Instagram/YouTube dan video yuklab, templatesga qo'shadi"""
     
     def __init__(self):
-        self.downloader = VideoDownloader()
         self.session = requests.Session()
         
     def download_from_url(self, url: str) -> dict:
-        """
-        Instagram Reels yoki YouTube dan video yuklash
-        """
-        print(f"\n📥 Yuklanmoqda: {url}")
+        """Instagram Reels yoki YouTube dan video yuklash"""
+        print(f"\n[INFO] Yuklanmoqda: {url}")
         
         try:
-            # Video ma'lumotlarini olish
-            video_info = self.downloader.get_video_info(url)
+            # Get video info with yt-dlp
+            ydl_opts = {
+                'format': 'best[ext=mp4]/best',
+                'quiet': True,
+                'no_warnings': True,
+                'noplaylist': True,
+                'extract_flat': False,
+            }
             
-            if not video_info:
-                return {"success": False, "error": "Video topilmadi"}
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(url, download=False)
+                
+                if not info:
+                    return {"success": False, "error": "Video topilmadi"}
+                
+                title = info.get('title', 'Unknown')
+                thumbnail = info.get('thumbnail', '')
+                video_url = info.get('url', url)
+                
+                print(f"✓ Topildi: {title}")
+                print(f"  Thumbnail: {thumbnail}")
             
-            print(f"✓ Topildi: {video_info.title}")
-            print(f"  Duration: {video_info.duration}")
-            print(f"  Thumbnail: {video_info.thumbnail}")
-            
-            # Video yuklash
-            video_path = self.downloader.download_video(url, output_dir=VIDEOS_DIR)
-            
-            if not video_path:
-                return {"success": False, "error": "Video yuklashda xatolik"}
-            
+            # Download video
+            video_path = self._download_video(video_url, title)
             print(f"✓ Video yuklandi: {video_path}")
             
-            # Thumbnail yuklash
+            # Download thumbnail
             thumbnail_path = None
-            if video_info.thumbnail and video_info.thumbnail.startswith('http'):
-                thumbnail_path = self.download_thumbnail(
-                    video_info.thumbnail, 
-                    video_info.title,
-                    IMAGES_DIR
-                )
+            if thumbnail:
+                thumbnail_path = self._download_thumbnail(thumbnail, title)
                 print(f"✓ Thumbnail yuklandi: {thumbnail_path}")
             
-            # Templatesga qo'shish
-            result = self.add_to_templates(
-                title=video_info.title,
+            # Add to templates
+            result = self._add_to_templates(
+                title=title,
                 video_path=video_path,
                 image_path=thumbnail_path
             )
@@ -88,41 +85,44 @@ class AutoTemplateDownloader:
         except Exception as e:
             return {"success": False, "error": str(e)}
     
-    def download_thumbnail(self, url: str, title: str, output_dir: Path) -> str:
-        """Thumbnail ni yuklash"""
-        try:
-            response = requests.get(url, timeout=10)
-            response.raise_for_status()
-            
-            # Filename yaratish
-            safe_title = self.sanitize_filename(title)
-            filename = f"i_{safe_title}.jpg"
-            filepath = output_dir / filename
-            
-            # Save
-            with open(filepath, 'wb') as f:
-                f.write(response.content)
-            
-            return str(filepath)
-            
-        except Exception as e:
-            print(f"⚠️ Thumbnail yuklashda xatolik: {e}")
-            return None
+    def _download_video(self, url: str, title: str) -> str:
+        """Video yuklash"""
+        safe_title = self._sanitize_filename(title)
+        filename = f"v_{safe_title}.mp4"
+        filepath = VIDEOS_DIR / filename
+        
+        # Download with requests
+        response = requests.get(url, stream=True, timeout=30)
+        response.raise_for_status()
+        
+        with open(filepath, 'wb') as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+        
+        return str(filepath)
     
-    def add_to_templates(self, title: str, video_path: str, image_path: str = None) -> dict:
-        """
-        Videoni templatesga qo'shish
-        Upload server API orqali
-        """
-        # Fayl nomlarini tayyorlash
+    def _download_thumbnail(self, url: str, title: str) -> str:
+        """Thumbnail yuklash"""
+        safe_title = self._sanitize_filename(title)
+        filename = f"i_{safe_title}.jpg"
+        filepath = IMAGES_DIR / filename
+        
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        
+        with open(filepath, 'wb') as f:
+            f.write(response.content)
+        
+        return str(filepath)
+    
+    def _add_to_templates(self, title: str, video_path: str, image_path: str = None) -> dict:
+        """Videoni templatesga qo'shish"""
         video_filename = Path(video_path).name
         image_filename = Path(image_path).name if image_path else None
         
-        # URL lar
         video_url = f"/videos/{video_filename}"
         image_url = f"/image/{image_filename}" if image_filename else "/image/default.jpg"
         
-        # Upload serverga yuborish
         upload_url = f"{UPLOAD_SERVER}/api/upload"
         
         files = {}
@@ -131,10 +131,8 @@ class AutoTemplateDownloader:
             'password': UPLOAD_PASSWORD
         }
         
-        # Video fayl
         files['video'] = open(video_path, 'rb')
         
-        # Image fayl
         if image_path and os.path.exists(image_path):
             files['image'] = open(image_path, 'rb')
         
@@ -155,45 +153,16 @@ class AutoTemplateDownloader:
         except Exception as e:
             return {"success": False, "error": f"Upload error: {str(e)}"}
         finally:
-            # Close files
             for f in files.values():
                 f.close()
     
-    def sanitize_filename(self, filename: str) -> str:
+    def _sanitize_filename(self, filename: str) -> str:
         """Fayl nomini tozalash"""
-        # Maxsus belgilarni olib tashlash
+        import time
         sanitized = filename
         for char in ['/', '\\', '?', '%', '*', ':', '|', '"', '<', '>', '.']:
             sanitized = sanitized.replace(char, '-')
-        return sanitized[:50]  # 50 belgigacha
-    
-    def add_from_json(self, json_file: str):
-        """
-        JSON fayldan linklarni o'qib, avtomatik yuklash
-        """
-        with open(json_file, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        
-        urls = data.get('urls', [])
-        
-        print(f"📋 {len(urls)} ta link topildi")
-        
-        results = []
-        for i, url in enumerate(urls, 1):
-            print(f"\n[{i}/{len(urls)}] {url}")
-            result = self.download_from_url(url)
-            results.append(result)
-            
-            # 2 soniya kutish (rate limit)
-            if i < len(urls):
-                import time
-                time.sleep(2)
-        
-        # Natija
-        success_count = sum(1 for r in results if r.get('success'))
-        print(f"\n✅ Tayyor! {success_count}/{len(urls)} ta video yuklandi")
-        
-        return results
+        return f"{int(time.time())}_{sanitized[:30]}"
 
 # ============================================================================
 # QUICK FUNCTIONS
@@ -209,11 +178,6 @@ def download_youtube(url: str) -> dict:
     downloader = AutoTemplateDownloader()
     return downloader.download_from_url(url)
 
-def download_batch(json_file: str) -> list:
-    """JSON fayldan bir nechta video yuklash"""
-    downloader = AutoTemplateDownloader()
-    return downloader.add_from_json(json_file)
-
 # ============================================================================
 # CLI INTERFACE
 # ============================================================================
@@ -225,26 +189,25 @@ if __name__ == "__main__":
     print()
     
     if len(sys.argv) > 1:
-        # Command line argument
         url = sys.argv[1]
         
-        if url.endswith('.json'):
-            # JSON batch mode
-            print(f"📋 JSON mode: {url}")
-            results = download_batch(url)
+        print(f"[INFO] URL: {url}")
+        
+        if 'instagram' in url.lower():
+            result = download_reel(url)
+        elif 'youtube' in url.lower() or 'youtu.be' in url.lower():
+            result = download_youtube(url)
         else:
-            # Single URL mode
-            print(f"📥 URL: {url}")
-            result = download_reel(url) if 'instagram' in url else download_youtube(url)
-            
-            if result.get('success'):
-                print("\n✅ MUVAFFAQIYAT!")
-            else:
-                print(f"\n❌ XATOLIK: {result.get('error')}")
+            result = download_reel(url)
+        
+        if result.get('success'):
+            print("\n[SUCCESS] Video templatesga qo'shildi")
+            print(f"   URL: http://localhost:5173/templates")
+        else:
+            print(f"\n[ERROR] XATOLIK: {result.get('error')}")
     else:
-        # Interactive mode
         print("Instagram Reels yoki YouTube linkini kiriting:")
-        print("(yoki 'batch' deb yozing JSON fayl uchun)")
+        print("(yoki 'exit' deb yozing chiqish uchun)")
         print()
         
         while True:
@@ -254,30 +217,21 @@ if __name__ == "__main__":
                 if url.lower() == 'exit':
                     break
                 
-                if url.lower() == 'batch':
-                    json_file = input("JSON fayl nomi: ").strip()
-                    if os.path.exists(json_file):
-                        download_batch(json_file)
-                    else:
-                        print("❌ Fayl topilmadi!")
-                    continue
-                
                 if not url:
                     continue
                 
-                # Download
                 if 'instagram' in url.lower():
                     result = download_reel(url)
                 elif 'youtube' in url.lower() or 'youtu.be' in url.lower():
                     result = download_youtube(url)
                 else:
-                    result = download_reel(url)  # Try anyway
+                    result = download_reel(url)
                 
                 if result.get('success'):
-                    print("\n✅ MUVAFFAQIYAT! Video templatesga qo'shildi")
+                    print("\n[SUCCESS] Video templatesga qo'shildi")
                     print(f"   URL: http://localhost:5173/templates")
                 else:
-                    print(f"\n❌ XATOLIK: {result.get('error')}")
+                    print(f"\n[ERROR] XATOLIK: {result.get('error')}")
                 
                 print("\n" + "=" * 60)
                 print("Keyingi linkni kiriting (yoki 'exit'):")
@@ -286,4 +240,4 @@ if __name__ == "__main__":
                 print("\n\nTo'xtatildi")
                 break
             except Exception as e:
-                print(f"\n❌ Xatolik: {e}")
+                print(f"\n[ERROR] Xatolik: {e}")
