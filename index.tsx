@@ -25,23 +25,31 @@ const fetchVideos = async () => {
     // Try upload server first
     const response = await fetch("http://localhost:3001/data/videos.json");
     if (response.ok) {
-      return await response.json();
+      const data = await response.json();
+      console.log('✅ Upload server videos loaded:', data.length);
+      return data;
     }
   } catch (err) {
-    console.log("Upload server not available, trying Vite...");
+    console.log("⚠ Upload server not available, trying Vite...");
   }
-  
+
   // Fallback to Vite
   try {
     const res = await fetch("/data/videos.json");
-    if (res.ok) return await res.json();
+    if (res.ok) {
+      const data = await res.json();
+      console.log('✅ Vite videos loaded:', data.length);
+      return data;
+    }
   } catch (err) {
-    console.error("Could not load videos from Vite:", err);
+    console.error("⚠ Could not load videos from Vite:", err);
   }
-  
+
+  console.log('ℹ️ No additional videos found, using config only');
   return [];
 };
 
+// Load videos and render app
 fetchVideos()
   .then((data) => {
     if (Array.isArray(data) && data.length > 0) {
@@ -51,12 +59,17 @@ fetchVideos()
         image: video.image.startsWith('http') ? video.image : `http://localhost:3001${video.image}`,
         videoUrl: video.videoUrl.startsWith('http') ? video.videoUrl : `http://localhost:3001${video.videoUrl}`
       }));
-      
+
       // Append the newly uploaded online videos to the end of the config
       config.videos.push(...rewrittenData);
+      console.log('✅ Total videos:', config.videos.length);
     }
+    
+    // Render the app
+    renderApp();
   })
-  .catch((err) => console.error("Could not load dynamic videos:", err))
-  .finally(() => {
+  .catch((err) => {
+    console.error("❌ Error loading videos:", err);
+    // Render anyway even if videos fail to load
     renderApp();
   });

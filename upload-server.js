@@ -4,6 +4,7 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import { spawn } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -275,6 +276,68 @@ app.put('/api/videos/:id', (req, res) => {
     });
   } catch (error) {
     console.error('Update error:', error);
+    res.status(500).json({ error: error.message || 'Serverda xatolik yuz berdi' });
+  }
+});
+
+// Auto Download from Instagram/YouTube endpoint
+app.post('/api/auto-download', async (req, res) => {
+  try {
+    const { url, password } = req.body;
+    
+    // Check password
+    if (password !== 'creative2026') {
+      return res.status(401).json({ error: 'Parol noto\'g\'ri' });
+    }
+    
+    if (!url || !url.trim()) {
+      return res.status(400).json({ error: 'URL kiriting' });
+    }
+    
+    console.log(`📥 Auto download started: ${url}`);
+    
+    // Run Python script
+    const scriptPath = path.join(__dirname, 'telegram-video-bot', 'auto_template_downloader.py');
+    
+    // Check if script exists
+    if (!fs.existsSync(scriptPath)) {
+      return res.status(500).json({ error: 'Auto downloader script topilmadi' });
+    }
+    
+    // Execute Python script
+    const pythonProcess = spawn('python', [scriptPath, url]);
+    
+    let output = '';
+    let errorOutput = '';
+    
+    pythonProcess.stdout.on('data', (data) => {
+      output += data.toString();
+      console.log(data.toString());
+    });
+    
+    pythonProcess.stderr.on('data', (data) => {
+      errorOutput += data.toString();
+      console.error(data.toString());
+    });
+    
+    pythonProcess.on('close', (code) => {
+      if (code === 0) {
+        console.log('✅ Auto download completed');
+        res.json({ 
+          success: true, 
+          message: 'Video muvaffaqiyatli yuklandi va templatesga qo\'shildi' 
+        });
+      } else {
+        console.error('❌ Auto download failed');
+        res.status(500).json({ 
+          error: 'Video yuklashda xatolik', 
+          details: errorOutput 
+        });
+      }
+    });
+    
+  } catch (error) {
+    console.error('Auto download error:', error);
     res.status(500).json({ error: error.message || 'Serverda xatolik yuz berdi' });
   }
 });
