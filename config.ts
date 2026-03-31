@@ -334,13 +334,13 @@ export const config = {
     {
       id: 54,
       title: "dizayn 54",
-      image: "/image/i54.jpg",
+      image: "/image/i_1774939309113-867752366.jpg",
       videoUrl: "/videos/2f691cdc_Video by thetriointransit.mp4",
     },
     {
       id: 55,
       title: "dizayn 55",
-      image: "/image/i55.jpg",
+      image: "/image/i_1774947920422-293043772.jpg",
       videoUrl: "/videos/dab71539_Video by thetriointransit.mp4",
     },
   ],
