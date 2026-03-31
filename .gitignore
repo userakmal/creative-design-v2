@@ -63,6 +63,9 @@ telegram-video-bot/downloads/*.part
 telegram-video-bot/downloads/*.ytdl
 telegram-video-bot/downloads/hls_*/
 
+# Sensitive files
+cookies.txt
+
 # Cache
 .cache/
 *.cache
