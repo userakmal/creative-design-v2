@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { UploadCloud, Image as ImageIcon, Video, Save, CheckCircle2, ArrowLeft, WifiOff, Wifi } from "lucide-react";
+import { UploadCloud, Image as ImageIcon, Video, Save, CheckCircle2, ArrowLeft, WifiOff, Wifi, Trash2, Film, RefreshCw, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+
+interface UploadedVideo {
+  id: number;
+  title: string;
+  image: string;
+  videoUrl: string;
+}
+
+// Use production URL or localhost
+const SERVER_URL = window.location.hostname === 'creative-design.uz' 
+  ? 'https://creative-design.uz' 
+  : 'http://localhost:3001';
 
 export const AdminPage: React.FC = () => {
   const navigate = useNavigate();
@@ -17,13 +29,22 @@ export const AdminPage: React.FC = () => {
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
 
+  // Uploaded videos state
+  const [uploadedVideos, setUploadedVideos] = useState<UploadedVideo[]>([]);
+  const [isLoadingVideos, setIsLoadingVideos] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [actionMessage, setActionMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
+
   // Check server connection on mount
   useEffect(() => {
     const checkServer = async () => {
       try {
-        const response = await fetch("http://localhost:3001/api/health");
+        const response = await fetch(`${SERVER_URL}/api/health`);
         if (response.ok) {
           setServerConnected(true);
+          loadUploadedVideos();
         } else {
           setServerConnected(false);
         }
@@ -31,11 +52,103 @@ export const AdminPage: React.FC = () => {
         setServerConnected(false);
       }
     };
-    
+
     checkServer();
     const interval = setInterval(checkServer, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  // Load uploaded videos
+  const loadUploadedVideos = async () => {
+    setIsLoadingVideos(true);
+    try {
+      const response = await fetch(`${SERVER_URL}/api/videos`);
+      if (response.ok) {
+        const videos = await response.json();
+        setUploadedVideos(videos);
+      }
+    } catch (err) {
+      console.error("Failed to load videos:", err);
+    } finally {
+      setIsLoadingVideos(false);
+    }
+  };
+
+  // Delete video
+  const handleDelete = async (id: number, title: string) => {
+    if (!confirm(`"${title}" ni o'chirmoqchimisiz? Bu amalni qaytarib bo'lmaydi!`)) {
+      return;
+    }
+
+    setDeletingId(id);
+    try {
+      const response = await fetch(`${SERVER_URL}/api/videos/${id}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "O'chirishda xatolik");
+      }
+
+      // Remove from list
+      setUploadedVideos(prev => prev.filter(v => v.id !== id));
+      setActionMessage({ type: 'success', text: 'Video o\'chirildi!' });
+      setTimeout(() => setActionMessage(null), 3000);
+    } catch (err: any) {
+      console.error(err);
+      setActionMessage({ type: 'error', text: err.message || "Server bilan ulanishda xato" });
+      setTimeout(() => setActionMessage(null), 3000);
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  // Rename video
+  const handleRename = (video: UploadedVideo) => {
+    setEditingId(video.id);
+    setEditTitle(video.title);
+  };
+
+  const handleSaveRename = async (id: number) => {
+    if (!editTitle.trim()) {
+      setActionMessage({ type: 'error', text: 'Nom kiritish kerak' });
+      setTimeout(() => setActionMessage(null), 3000);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${SERVER_URL}/api/videos/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: editTitle }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "O'zgartirishda xatolik");
+      }
+
+      // Update in list
+      setUploadedVideos(prev => prev.map(v => 
+        v.id === id ? { ...v, title: editTitle.trim() } : v
+      ));
+      setEditingId(null);
+      setActionMessage({ type: 'success', text: 'Nom o\'zgartirildi!' });
+      setTimeout(() => setActionMessage(null), 3000);
+    } catch (err: any) {
+      console.error(err);
+      setActionMessage({ type: 'error', text: err.message || "Server bilan ulanishda xato" });
+      setTimeout(() => setActionMessage(null), 3000);
+    }
+  };
+
+  const handleCancelRename = () => {
+    setEditingId(null);
+    setEditTitle("");
+  };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,7 +179,7 @@ export const AdminPage: React.FC = () => {
 
     try {
       // Use the Node.js upload server
-      const response = await fetch("http://localhost:3001/api/upload", {
+      const response = await fetch(`${SERVER_URL}/api/upload`, {
         method: "POST",
         body: formData,
       });
@@ -250,6 +363,130 @@ export const AdminPage: React.FC = () => {
               {isUploading ? "Yuklanmoqda..." : "Videoni Yuklash va Saqlash"}
             </button>
           </form>
+        </div>
+
+        {/* Uploaded Videos List */}
+        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-stone-100 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-base sm:text-lg font-serif font-bold text-stone-800 flex items-center gap-2">
+              <Film size={20} className="text-[#229ED9]" />
+              Yuklangan Videolar
+            </h3>
+            <button
+              onClick={loadUploadedVideos}
+              className="text-xs text-[#229ED9] hover:text-[#1c81b4] font-medium flex items-center gap-1"
+            >
+              <RefreshCw size={14} className={isLoadingVideos ? "animate-spin" : ""} />
+              <span className="hidden sm:inline">Yangilash</span>
+            </button>
+          </div>
+
+          {/* Action Message */}
+          {actionMessage && (
+            <div className={`mb-4 p-3 rounded-xl text-sm flex items-center gap-2 ${
+              actionMessage.type === 'success' 
+                ? 'bg-green-50 text-green-700 border border-green-100' 
+                : 'bg-red-50 text-red-600 border border-red-100'
+            }`}>
+              {actionMessage.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+              {actionMessage.text}
+            </div>
+          )}
+
+          {isLoadingVideos ? (
+            <div className="flex items-center justify-center py-8 text-stone-400">
+              <div className="w-6 h-6 border-2 border-stone-300 border-t-[#229ED9] rounded-full animate-spin" />
+            </div>
+          ) : uploadedVideos.length === 0 ? (
+            <p className="text-sm text-stone-400 text-center py-6">
+              Hozircha yuklangan videolar yo'q
+            </p>
+          ) : (
+            <div className="space-y-2 max-h-[500px] overflow-y-auto">
+              {uploadedVideos.map((video) => (
+                <div
+                  key={video.id}
+                  className="flex items-center gap-3 p-3 bg-stone-50 rounded-xl border border-stone-100 hover:border-[#229ED9]/30 transition-all"
+                >
+                  <img
+                    src={`${SERVER_URL}${video.image}`}
+                    alt={video.title}
+                    className="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded-lg flex-shrink-0"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24'%3E%3Crect fill='%23e5e5e5' width='24' height='24'/%3E%3Ctext fill='%23999' x='50%25' y='50%25' text-anchor='middle' dy='.3em' font-size='4'%3E?%3C/text%3E%3C/svg%3E";
+                    }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    {editingId === video.id ? (
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={editTitle}
+                          onChange={(e) => setEditTitle(e.target.value)}
+                          className="flex-1 px-2 py-1 text-sm border border-[#229ED9] rounded focus:outline-none"
+                          autoFocus
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleSaveRename(video.id);
+                            if (e.key === 'Escape') handleCancelRename();
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <p className="font-medium text-stone-800 text-sm truncate">
+                        {video.title}
+                      </p>
+                    )}
+                    <p className="text-xs text-stone-400">
+                      ID: {video.id}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    {editingId === video.id ? (
+                      <>
+                        <button
+                          onClick={() => handleSaveRename(video.id)}
+                          className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                          title="Saqlash"
+                        >
+                          <Save size={18} />
+                        </button>
+                        <button
+                          onClick={handleCancelRename}
+                          className="p-2 text-stone-400 hover:bg-stone-100 rounded-lg transition-colors"
+                          title="Bekor qilish"
+                        >
+                          <ArrowLeft size={18} />
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => handleRename(video)}
+                          disabled={deletingId === video.id}
+                          className="p-2 text-[#229ED9] hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50"
+                          title="Nomini o'zgartirish"
+                        >
+                          <Save size={18} className="rotate-45" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(video.id, video.title)}
+                          disabled={deletingId === video.id || editingId !== null}
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                          title="O'chirish"
+                        >
+                          {deletingId === video.id ? (
+                            <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <Trash2 size={18} />
+                          )}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

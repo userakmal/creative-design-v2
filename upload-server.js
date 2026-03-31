@@ -172,6 +172,113 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Upload server is running' });
 });
 
+// Get all videos endpoint
+app.get('/api/videos', (req, res) => {
+  try {
+    const dataFile = path.join(__dirname, 'public', 'data', 'videos.json');
+    if (!fs.existsSync(dataFile)) {
+      return res.json([]);
+    }
+    const content = fs.readFileSync(dataFile, 'utf-8');
+    const videos = JSON.parse(content);
+    res.json(videos);
+  } catch (error) {
+    console.error('Error reading videos:', error);
+    res.status(500).json({ error: 'Failed to read videos' });
+  }
+});
+
+// Delete video endpoint
+app.delete('/api/videos/:id', (req, res) => {
+  try {
+    const videoId = parseInt(req.params.id);
+    const dataFile = path.join(__dirname, 'public', 'data', 'videos.json');
+    
+    if (!fs.existsSync(dataFile)) {
+      return res.status(404).json({ error: 'Videos file not found' });
+    }
+    
+    const content = fs.readFileSync(dataFile, 'utf-8');
+    let videos = JSON.parse(content);
+    
+    // Find the video to delete
+    const videoIndex = videos.findIndex(v => v.id === videoId);
+    if (videoIndex === -1) {
+      return res.status(404).json({ error: 'Video not found' });
+    }
+    
+    const video = videos[videoIndex];
+    
+    // Delete video file
+    const videoPath = path.join(__dirname, 'public', 'videos', path.basename(video.videoUrl));
+    if (fs.existsSync(videoPath)) {
+      fs.unlinkSync(videoPath);
+      console.log(`Deleted video file: ${videoPath}`);
+    }
+    
+    // Delete image file
+    const imagePath = path.join(__dirname, 'public', 'image', path.basename(video.image));
+    if (fs.existsSync(imagePath)) {
+      fs.unlinkSync(imagePath);
+      console.log(`Deleted image file: ${imagePath}`);
+    }
+    
+    // Remove from videos array
+    videos.splice(videoIndex, 1);
+    
+    // Save updated videos array
+    fs.writeFileSync(dataFile, JSON.stringify(videos, null, 2), 'utf-8');
+    
+    console.log(`Video deleted: ${video.title} (ID: ${videoId})`);
+    res.json({ success: true, message: 'Video o\'chirildi', deletedId: videoId });
+  } catch (error) {
+    console.error('Delete error:', error);
+    res.status(500).json({ error: error.message || 'Serverda xatolik yuz berdi' });
+  }
+});
+
+// Rename/Update video endpoint
+app.put('/api/videos/:id', (req, res) => {
+  try {
+    const videoId = parseInt(req.params.id);
+    const { title } = req.body;
+    const dataFile = path.join(__dirname, 'public', 'data', 'videos.json');
+    
+    if (!fs.existsSync(dataFile)) {
+      return res.status(404).json({ error: 'Videos file not found' });
+    }
+    
+    if (!title || title.trim() === '') {
+      return res.status(400).json({ error: 'Nom kiritish kerak' });
+    }
+    
+    const content = fs.readFileSync(dataFile, 'utf-8');
+    let videos = JSON.parse(content);
+    
+    // Find the video
+    const videoIndex = videos.findIndex(v => v.id === videoId);
+    if (videoIndex === -1) {
+      return res.status(404).json({ error: 'Video not found' });
+    }
+    
+    // Update title
+    videos[videoIndex].title = title.trim();
+    
+    // Save updated videos array
+    fs.writeFileSync(dataFile, JSON.stringify(videos, null, 2), 'utf-8');
+    
+    console.log(`Video renamed: ${videoId} - ${title}`);
+    res.json({ 
+      success: true, 
+      message: 'Nom o\'zgartirildi', 
+      data: videos[videoIndex] 
+    });
+  } catch (error) {
+    console.error('Update error:', error);
+    res.status(500).json({ error: error.message || 'Serverda xatolik yuz berdi' });
+  }
+});
+
 // Serve static files from public directory
 app.use('/videos', express.static(path.join(__dirname, 'public', 'videos')));
 app.use('/image', express.static(path.join(__dirname, 'public', 'image')));
