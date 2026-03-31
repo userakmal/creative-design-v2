@@ -331,6 +331,18 @@ export const config = {
       image: "/image/i_1774973155_Video by creative_designuz.jpg",
       videoUrl: "/videos/v_1774973154_Video by creative_designuz.mp4",
     },
+    {
+      id: 54,
+      title: "dizayn 54",
+      image: "/image/i54.jpg",
+      videoUrl: "/videos/2f691cdc_Video by thetriointransit.mp4",
+    },
+    {
+      id: 55,
+      title: "dizayn 55",
+      image: "/image/i55.jpg",
+      videoUrl: "/videos/dab71539_Video by thetriointransit.mp4",
+    },
   ],
 
   // 4. MUSIQALAR RO'YXATI (Stable Pixabay Links)

@@ -50,11 +50,18 @@ logs/
 *.sqlite
 *.sqlite3
 
-# Uploads
-public/videos/*
-public/image/*
-!public/videos/.gitkeep
-!public/image/.gitkeep
+# Uploads - track these files
+!public/videos/*.mp4
+!public/image/*.jpg
+!public/music/*
+!public/logo/*
+!public/data/*.json
+
+# Telegram bot downloads (ignore all downloads folder)
+telegram-video-bot/downloads/*.mp4
+telegram-video-bot/downloads/*.part
+telegram-video-bot/downloads/*.ytdl
+telegram-video-bot/downloads/hls_*/
 
 # Cache
 .cache/
