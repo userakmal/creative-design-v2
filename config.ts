@@ -301,48 +301,6 @@ export const config = {
       image: "/image/i48.jpg",
       videoUrl: "/videos/v48.mp4",
     },
-    {
-      id: 49,
-      title: "dizayn 49",
-      image: "/image/i_1774939309113-867752366.jpg",
-      videoUrl: "/videos/v_1774939309069-911080865.mp4",
-    },
-    {
-      id: 50,
-      title: "dizayn 50",
-      image: "/image/i_1774958534335-780080446.jpg",
-      videoUrl: "/videos/v_1774958534294-478781370.mp4",
-    },
-    {
-      id: 51,
-      title: "dizayn 51",
-      image: "/image/i_1774973155754-89052392.jpg",
-      videoUrl: "/videos/v_1774973155751-103308732.mp4",
-    },
-    {
-      id: 52,
-      title: "dizayn 52",
-      image: "/image/i_1774947920422-293043772.jpg",
-      videoUrl: "/videos/v_1774947920397-12801377.mp4",
-    },
-    {
-      id: 53,
-      title: "dizayn 53",
-      image: "/image/i_1774973155_Video by creative_designuz.jpg",
-      videoUrl: "/videos/v_1774973154_Video by creative_designuz.mp4",
-    },
-    {
-      id: 54,
-      title: "dizayn 54",
-      image: "/image/i_1774939309113-867752366.jpg",
-      videoUrl: "/videos/2f691cdc_Video by thetriointransit.mp4",
-    },
-    {
-      id: 55,
-      title: "dizayn 55",
-      image: "/image/i_1774947920422-293043772.jpg",
-      videoUrl: "/videos/dab71539_Video by thetriointransit.mp4",
-    },
   ],
 
   // 4. MUSIQALAR RO'YXATI (Stable Pixabay Links)
