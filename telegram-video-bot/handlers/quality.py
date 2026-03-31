@@ -18,7 +18,7 @@ from loguru import logger
 import yt_dlp
 
 from locales import get_text
-from downloader import VideoDownloader, VideoInfo, DownloadTask, get_browser_cookies
+from downloader import VideoDownloader, VideoInfo, DownloadTask, get_ytdlp_cookies
 from database import SQLiteCache, hash_url
 from utils import format_file_size, format_duration, truncate_text
 
@@ -63,7 +63,7 @@ async def extract_available_resolutions(url: str) -> List[str]:
             "no_warnings": True,
             "extract_flat": False,
             "noplaylist": True,
-            **get_browser_cookies(),
+            **get_ytdlp_cookies(),
         }
         with yt_dlp.YoutubeDL(opts) as ydl:
             info = ydl.extract_info(url, download=False)
@@ -172,67 +172,7 @@ async def show_quality_selection(
     logger.debug(f"Available resolutions: {resolutions}")
 
 
-@quality_router.callback_query(F.data.startswith("res_"))
-async def handle_quality_selection(
-    callback_query: CallbackQuery,
-    state,
-) -> None:
-    """
-    Handle quality selection callback.
-    CRITICAL: Resolution tag only (res_360, res_720, etc.) - dynamically builds format string.
-    """
-    user_id = callback_query.from_user.id
-    callback_data = callback_query.data
-
-    # Parse callback data: res_<resolution>
-    if not callback_data.startswith("res_"):
-        await callback_query.answer("❌ Invalid selection", show_alert=True)
-        return
-
-    resolution = callback_data.replace("res_", "")
-
-    if resolution == "cancel":
-        await callback_query.message.delete()
-        await callback_query.answer("Cancelled")
-        return
-
-    # Validate resolution
-    if resolution not in QUALITY_OPTIONS:
-        await callback_query.answer("❌ Invalid quality", show_alert=True)
-        return
-
-    quality_label = QUALITY_OPTIONS[resolution]["label"]
-
-    # Acknowledge
-    await callback_query.answer(f"⏳ Downloading {quality_label}...")
-
-    # Update message to show progress
-    progress_text = get_text(
-        "downloading_selected_quality",
-        user_id,
-        quality=quality_label.upper()
-    )
-    await callback_query.message.edit_text(progress_text)
-
-    # Get the URL from user data or re-extract
-    # For simplicity, we need to store URL somewhere - using FSM or inline query
-    # Since we can't pass URL in callback, we need a different approach
-    # Let's store in task.extra via a temporary cache
-    
-    logger.info(f"User {user_id} selected resolution: {resolution} ({quality_label})")
-    
-    # For now, send a message asking user to resend the URL with quality info
-    # This is a limitation of Telegram's 64-byte callback limit
-    # Better approach: Store URL in a temporary dict/cache keyed by user_id
-    
-    await callback_query.message.answer(
-        f"⚠️ <b>Quality Selected: {quality_label}</b>\n\n"
-        f"Please send the YouTube URL again to download in {quality_label} quality.\n\n"
-        f"<i>(Due to Telegram's callback limitations, we need the URL separately)</i>"
-    )
-
-
-# Alternative approach: Store URL in a temporary cache per user
+# URL cache per user — stores URL for quality selection callback
 _quality_selection_cache: Dict[int, dict] = {}
 
 

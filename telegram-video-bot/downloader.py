@@ -47,13 +47,6 @@ class AudioExtractionError(Exception):
     pass
 
 
-def get_browser_cookies():
-    """
-    Get browser cookies for yt-dlp.
-    Returns empty dict as we use static cookies.txt file.
-    """
-    return {}
-
 
 # ============================================================================
 # Configuration

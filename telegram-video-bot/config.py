@@ -107,13 +107,14 @@ class Config:
         # Create necessary directories
         Path(self.downloader.DOWNLOAD_DIR).mkdir(parents=True, exist_ok=True)
 
-        # Validate file size based on API server configuration
-        if self.bot.TELEGRAM_API_SERVER:
-            if self.downloader.MAX_FILE_SIZE > 4294967296:  # 4GB
-                raise ValueError("MAX_FILE_SIZE cannot exceed 4GB")
-        else:
+        # Log warning about file size limits (don't crash)
+        if not self.bot.TELEGRAM_API_SERVER:
             if self.downloader.MAX_FILE_SIZE > 52428800:  # 50MB
-                raise ValueError("MAX_FILE_SIZE cannot exceed 50MB without Local API Server")
+                import logging
+                logging.warning(
+                    "MAX_FILE_SIZE > 50MB but no TELEGRAM_API_SERVER configured. "
+                    "Uploads > 50MB will fail via standard Telegram API."
+                )
 
 
 # Global configuration instance

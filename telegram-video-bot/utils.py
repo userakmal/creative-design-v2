@@ -283,11 +283,19 @@ class AsyncFileLock:
             self._lock.release()
 
 
+# Module-level start time — set by bot.py at startup
+_bot_start_time: float = time.time()
+
+
+def set_bot_start_time(t: float) -> None:
+    """Called by bot.py to record the start time."""
+    global _bot_start_time
+    _bot_start_time = t
+
+
 def get_uptime() -> str:
     """Get bot uptime as formatted string."""
-    from main import bot_start_time
-    
-    uptime_seconds = int(time.time() - bot_start_time)
+    uptime_seconds = int(time.time() - _bot_start_time)
     
     days, remainder = divmod(uptime_seconds, 86400)
     hours, remainder = divmod(remainder, 3600)

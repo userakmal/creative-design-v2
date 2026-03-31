@@ -59,12 +59,14 @@ from utils import (
     format_timestamp,
     get_uptime,
     is_valid_url,
+    set_bot_start_time,
     setup_logging,
     truncate_text,
 )
 
 # Global bot start time for uptime calculation
 bot_start_time: float = time.time()
+set_bot_start_time(bot_start_time)
 
 # Statistics tracking
 stats = BotStatistics()
