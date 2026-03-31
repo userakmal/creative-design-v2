@@ -9,10 +9,25 @@ interface UploadedVideo {
   videoUrl: string;
 }
 
-// Use production URL or localhost
-const SERVER_URL = window.location.hostname === 'creative-design.uz' 
-  ? 'https://creative-design.uz' 
-  : 'http://localhost:3001';
+// Auto-detect server URL based on hostname
+const getServerUrl = () => {
+  const hostname = window.location.hostname;
+  
+  // Production domain
+  if (hostname === 'creative-design.uz' || hostname === 'www.creative-design.uz') {
+    return 'https://creative-design.uz';
+  }
+  
+  // Localhost development
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'http://localhost:3001';
+  }
+  
+  // For other domains, use the current origin
+  return window.location.origin;
+};
+
+const SERVER_URL = getServerUrl();
 
 export const AdminPage: React.FC = () => {
   const navigate = useNavigate();
@@ -49,6 +64,7 @@ export const AdminPage: React.FC = () => {
           setServerConnected(false);
         }
       } catch (err) {
+        console.error('Server connection error:', err);
         setServerConnected(false);
       }
     };
@@ -63,12 +79,28 @@ export const AdminPage: React.FC = () => {
     setIsLoadingVideos(true);
     try {
       const response = await fetch(`${SERVER_URL}/api/videos`);
+      
+      // Check if response is HTML (error page) instead of JSON
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('text/html')) {
+        console.error('Received HTML instead of JSON. Server may not be running.');
+        setActionMessage({ 
+          type: 'error', 
+          text: 'Server xatosi: Upload server ishga tushmagan yoki noto\'g\'ri URL' 
+        });
+        return;
+      }
+      
       if (response.ok) {
         const videos = await response.json();
         setUploadedVideos(videos);
       }
     } catch (err) {
       console.error("Failed to load videos:", err);
+      setActionMessage({ 
+        type: 'error', 
+        text: 'Videolarni yuklashda xatolik. Serverni tekshiring.' 
+      });
     } finally {
       setIsLoadingVideos(false);
     }
@@ -184,7 +216,20 @@ export const AdminPage: React.FC = () => {
         body: formData,
       });
 
-      const data = await response.json();
+      // Check content type
+      const contentType = response.headers.get('content-type');
+      let data;
+      
+      if (contentType && contentType.includes('text/html')) {
+        throw new Error('Server HTML javob qaytardi. Upload server ishga tushmagan.');
+      }
+      
+      try {
+        data = await response.json();
+      } catch {
+        const text = await response.text();
+        throw new Error(`Noto'g'ri javob: ${text.substring(0, 100)}`);
+      }
 
       if (!response.ok) {
         throw new Error(data.error || "Yuklashda xatolik yuz berdi");
