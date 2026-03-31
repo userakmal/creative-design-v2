@@ -48,6 +48,8 @@ const storage = multer.diskStorage({
       uploadPath = path.join(__dirname, 'public', 'videos');
     } else if (file.fieldname === 'image') {
       uploadPath = path.join(__dirname, 'public', 'image');
+    } else if (file.fieldname === 'music') {
+      uploadPath = path.join(__dirname, 'public', 'music');
     }
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
@@ -61,6 +63,8 @@ const storage = multer.diskStorage({
       cb(null, `v_${uniqueSuffix}${ext}`);
     } else if (file.fieldname === 'image') {
       cb(null, `i_${uniqueSuffix}${ext}`);
+    } else if (file.fieldname === 'music') {
+      cb(null, `m_${uniqueSuffix}${ext}`);
     }
   },
 });
@@ -340,9 +344,79 @@ app.post('/api/auto-download', async (req, res) => {
   }
 });
 
+// Music upload endpoint
+app.post('/api/upload-music', upload.fields([
+  { name: 'music', maxCount: 1 },
+]), async (req, res) => {
+  console.log('Music upload request received');
+
+  try {
+    const password = req.body.password;
+    if (password !== 'creative2026') {
+      return res.status(401).json({ error: "Parol noto'g'ri" });
+    }
+
+    if (!req.files?.music) {
+      return res.status(400).json({ error: 'Musiqa faylni yuklang' });
+    }
+
+    const title = req.body.title || 'Yangi musiqa';
+    const author = req.body.author || 'Noma\'lum';
+    const musicFile = req.files.music[0];
+
+    console.log('Music file saved locally:', musicFile.filename);
+
+    // Upload to FTP hosting
+    let musicUrl;
+    try {
+      musicUrl = await uploadToFTP(musicFile.path, 'music', musicFile.filename);
+      console.log('✅ Music FTP upload:', musicUrl);
+    } catch (ftpErr) {
+      console.error('⚠️ Music FTP failed, using local:', ftpErr.message);
+      musicUrl = `/music/${musicFile.filename}`;
+    }
+
+    // Save to music.json
+    const dataDir = path.join(__dirname, 'public', 'data');
+    const dataFile = path.join(dataDir, 'music.json');
+    if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+
+    let musicList = [];
+    if (fs.existsSync(dataFile)) {
+      musicList = JSON.parse(fs.readFileSync(dataFile, 'utf-8'));
+    }
+
+    let maxId = 10;
+    musicList.forEach(m => { if (m.id > maxId) maxId = m.id; });
+
+    const newMusic = {
+      id: maxId + 1,
+      title: title,
+      author: author,
+      duration: '0:00',
+      url: musicUrl,
+    };
+
+    musicList.push(newMusic);
+    fs.writeFileSync(dataFile, JSON.stringify(musicList, null, 2), 'utf-8');
+
+    console.log(`✅ Music saved: ${title} (ID: ${newMusic.id})`);
+
+    res.json({
+      success: true,
+      message: 'Musiqa muvaffaqiyatli yuklandi!',
+      data: newMusic,
+    });
+  } catch (error) {
+    console.error('Music upload error:', error);
+    res.status(500).json({ error: error.message || 'Serverda xatolik' });
+  }
+});
+
 // Serve static files
 app.use('/videos', express.static(path.join(__dirname, 'public', 'videos')));
 app.use('/image', express.static(path.join(__dirname, 'public', 'image')));
+app.use('/music', express.static(path.join(__dirname, 'public', 'music')));
 app.use('/data', express.static(path.join(__dirname, 'public', 'data')));
 
 // Start server

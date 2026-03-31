@@ -287,7 +287,7 @@ export const VideoDownloaderPage: React.FC = () => {
               <div>
                 <p className="text-sm font-medium text-amber-800 mb-1">Server ishlamayapti</p>
                 <p className="text-xs text-amber-600 leading-relaxed">
-                  Video API serverni ishga tushiring (<b>START.bat</b>)
+                  Video API serverni ishga tushiring (<b>current_starter.bat</b>)
                 </p>
                 <button
                   onClick={checkServer}
