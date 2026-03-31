@@ -18,6 +18,8 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
-      }
+      },
+      // Serve static files from public directory
+      publicDir: 'public',
     };
 });

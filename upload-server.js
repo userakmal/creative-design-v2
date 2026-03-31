@@ -172,13 +172,15 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Upload server is running' });
 });
 
-// Serve static files from public directory
+// Serve static files from public directory (for development)
 app.use('/videos', express.static(path.join(__dirname, 'public', 'videos')));
 app.use('/image', express.static(path.join(__dirname, 'public', 'image')));
+app.use('/data', express.static(path.join(__dirname, 'public', 'data')));
 
 app.listen(PORT, () => {
   console.log(`🚀 Upload server running on http://localhost:${PORT}`);
   console.log(`📁 Upload endpoint: http://localhost:${PORT}/api/upload`);
-  console.log(`📂 Serving videos from: ${path.join(__dirname, 'public', 'videos')}`);
-  console.log(`📂 Serving images from: ${path.join(__dirname, 'public', 'image')}`);
+  console.log(`📂 Serving videos from: http://localhost:${PORT}/videos/`);
+  console.log(`📂 Serving images from: http://localhost:${PORT}/image/`);
+  console.log(`📂 Serving data from: http://localhost:${PORT}/data/`);
 });
