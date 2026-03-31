@@ -113,8 +113,8 @@ app.post('/api/upload', upload.fields([
     const videoUrl = `/videos/${path.basename(videoFile.filename)}`;
     const imageUrl = `/image/${path.basename(imageFile.filename)}`;
 
-    // Read existing videos from data/videos.json
-    const dataDir = path.join(__dirname, 'data');
+    // Read existing videos from public/data/videos.json (where frontend loads from)
+    const dataDir = path.join(__dirname, 'public', 'data');
     const dataFile = path.join(dataDir, 'videos.json');
     
     // Create data directory if it doesn't exist
