@@ -4,6 +4,7 @@ Utility functions for the Telegram Video Downloader Bot.
 
 import asyncio
 import os
+import re
 import time
 from datetime import datetime
 from typing import Optional
@@ -111,22 +112,39 @@ def sanitize_filename(filename: str) -> str:
 def extract_url_from_text(text: str) -> Optional[str]:
     """
     Extract the first valid HTTP/HTTPS URL from text.
-    Sanitizes input by removing trailing garbage, spaces, and extra characters.
+    UNIVERSAL URL REGEX - Catches ALL URL formats including:
+    - Instagram: instagram.com/p/, /reel/, /stories/, /tv/, short links
+    - YouTube: youtube.com, youtu.be
+    - TikTok: tiktok.com
+    - And any other valid HTTP/HTTPS URL
     
+    Sanitizes input by removing trailing garbage, spaces, and extra characters.
+
     Handles cases like:
     - "https://instagram.com/reel/...?igsh=... °C³" -> "https://instagram.com/reel/...?igsh=..."
     - "  https://youtube.com/watch?v=abc  " -> "https://youtube.com/watch?v=abc"
     - "Check this: https://tiktok.com/..." -> "https://tiktok.com/..."
     """
     import re
-    
-    # Pattern to match HTTP/HTTPS URLs
+
+    # UNIVERSAL URL PATTERN - Matches any HTTP/HTTPS URL
+    # This comprehensive regex catches:
+    # - Standard URLs with domain and path
+    # - URLs with query parameters and fragments
+    # - Short URLs (youtu.be, etc.)
+    # - Instagram specific paths (/p/, /reel/, /stories/, /tv/)
     url_pattern = re.compile(
-        r'(https?://)'  # protocol
-        r'(?:[^\s<>"\'{}|\\^`\[\]]+)',  # domain and path
-        re.IGNORECASE
+        r'(https?://)'                          # protocol: http:// or https://
+        r'(?:'                                   # start domain/path group
+        r'(?:[^\s<>"\'{}|\\^`\[\]]+)'           # domain and path (non-whitespace chars)
+        r')'                                    # end domain/path group
+        r'(?:'                                   # optional query/fragment
+        r'[?#][^\s<>"\'{}|\\^`\[\]]*'           # query string or fragment
+        r')?'                                   # optional
+        ,
+        re.IGNORECASE | re.UNICODE
     )
-    
+
     match = url_pattern.search(text)
     if match:
         url = match.group(0)
@@ -136,7 +154,7 @@ def extract_url_from_text(text: str) -> Optional[str]:
         # Remove trailing punctuation that's not part of URL
         url = re.sub(r'[.,;:!?\)]+$', '', url)
         return url
-    
+
     return None
 
 
@@ -184,18 +202,19 @@ def setup_logging(
 ) -> None:
     """Configure logging for the application."""
     from config import config
-    
+    import sys
+
     # Remove default handler
     logger.remove()
-    
-    # Console handler with colors
+
+    # Console handler - use sys.stderr.write for Unicode-safe output on Windows
     logger.add(
-        lambda msg: print(msg, flush=True),
+        sys.stderr,
         level=log_level,
         format=log_format or config.logging.LOG_FORMAT,
         colorize=True,
     )
-    
+
     # File handler if specified
     if log_file:
         logger.add(
@@ -205,8 +224,9 @@ def setup_logging(
             rotation="10 MB",
             retention="7 days",
             compression="zip",
+            encoding="utf-8"
         )
-    
+
     logger.info(f"Logging initialized (level: {log_level})")
 
 

@@ -129,7 +129,7 @@ class CachedVideo:
 @dataclass
 class DownloadTask:
     """Represents a download task with status tracking."""
-    
+
     task_id: str
     url: str
     user_id: int
@@ -141,12 +141,13 @@ class DownloadTask:
     progress: int = 0  # 0-100
     created_at: datetime = field(default_factory=datetime.now)
     completed_at: Optional[datetime] = None
-    
+    extra: dict = field(default_factory=dict)  # Additional metadata (chat_type, etc.)
+
     @property
     def is_complete(self) -> bool:
         """Check if task is complete."""
         return self.status in (DownloadStatus.COMPLETED, DownloadStatus.CACHED)
-    
+
     @property
     def is_failed(self) -> bool:
         """Check if task has failed."""

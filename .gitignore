@@ -24,10 +24,12 @@ dist-ssr
 *.sln
 *.sw?
 
-# Video Downloader Files
+# Bot downloads and logs
+telegram-video-bot/downloads/
+telegram-video-bot/*.log
+telegram-video-bot/cache.db
 local-video-api/*.mp4
 local-video-api/*.part
 local-video-api/*.ytdl
 local-video-api/*.log
 local-video-api/*.exe
-

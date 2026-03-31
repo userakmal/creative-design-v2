@@ -44,7 +44,8 @@ export const AdminPage: React.FC = () => {
     formData.append("password", password);
 
     try {
-      const response = await fetch("/api/upload.php", {
+      // Use the Node.js upload server
+      const response = await fetch("http://localhost:3001/api/upload", {
         method: "POST",
         body: formData,
       });
@@ -59,14 +60,14 @@ export const AdminPage: React.FC = () => {
       setTitle("");
       setVideoFile(null);
       setImageFile(null);
-      
+
       // Reset file inputs visually
       const fileInputs = document.querySelectorAll('input[type="file"]') as NodeListOf<HTMLInputElement>;
       fileInputs.forEach(input => input.value = "");
 
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Server bilan ulanishda xato. Lokal server (npm run dev) ishlaganiga ishonch hosil qiling.");
+      setError(err.message || "Server bilan ulanishda xato. Upload server (npm run server) ishlaganiga ishonch hosil qiling.");
     } finally {
       setIsUploading(false);
     }
@@ -142,7 +143,7 @@ export const AdminPage: React.FC = () => {
       <div className="px-6">
         <div className="bg-white p-6 rounded-2xl border border-stone-100 shadow-sm mb-6">
           <p className="text-stone-500 text-sm mb-6">
-            Yangi videoni shu yerdan yuklang. Fayllar avtomatik "public" papkaga saqlanadi va sayt kodi (config.ts) yangilanadi. Keyin GitHubga yuklashingiz mumkin.
+            Yangi videoni shu yerdan yuklang. Fayllar avtomatik "public/videos" va "public/image" papkalariga saqlanadi va "data/videos.json" yangilanadi.
           </p>
 
           <form onSubmit={handleUpload} className="flex flex-col gap-5">

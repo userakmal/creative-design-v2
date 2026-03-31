@@ -66,6 +66,31 @@ class CacheBackend(ABC):
         """Remove entries older than specified days."""
         pass
 
+    @abstractmethod
+    async def track_user(self, user_id: int, language: str = "uz") -> None:
+        """Track a unique user."""
+        pass
+
+    @abstractmethod
+    async def set_user_language(self, user_id: int, language: str) -> None:
+        """Set user's preferred language."""
+        pass
+
+    @abstractmethod
+    async def get_user_language(self, user_id: int) -> str:
+        """Get user's preferred language."""
+        pass
+
+    @abstractmethod
+    async def get_all_users(self) -> list:
+        """Get all user IDs."""
+        pass
+
+    @abstractmethod
+    async def get_unique_users_count(self) -> int:
+        """Get the count of unique users."""
+        pass
+
 
 class SQLiteCache(CacheBackend):
     """SQLite-based cache implementation."""
@@ -94,7 +119,7 @@ class SQLiteCache(CacheBackend):
                 last_accessed TEXT NOT NULL,
                 file_size INTEGER DEFAULT 0
             );
-            
+
             CREATE TABLE IF NOT EXISTS statistics (
                 id INTEGER PRIMARY KEY CHECK (id = 1),
                 total_downloads INTEGER DEFAULT 0,
@@ -105,15 +130,32 @@ class SQLiteCache(CacheBackend):
                 failed_downloads INTEGER DEFAULT 0,
                 unique_users INTEGER DEFAULT 0
             );
-            
-            CREATE INDEX IF NOT EXISTS idx_access_count 
+
+            CREATE TABLE IF NOT EXISTS unique_users (
+                user_id INTEGER PRIMARY KEY,
+                first_seen TEXT NOT NULL,
+                last_seen TEXT NOT NULL,
+                download_count INTEGER DEFAULT 0,
+                language TEXT DEFAULT 'uz'
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_access_count
             ON cached_videos(access_count DESC);
-            
-            CREATE INDEX IF NOT EXISTS idx_created_at 
+
+            CREATE INDEX IF NOT EXISTS idx_created_at
             ON cached_videos(created_at);
-            
+
             INSERT OR IGNORE INTO statistics (id) VALUES (1);
         """)
+
+        # Add language column to unique_users if it doesn't exist (migration)
+        try:
+            await self._connection.execute("ALTER TABLE unique_users ADD COLUMN language TEXT DEFAULT 'uz'")
+            await self._connection.commit()
+            logger.debug("Added language column to unique_users table")
+        except Exception:
+            # Column already exists - this is normal for existing databases
+            pass
         
         await self._connection.commit()
         logger.info(f"SQLite cache initialized: {self.db_path}")
@@ -278,12 +320,136 @@ class SQLiteCache(CacheBackend):
         """Increment a statistics counter."""
         if not self._connection:
             return
-        
+
         await self._connection.execute(
             f"UPDATE statistics SET {stat_name} = {stat_name} + ? WHERE id = 1",
             (value,)
         )
         await self._connection.commit()
+
+    async def track_user(self, user_id: int, language: str = "uz") -> None:
+        """
+        Track a unique user in the database.
+        Updates last_seen and increments download_count if user exists.
+        Creates new entry if user is new.
+        """
+        if not self._connection:
+            return
+
+        now = datetime.now().isoformat()
+
+        # Check if user exists
+        async with self._connection.execute(
+            "SELECT user_id FROM unique_users WHERE user_id = ?",
+            (user_id,)
+        ) as cursor:
+            existing = await cursor.fetchone()
+
+        if existing:
+            # Update existing user
+            await self._connection.execute(
+                """
+                UPDATE unique_users
+                SET last_seen = ?, download_count = download_count + 1, language = ?
+                WHERE user_id = ?
+                """,
+                (now, language, user_id)
+            )
+        else:
+            # Insert new user and increment unique_users count
+            await self._connection.execute(
+                """
+                INSERT INTO unique_users (user_id, first_seen, last_seen, download_count, language)
+                VALUES (?, ?, ?, 1, ?)
+                """,
+                (user_id, now, now, language)
+            )
+            await self._connection.execute(
+                "UPDATE statistics SET unique_users = unique_users + 1 WHERE id = 1"
+            )
+
+        await self._connection.commit()
+
+    async def set_user_language(self, user_id: int, language: str) -> None:
+        """Set user's preferred language."""
+        if not self._connection:
+            return
+
+        # Check if user exists
+        async with self._connection.execute(
+            "SELECT user_id FROM unique_users WHERE user_id = ?",
+            (user_id,)
+        ) as cursor:
+            existing = await cursor.fetchone()
+
+        if existing:
+            await self._connection.execute(
+                "UPDATE unique_users SET language = ? WHERE user_id = ?",
+                (language, user_id)
+            )
+        else:
+            # User doesn't exist yet, create entry
+            now = datetime.now().isoformat()
+            await self._connection.execute(
+                """
+                INSERT INTO unique_users (user_id, first_seen, last_seen, download_count, language)
+                VALUES (?, ?, ?, 0, ?)
+                """,
+                (user_id, now, now, language)
+            )
+            await self._connection.execute(
+                "UPDATE statistics SET unique_users = unique_users + 1 WHERE id = 1"
+            )
+
+        await self._connection.commit()
+
+    async def get_user_language(self, user_id: int) -> str:
+        """Get user's preferred language."""
+        if not self._connection:
+            return "uz"
+
+        async with self._connection.execute(
+            "SELECT language FROM unique_users WHERE user_id = ?",
+            (user_id,)
+        ) as cursor:
+            row = await cursor.fetchone()
+            return row["language"] if row and row["language"] else "uz"
+
+    async def get_all_users(self) -> list:
+        """Get all user IDs for broadcast."""
+        if not self._connection:
+            return []
+
+        async with self._connection.execute(
+            "SELECT user_id FROM unique_users"
+        ) as cursor:
+            rows = await cursor.fetchall()
+            return [row["user_id"] for row in rows if row["user_id"]]
+
+    async def get_unique_users_count(self) -> int:
+        """Get the total count of unique users."""
+        if not self._connection:
+            return 0
+
+        async with self._connection.execute(
+            "SELECT COUNT(*) as count FROM unique_users"
+        ) as cursor:
+            row = await cursor.fetchone()
+            return row["count"] if row else 0
+
+    async def get_user_stats(self, user_id: int) -> Optional[dict]:
+        """Get statistics for a specific user."""
+        if not self._connection:
+            return None
+
+        async with self._connection.execute(
+            "SELECT * FROM unique_users WHERE user_id = ?",
+            (user_id,)
+        ) as cursor:
+            row = await cursor.fetchone()
+            if row:
+                return dict(row)
+            return None
 
 
 class RedisCache(CacheBackend):
@@ -417,6 +583,51 @@ class RedisCache(CacheBackend):
         # This method is mainly for logging
         logger.info(f"Redis TTL auto-cleanup active (TTL: {self.ttl}s)")
         return 0
+
+    async def track_user(self, user_id: int, language: str = "uz") -> None:
+        """Track a unique user in Redis (simplified implementation)."""
+        if not self._redis:
+            return
+        # Simple implementation: increment unique users counter
+        await self._redis.incr("stats:unique_users")
+        await self._redis.hincrby(f"user:{user_id}", "download_count", 1)
+        await self._redis.hset(f"user:{user_id}", "last_seen", datetime.now().isoformat())
+        await self._redis.hset(f"user:{user_id}", "language", language)
+
+    async def set_user_language(self, user_id: int, language: str) -> None:
+        """Set user's preferred language in Redis."""
+        if not self._redis:
+            return
+        await self._redis.hset(f"user:{user_id}", "language", language)
+
+    async def get_user_language(self, user_id: int) -> str:
+        """Get user's preferred language from Redis."""
+        if not self._redis:
+            return "uz"
+        lang = await self._redis.hget(f"user:{user_id}", "language")
+        return lang if lang else "uz"
+
+    async def get_all_users(self) -> list:
+        """Get all user IDs from Redis."""
+        if not self._redis:
+            return []
+        # Get all user:* keys
+        keys = await self._redis.keys("user:*")
+        user_ids = []
+        for key in keys:
+            try:
+                user_id = int(key.replace("user:", ""))
+                user_ids.append(user_id)
+            except ValueError:
+                pass
+        return user_ids
+
+    async def get_unique_users_count(self) -> int:
+        """Get the count of unique users from Redis."""
+        if not self._redis:
+            return 0
+        count = await self._redis.get("stats:unique_users")
+        return int(count) if count else 0
 
 
 def create_cache_backend() -> CacheBackend:

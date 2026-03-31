@@ -1,0 +1,1 @@
+python: can't open file 'C:\\Users\\Acer\\OneDrive\\Desktop\\creative-design-main\\telegram-video-bot\\diagnostic.py': [Errno 2] No such file or directory

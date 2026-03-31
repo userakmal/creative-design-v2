@@ -16,17 +16,20 @@ load_dotenv()
 @dataclass(frozen=True)
 class BotConfig:
     """Telegram bot configuration."""
-    
+
     # Telegram Bot Token (required)
     TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
-    
+
     # Telegram Local API Server (for 2GB uploads)
     # Set to your local server URL (e.g., "http://localhost:8081")
     # Leave empty to use standard Telegram API (50MB limit)
     TELEGRAM_API_SERVER: Optional[str] = os.getenv("TELEGRAM_API_SERVER", None)
-    
+
     # Bot API Server local path (for file serving)
     TELEGRAM_API_LOCAL_PATH: Optional[str] = os.getenv("TELEGRAM_API_LOCAL_PATH", None)
+
+    # Admin ID for restricted commands (leave empty in .env if not needed)
+    ADMIN_ID: Optional[int] = int(os.getenv("ADMIN_ID", "0")) or None
 
 
 @dataclass(frozen=True)
@@ -52,21 +55,25 @@ class DatabaseConfig:
 @dataclass(frozen=True)
 class DownloaderConfig:
     """Video downloader configuration."""
-    
+
     # Temporary download directory
     DOWNLOAD_DIR: str = os.getenv("DOWNLOAD_DIR", "downloads")
-    
+
+    # Temporary directory for audio extraction
+    AUDIO_DIR: str = os.getenv("AUDIO_DIR", "downloads/audio")
+
     # Maximum file size in bytes (2GB for local server, 50MB for standard)
     MAX_FILE_SIZE: int = int(os.getenv("MAX_FILE_SIZE", "2147483648"))  # 2GB
-    
+
     # yt-dlp options
     YTDLP_FORMAT: str = os.getenv("YTDLP_FORMAT", "best[ext=mp4]/best")
+    YTDLP_AUDIO_FORMAT: str = os.getenv("YTDLP_AUDIO_FORMAT", "bestaudio/best")
     YTDLP_TIMEOUT: int = int(os.getenv("YTDLP_TIMEOUT", "300"))  # 5 minutes
-    
+
     # ffmpeg configuration
     FFMPEG_PATH: str = os.getenv("FFMPEG_PATH", "ffmpeg")
     FFPROBE_PATH: str = os.getenv("FFPROBE_PATH", "ffprobe")
-    
+
     # Enable HLS (.m3u8) processing
     ENABLE_HLS_PROCESSING: bool = os.getenv("ENABLE_HLS_PROCESSING", "true").lower() == "true"
 
@@ -96,14 +103,14 @@ class Config:
         """Validate critical configuration values."""
         if not self.bot.TELEGRAM_BOT_TOKEN:
             raise ValueError("TELEGRAM_BOT_TOKEN environment variable is required")
-        
+
         # Create necessary directories
         Path(self.downloader.DOWNLOAD_DIR).mkdir(parents=True, exist_ok=True)
-        
+
         # Validate file size based on API server configuration
         if self.bot.TELEGRAM_API_SERVER:
-            if self.downloader.MAX_FILE_SIZE > 2147483648:  # 2GB
-                raise ValueError("MAX_FILE_SIZE cannot exceed 2GB")
+            if self.downloader.MAX_FILE_SIZE > 4294967296:  # 4GB
+                raise ValueError("MAX_FILE_SIZE cannot exceed 4GB")
         else:
             if self.downloader.MAX_FILE_SIZE > 52428800:  # 50MB
                 raise ValueError("MAX_FILE_SIZE cannot exceed 50MB without Local API Server")

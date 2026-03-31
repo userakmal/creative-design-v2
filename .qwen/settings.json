@@ -20,7 +20,8 @@
       "Bash(taskkill *)",
       "Bash(timeout *)",
       "Bash(start *)",
-      "Bash(type *)"
+      "Bash(type *)",
+      "Bash(echo.)"
     ]
   },
   "$version": 3
