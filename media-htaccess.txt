@@ -1,0 +1,22 @@
+# Creative Design Media Directory
+# Allow CORS access for CDN media files
+
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type"
+</IfModule>
+
+# Enable caching for media files
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType video/mp4 "access plus 30 days"
+    ExpiresByType image/jpeg "access plus 30 days"
+    ExpiresByType image/png "access plus 30 days"
+    ExpiresByType image/webp "access plus 30 days"
+    ExpiresByType audio/mpeg "access plus 30 days"
+    ExpiresByType audio/mp4 "access plus 30 days"
+</IfModule>
+
+# Prevent directory listing
+Options -Indexes

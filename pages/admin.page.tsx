@@ -402,11 +402,11 @@ export const AdminPage = () => {
               {uploadedVideos.map((video) => (
                 <div key={video.id} className="admin-video-item">
                   <img
-                    src={`${SERVER_URL}${video.image}`}
+                    src={video.image.startsWith('http') ? video.image : `${SERVER_URL}${video.image}`}
                     alt={video.title}
                     className="admin-video-thumb"
                     onError={(e) => {
-                      e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24'%3E%3Crect fill='%23e5e5e5' width='24' height='24'/%3E%3Ctext fill='%23999' x='50%25' y='50%25' text-anchor='middle' dy='.3em' font-size='4'%3E?%3C/text%3E%3C/svg%3E";
+                      (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24'%3E%3Crect fill='%23e5e5e5' width='24' height='24'/%3E%3Ctext fill='%23999' x='50%25' y='50%25' text-anchor='middle' dy='.3em' font-size='4'%3E?%3C/text%3E%3C/svg%3E";
                     }}
                   />
                   <div className="admin-video-info">
