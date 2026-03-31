@@ -58,6 +58,14 @@ interface ApiEndpoint {
   priority: number;
 }
 
+interface DownloadResponse {
+  status?: string;
+  data?: VideoData;
+  text?: string;
+  error?: string;
+  message?: string;
+}
+
 // ============================================================================
 // CONSTANTS
 // ============================================================================
@@ -323,7 +331,7 @@ export const VideoDownloaderPage: React.FC = () => {
 
     // Determine endpoints to try
     const endpointsToTry = activeEndpoint
-      ? [activeEndpoint, ...API_ENDPOINTS.filter((ep) => ep.url !== activeEndpoint)]
+      ? [activeEndpoint, ...API_ENDPOINTS.filter((ep) => ep.url !== activeEndpoint).map((ep) => ep.url)]
       : API_ENDPOINTS.map((ep) => ep.url);
 
     let lastError = "";
@@ -333,7 +341,7 @@ export const VideoDownloaderPage: React.FC = () => {
       const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
 
       try {
-        const infoEndpoint = endpoint.replace("/download", "/info");
+        const infoEndpoint = (endpoint as string).replace("/download", "/info");
 
         const response = await fetch(infoEndpoint, {
           method: "POST",
@@ -362,7 +370,7 @@ export const VideoDownloaderPage: React.FC = () => {
           continue;
         }
 
-        let data: { status?: string; data?: VideoData; text?: string };
+        let data: DownloadResponse;
         try {
           data = JSON.parse(responseText);
         } catch {
@@ -372,7 +380,7 @@ export const VideoDownloaderPage: React.FC = () => {
         }
 
         if (data.status === "success" && data.data) {
-          setActiveEndpoint(endpoint);
+          setActiveEndpoint(endpoint as string);
           setServerStatus("online");
           setResult({
             ...data.data,
