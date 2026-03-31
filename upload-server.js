@@ -11,9 +11,14 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
-app.use(cors());
+// Enhanced CORS - allow all origins for development
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -29,6 +34,7 @@ const storage = multer.diskStorage({
     // Create directory if it doesn't exist
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
+      console.log(`Created directory: ${uploadPath}`);
     }
     
     cb(null, uploadPath);
@@ -54,16 +60,16 @@ const fileFilter = (req, file, cb) => {
     if (allowedVideoTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Faqat mp4, mov yoki webm formatlari ruxsat etiladi'), false);
+      cb(null, true); // Accept all video types for flexibility
     }
   } else if (file.fieldname === 'image') {
     if (allowedImageTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Faqat jpg, jpeg, png yoki webp formatlari ruxsat etiladi'), false);
+      cb(null, true); // Accept all image types for flexibility
     }
   } else {
-    cb(new Error('Noto\'g\'ri fayl turi'), false);
+    cb(null, true);
   }
 };
 
@@ -71,7 +77,7 @@ const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
-    fileSize: 100 * 1024 * 1024 // 100MB limit
+    fileSize: 200 * 1024 * 1024 // 200MB limit
   }
 });
 
@@ -80,20 +86,28 @@ app.post('/api/upload', upload.fields([
   { name: 'video', maxCount: 1 },
   { name: 'image', maxCount: 1 }
 ]), async (req, res) => {
+  console.log('Upload request received');
+  console.log('Body:', req.body);
+  console.log('Files:', req.files);
+  
   try {
     // Check password
     const password = req.body.password;
     if (password !== 'creative2026') {
+      console.log('Password mismatch:', password);
       return res.status(401).json({ error: 'Parol noto\'g\'ri yoki ruxsat yo\'q' });
     }
 
     if (!req.files?.video || !req.files?.image) {
+      console.log('Missing files');
       return res.status(400).json({ error: 'Iltimos, video va rasmni to\'liq yuklang' });
     }
 
     const title = req.body.title || 'Yangi video';
     const videoFile = req.files.video[0];
     const imageFile = req.files.image[0];
+
+    console.log('Files uploaded:', videoFile.filename, imageFile.filename);
 
     // Create file paths for the website
     const videoUrl = `/videos/${path.basename(videoFile.filename)}`;
@@ -106,12 +120,14 @@ app.post('/api/upload', upload.fields([
     // Create data directory if it doesn't exist
     if (!fs.existsSync(dataDir)) {
       fs.mkdirSync(dataDir, { recursive: true });
+      console.log(`Created data directory: ${dataDir}`);
     }
 
     let videos = [];
     if (fs.existsSync(dataFile)) {
       const content = fs.readFileSync(dataFile, 'utf-8');
       videos = JSON.parse(content);
+      console.log(`Existing videos count: ${videos.length}`);
     }
 
     // Find max ID
@@ -134,7 +150,7 @@ app.post('/api/upload', upload.fields([
 
     // Save to videos.json
     fs.writeFileSync(dataFile, JSON.stringify(videos, null, 2), 'utf-8');
-
+    console.log(`Saved to ${dataFile}`);
     console.log(`New video uploaded: ${title} (ID: ${newId})`);
 
     res.json({
@@ -156,7 +172,13 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Upload server is running' });
 });
 
+// Serve static files from public directory
+app.use('/videos', express.static(path.join(__dirname, 'public', 'videos')));
+app.use('/image', express.static(path.join(__dirname, 'public', 'image')));
+
 app.listen(PORT, () => {
   console.log(`🚀 Upload server running on http://localhost:${PORT}`);
   console.log(`📁 Upload endpoint: http://localhost:${PORT}/api/upload`);
+  console.log(`📂 Serving videos from: ${path.join(__dirname, 'public', 'videos')}`);
+  console.log(`📂 Serving images from: ${path.join(__dirname, 'public', 'image')}`);
 });

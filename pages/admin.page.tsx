@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { UploadCloud, Image as ImageIcon, Video, Save, CheckCircle2, ArrowLeft } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { UploadCloud, Image as ImageIcon, Video, Save, CheckCircle2, ArrowLeft, WifiOff, Wifi } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export const AdminPage: React.FC = () => {
@@ -10,11 +10,32 @@ export const AdminPage: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
+  const [serverConnected, setServerConnected] = useState(false);
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
+
+  // Check server connection on mount
+  useEffect(() => {
+    const checkServer = async () => {
+      try {
+        const response = await fetch("http://localhost:3001/api/health");
+        if (response.ok) {
+          setServerConnected(true);
+        } else {
+          setServerConnected(false);
+        }
+      } catch (err) {
+        setServerConnected(false);
+      }
+    };
+    
+    checkServer();
+    const interval = setInterval(checkServer, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,6 +162,20 @@ export const AdminPage: React.FC = () => {
       </div>
 
       <div className="px-6">
+        {/* Server Status */}
+        <div className={`mb-4 p-3 rounded-xl border flex items-center gap-2 text-sm ${
+          serverConnected 
+            ? 'bg-green-50 border-green-200 text-green-700' 
+            : 'bg-red-50 border-red-200 text-red-700'
+        }`}>
+          {serverConnected ? <Wifi size={18} /> : <WifiOff size={18} />}
+          <span>
+            {serverConnected 
+              ? 'Upload server ulandi' 
+              : 'Upload server topilmadi. "start-upload-server.bat" ni ishga tushiring!'}
+          </span>
+        </div>
+
         <div className="bg-white p-6 rounded-2xl border border-stone-100 shadow-sm mb-6">
           <p className="text-stone-500 text-sm mb-6">
             Yangi videoni shu yerdan yuklang. Fayllar avtomatik "public/videos" va "public/image" papkalariga saqlanadi va "data/videos.json" yangilanadi.
