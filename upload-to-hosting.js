@@ -114,6 +114,28 @@ async function main() {
     totals.failed += r.failed;
   }
 
+  // Upload data (videos.json, music.json)
+  const dataDir = path.join(__dirname, 'public', 'data');
+  if (fs.existsSync(dataDir)) {
+    // Note: videos.json should be in /public_html/data/ to match app's fetch('/data/videos.json')
+    // We use a different remote path for data if it's outside 'media'
+    const remoteDataDir = '/public_html/data';
+    console.log(`\n📂 Uploading data files from ${dataDir} → ${remoteDataDir}`);
+    await client.ensureDir(remoteDataDir);
+    
+    const dataFiles = fs.readdirSync(dataDir).filter(f => fs.statSync(path.join(dataDir, f)).isFile());
+    for (const file of dataFiles) {
+      try {
+        await client.uploadFrom(path.join(dataDir, file), `${remoteDataDir}/${file}`);
+        console.log(`  [Data] ${file} ✅`);
+        totals.uploaded++;
+      } catch (err) {
+        console.log(`  [Data] ${file} ❌ ${err.message}`);
+        totals.failed++;
+      }
+    }
+  }
+
   // Upload .htaccess for CORS and caching
   const htaccessFile = path.join(__dirname, 'media-htaccess.txt');
   if (fs.existsSync(htaccessFile)) {
