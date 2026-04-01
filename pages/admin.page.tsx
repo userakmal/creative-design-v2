@@ -1,456 +1,696 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "./admin.css";
 
 const SERVER_URL = "http://localhost:3001";
+const ADMIN_PASSWORD = "creative2026";
 
+// ============================================================================
+// Types
+// ============================================================================
+interface VideoItem {
+  id: number;
+  title: string;
+  image: string;
+  videoUrl: string;
+  uploadedAt?: string;
+  size?: string;
+}
+
+interface MusicItem {
+  id: number;
+  title: string;
+  author: string;
+  duration?: string;
+  url: string;
+  uploadedAt?: string;
+  size?: string;
+}
+
+interface Stats {
+  videos: number;
+  music: number;
+  diskUsage: string;
+  lastVideoUpload: string | null;
+  lastMusicUpload: string | null;
+}
+
+type MessageType = { type: "success" | "error" | ""; text: string };
+
+// ============================================================================
+// Main Component
+// ============================================================================
 export const AdminPage = () => {
   const navigate = useNavigate();
+
+  // Auth
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
 
+  // Server
   const [serverConnected, setServerConnected] = useState(false);
-  const [uploadedVideos, setUploadedVideos] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState({ type: "", text: "" });
+  const [stats, setStats] = useState<Stats>({ videos: 0, music: 0, diskUsage: "0 B", lastVideoUpload: null, lastMusicUpload: null });
+
+  // Tab
   const [activeTab, setActiveTab] = useState<"video" | "music">("video");
 
-  // Video stats
-  const [videoStats, setVideoStats] = useState({
-    total: 0,
-    lastUpload: null as string | null,
-  });
+  // Videos
+  const [videos, setVideos] = useState<VideoItem[]>([]);
+  const [isLoadingVideos, setIsLoadingVideos] = useState(false);
 
-  // Upload form state
-  const [title, setTitle] = useState("");
+  // Music
+  const [musicList, setMusicList] = useState<MusicItem[]>([]);
+  const [isLoadingMusic, setIsLoadingMusic] = useState(false);
+
+  // Video Upload
+  const [videoTitle, setVideoTitle] = useState("");
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [videoUploadProgress, setVideoUploadProgress] = useState(0);
 
-  // Music upload state
+  // Music Upload
   const [musicTitle, setMusicTitle] = useState("");
   const [musicAuthor, setMusicAuthor] = useState("");
   const [musicFile, setMusicFile] = useState<File | null>(null);
   const [isUploadingMusic, setIsUploadingMusic] = useState(false);
+  const [musicUploadProgress, setMusicUploadProgress] = useState(0);
 
-  // Instagram/YouTube auto-download state
-  const [autoUrl, setAutoUrl] = useState("");
-  const [isAutoDownloading, setIsAutoDownloading] = useState(false);
+  // Toast
+  const [message, setMessage] = useState<MessageType>({ type: "", text: "" });
 
-  useEffect(() => {
-    checkServer();
-    const interval = setInterval(checkServer, 5000);
-    return () => clearInterval(interval);
+  // Refs
+  const videoInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const musicInputRef = useRef<HTMLInputElement>(null);
+
+  // ========================================================================
+  // API Calls
+  // ========================================================================
+
+  const showToast = useCallback((type: "success" | "error", text: string) => {
+    setMessage({ type, text });
+    setTimeout(() => setMessage({ type: "", text: "" }), 4000);
   }, []);
 
-  const checkServer = async () => {
+  const checkServer = useCallback(async () => {
     try {
-      const res = await fetch(`${SERVER_URL}/api/health`);
+      const res = await fetch(`${SERVER_URL}/api/health`, { signal: AbortSignal.timeout(3000) });
       if (res.ok) {
         setServerConnected(true);
-        loadVideos();
-      } else {
-        setServerConnected(false);
+        return true;
       }
-    } catch {
-      setServerConnected(false);
-    }
-  };
+    } catch { /* silent */ }
+    setServerConnected(false);
+    return false;
+  }, []);
 
-  const loadVideos = async () => {
-    setIsLoading(true);
+  const loadStats = useCallback(async () => {
+    try {
+      const res = await fetch(`${SERVER_URL}/api/stats`);
+      if (res.ok) {
+        const data = await res.json();
+        setStats(data);
+      }
+    } catch { /* silent */ }
+  }, []);
+
+  const loadVideos = useCallback(async () => {
+    setIsLoadingVideos(true);
     try {
       const res = await fetch(`${SERVER_URL}/api/videos`);
       if (res.ok) {
         const data = await res.json();
-        setUploadedVideos(data);
-        const lastUpload = data.length > 0 ? data[data.length - 1] : null;
-        setVideoStats({
-          total: data.length,
-          lastUpload: lastUpload ? lastUpload.title : null,
-        });
+        setVideos(data);
       }
     } catch (err) {
       console.error("Failed to load videos:", err);
     } finally {
-      setIsLoading(false);
+      setIsLoadingVideos(false);
     }
-  };
+  }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (username === "admin" && password === "creative2026") {
-      setIsAuthenticated(true);
-      setLoginError("");
+  const loadMusic = useCallback(async () => {
+    setIsLoadingMusic(true);
+    try {
+      const res = await fetch(`${SERVER_URL}/api/music`);
+      if (res.ok) {
+        const data = await res.json();
+        setMusicList(data);
+      }
+    } catch (err) {
+      console.error("Failed to load music:", err);
+    } finally {
+      setIsLoadingMusic(false);
+    }
+  }, []);
+
+  // Initial load + periodic health check
+  useEffect(() => {
+    const init = async () => {
+      const connected = await checkServer();
+      if (connected) {
+        loadStats();
+        loadVideos();
+        loadMusic();
+      }
+    };
+    init();
+    const interval = setInterval(async () => {
+      const connected = await checkServer();
+      if (connected) loadStats();
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [checkServer, loadStats, loadVideos, loadMusic]);
+
+  // Image preview
+  useEffect(() => {
+    if (imageFile) {
+      const url = URL.createObjectURL(imageFile);
+      setImagePreview(url);
+      return () => URL.revokeObjectURL(url);
     } else {
-      setLoginError("Login yoki parol noto'g'ri!");
+      setImagePreview(null);
     }
-  };
+  }, [imageFile]);
 
-  const showMessage = (type: string, text: string) => {
-    setMessage({ type, text });
-    setTimeout(() => setMessage({ type: "", text: "" }), 4000);
-  };
+  // ========================================================================
+  // Upload Handlers
+  // ========================================================================
 
-  const handleUpload = async (e: React.FormEvent) => {
+  const handleVideoUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !videoFile || !imageFile) {
-      showMessage("error", "Barcha maydonlarni to'ldiring");
-      return;
-    }
+    if (!videoTitle.trim()) { showToast("error", "Video nomini kiriting"); return; }
+    if (!videoFile) { showToast("error", "Video faylni tanlang"); return; }
+    if (!imageFile) { showToast("error", "Rasm (thumbnail) tanlang"); return; }
 
-    setIsUploading(true);
+    setIsUploadingVideo(true);
+    setVideoUploadProgress(0);
 
     const formData = new FormData();
-    formData.append("title", title);
+    formData.append("title", videoTitle.trim());
     formData.append("video", videoFile);
     formData.append("image", imageFile);
-    formData.append("password", "creative2026");
+    formData.append("password", ADMIN_PASSWORD);
 
     try {
-      const res = await fetch(`${SERVER_URL}/api/upload`, {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Upload failed");
+      const xhr = new XMLHttpRequest();
 
-      showMessage("success", "✅ Video muvaffaqiyatli yuklandi va hostingga joylandi!");
-      setTitle("");
+      const uploadPromise = new Promise<any>((resolve, reject) => {
+        xhr.upload.addEventListener("progress", (e) => {
+          if (e.lengthComputable) {
+            const pct = Math.round((e.loaded / e.total) * 100);
+            setVideoUploadProgress(pct);
+          }
+        });
+
+        xhr.addEventListener("load", () => {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            if (xhr.status >= 200 && xhr.status < 300) {
+              resolve(data);
+            } else {
+              reject(new Error(data.error || "Upload xatosi"));
+            }
+          } catch {
+            reject(new Error("Server javobini o'qib bo'lmadi"));
+          }
+        });
+
+        xhr.addEventListener("error", () => reject(new Error("Tarmoq xatosi")));
+        xhr.addEventListener("abort", () => reject(new Error("Upload bekor qilindi")));
+
+        xhr.open("POST", `${SERVER_URL}/api/upload`);
+        xhr.send(formData);
+      });
+
+      const data = await uploadPromise;
+
+      showToast("success", `✅ "${data.data.title}" muvaffaqiyatli yuklandi!`);
+
+      // Reset form
+      setVideoTitle("");
       setVideoFile(null);
       setImageFile(null);
+      setImagePreview(null);
+      if (videoInputRef.current) videoInputRef.current.value = "";
+      if (imageInputRef.current) imageInputRef.current.value = "";
 
-      // Reset file inputs
-      const fileInputs = document.querySelectorAll<HTMLInputElement>('.admin-file-input');
-      fileInputs.forEach(input => { input.value = ''; });
-
+      // Refresh
       loadVideos();
+      loadStats();
     } catch (err: any) {
-      showMessage("error", err.message);
+      showToast("error", err.message || "Upload xatosi");
     } finally {
-      setIsUploading(false);
+      setIsUploadingVideo(false);
+      setVideoUploadProgress(0);
     }
   };
 
   const handleMusicUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!musicTitle || !musicAuthor || !musicFile) {
-      showMessage("error", "Barcha maydonlarni to'ldiring");
-      return;
-    }
+    if (!musicTitle.trim()) { showToast("error", "Musiqa nomini kiriting"); return; }
+    if (!musicAuthor.trim()) { showToast("error", "Muallif nomini kiriting"); return; }
+    if (!musicFile) { showToast("error", "Musiqa faylni tanlang"); return; }
 
     setIsUploadingMusic(true);
+    setMusicUploadProgress(0);
 
     const formData = new FormData();
-    formData.append("title", musicTitle);
-    formData.append("author", musicAuthor);
+    formData.append("title", musicTitle.trim());
+    formData.append("author", musicAuthor.trim());
     formData.append("music", musicFile);
-    formData.append("password", "creative2026");
+    formData.append("password", ADMIN_PASSWORD);
 
     try {
-      const res = await fetch(`${SERVER_URL}/api/upload-music`, {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Upload failed");
+      const xhr = new XMLHttpRequest();
 
-      showMessage("success", "✅ Musiqa muvaffaqiyatli yuklandi!");
+      const uploadPromise = new Promise<any>((resolve, reject) => {
+        xhr.upload.addEventListener("progress", (e) => {
+          if (e.lengthComputable) {
+            const pct = Math.round((e.loaded / e.total) * 100);
+            setMusicUploadProgress(pct);
+          }
+        });
+
+        xhr.addEventListener("load", () => {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            if (xhr.status >= 200 && xhr.status < 300) {
+              resolve(data);
+            } else {
+              reject(new Error(data.error || "Upload xatosi"));
+            }
+          } catch {
+            reject(new Error("Server javobini o'qib bo'lmadi"));
+          }
+        });
+
+        xhr.addEventListener("error", () => reject(new Error("Tarmoq xatosi")));
+        xhr.addEventListener("abort", () => reject(new Error("Upload bekor qilindi")));
+
+        xhr.open("POST", `${SERVER_URL}/api/upload-music`);
+        xhr.send(formData);
+      });
+
+      const data = await uploadPromise;
+
+      showToast("success", `🎵 "${data.data.title}" muvaffaqiyatli yuklandi!`);
+
+      // Reset form
       setMusicTitle("");
       setMusicAuthor("");
       setMusicFile(null);
+      if (musicInputRef.current) musicInputRef.current.value = "";
 
-      const fileInputs = document.querySelectorAll<HTMLInputElement>('.admin-music-input');
-      fileInputs.forEach(input => { input.value = ''; });
+      // Refresh
+      loadMusic();
+      loadStats();
     } catch (err: any) {
-      showMessage("error", err.message);
+      showToast("error", err.message || "Upload xatosi");
     } finally {
       setIsUploadingMusic(false);
+      setMusicUploadProgress(0);
     }
   };
 
-  const handleAutoDownload = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!autoUrl.trim()) {
-      showMessage("error", "Link kiriting");
-      return;
-    }
+  // ========================================================================
+  // Delete / Rename Handlers
+  // ========================================================================
 
-    setIsAutoDownloading(true);
-
-    try {
-      const res = await fetch(`${SERVER_URL}/api/auto-download`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: autoUrl.trim(), password: "creative2026" }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Download failed");
-
-      showMessage("success", "✅ Video yuklandi va templatesga qo'shildi!");
-      setAutoUrl("");
-      loadVideos();
-    } catch (err: any) {
-      showMessage("error", err.message || "Download failed");
-    } finally {
-      setIsAutoDownloading(false);
-    }
-  };
-
-  const handleDelete = async (id: number, title: string) => {
+  const handleDeleteVideo = async (id: number, title: string) => {
     if (!confirm(`"${title}" ni o'chirmoqchimisiz?`)) return;
-
     try {
       const res = await fetch(`${SERVER_URL}/api/videos/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Delete failed");
-      showMessage("success", "Video o'chirildi");
+      if (!res.ok) throw new Error("O'chirib bo'lmadi");
+      showToast("success", `🗑️ "${title}" o'chirildi`);
       loadVideos();
+      loadStats();
     } catch (err: any) {
-      showMessage("error", err.message);
+      showToast("error", err.message);
     }
   };
 
-  const handleRename = (video: any) => {
-    const newTitle = prompt("Yangi nom:", video.title);
-    if (newTitle && newTitle !== video.title) {
-      fetch(`${SERVER_URL}/api/videos/${video.id}`, {
+  const handleRenameVideo = async (video: VideoItem) => {
+    const newTitle = prompt("Yangi nom kiriting:", video.title);
+    if (!newTitle || newTitle === video.title) return;
+    try {
+      const res = await fetch(`${SERVER_URL}/api/videos/${video.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title: newTitle }),
-      })
-        .then(res => res.json())
-        .then(() => {
-          showMessage("success", "Nom o'zgartirildi");
-          loadVideos();
-        })
-        .catch(err => showMessage("error", err.message));
+      });
+      if (!res.ok) throw new Error("O'zgartirib bo'lmadi");
+      showToast("success", `✏️ Nom o'zgartirildi`);
+      loadVideos();
+    } catch (err: any) {
+      showToast("error", err.message);
     }
   };
 
-  // =========================================================================
+  const handleDeleteMusic = async (id: number, title: string) => {
+    if (!confirm(`"${title}" ni o'chirmoqchimisiz?`)) return;
+    try {
+      const res = await fetch(`${SERVER_URL}/api/music/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("O'chirib bo'lmadi");
+      showToast("success", `🗑️ "${title}" o'chirildi`);
+      loadMusic();
+      loadStats();
+    } catch (err: any) {
+      showToast("error", err.message);
+    }
+  };
+
+  const handleRenameMusic = async (music: MusicItem) => {
+    const newTitle = prompt("Yangi nom kiriting:", music.title);
+    if (!newTitle || newTitle === music.title) return;
+    try {
+      const res = await fetch(`${SERVER_URL}/api/music/${music.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: newTitle, author: music.author }),
+      });
+      if (!res.ok) throw new Error("O'zgartirib bo'lmadi");
+      showToast("success", `✏️ Nom o'zgartirildi`);
+      loadMusic();
+    } catch (err: any) {
+      showToast("error", err.message);
+    }
+  };
+
+  // ========================================================================
+  // Helpers
+  // ========================================================================
+
+  const formatFileSize = (size: number) => {
+    if (size < 1024) return size + " B";
+    if (size < 1024 * 1024) return (size / 1024).toFixed(1) + " KB";
+    return (size / (1024 * 1024)).toFixed(1) + " MB";
+  };
+
+  const getImageUrl = (src: string) => {
+    if (src.startsWith("http")) return src;
+    return `${SERVER_URL}${src}`;
+  };
+
+  // ========================================================================
   // LOGIN SCREEN
-  // =========================================================================
+  // ========================================================================
 
   if (!isAuthenticated) {
     return (
-      <div className="admin-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div className="admin-card" style={{ maxWidth: '400px', width: '100%' }}>
-          <h2 className="admin-card-title" style={{ textAlign: 'center' }}>🔐 Admin Panel</h2>
-          <p className="admin-card-desc" style={{ textAlign: 'center' }}>Tizimga kirish</p>
+      <div className="admin-root">
+        <div className="admin-login-bg">
+          <div className="admin-login-card">
+            <div className="admin-login-logo">🎬</div>
+            <h2 className="admin-login-title">Admin Panel</h2>
+            <p className="admin-login-desc">Creative Design boshqaruv tizimi</p>
 
-          <form onSubmit={handleLogin}>
-            <div className="admin-form-group">
-              <label className="admin-label">Login</label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="admin-input"
-                placeholder="admin"
-              />
-            </div>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (username === "admin" && password === ADMIN_PASSWORD) {
+                setIsAuthenticated(true);
+                setLoginError("");
+              } else {
+                setLoginError("Login yoki parol noto'g'ri!");
+              }
+            }}>
+              <div className="admin-form-group">
+                <label className="admin-label">Login</label>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="admin-input"
+                  placeholder="admin"
+                  autoComplete="username"
+                />
+              </div>
 
-            <div className="admin-form-group">
-              <label className="admin-label">Parol</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="admin-input"
-                placeholder="••••••••"
-              />
-            </div>
+              <div className="admin-form-group">
+                <label className="admin-label">Parol</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="admin-input"
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                />
+              </div>
 
-            {loginError && (
-              <div className="admin-message error">{loginError}</div>
-            )}
+              <button type="submit" className="admin-login-btn">Kirish →</button>
 
-            <button type="submit" className="admin-btn">Kirish</button>
-          </form>
+              {loginError && <div className="admin-login-error">{loginError}</div>}
+            </form>
 
-          <button
-            onClick={() => navigate("/")}
-            style={{ marginTop: '1rem', background: 'none', border: 'none', color: '#78716c', cursor: 'pointer', width: '100%' }}
-          >
-            ← Bosh sahifaga qaytish
-          </button>
+            <button onClick={() => navigate("/")} className="admin-login-back">
+              ← Bosh sahifaga qaytish
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
-  // =========================================================================
-  // MAIN ADMIN PANEL
-  // =========================================================================
+  // ========================================================================
+  // MAIN ADMIN DASHBOARD
+  // ========================================================================
 
   return (
-    <div className="admin-container">
-      {/* Header */}
-      <div className="admin-header">
-        <button onClick={() => navigate("/")} className="admin-back-btn">←</button>
-        <h1 className="admin-title">Admin Panel</h1>
-        <span className={`admin-badge ${serverConnected ? '' : 'offline'}`}>
-          {serverConnected ? "🟢 Online" : "🔴 Offline"}
-        </span>
-      </div>
-
-      <div className="admin-content">
-        {/* Stats */}
-        <div className="admin-card" style={{ padding: '1rem', marginBottom: '1rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', textAlign: 'center' }}>
-            <div>
-              <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#229ed9' }}>
-                {videoStats.total}
-              </div>
-              <div style={{ fontSize: '0.75rem', color: '#78716c' }}>Jami Videolar</div>
+    <div className="admin-root">
+      <div className="admin-bg-pattern" />
+      <div className="admin-wrapper">
+        {/* ===== HEADER ===== */}
+        <div className="admin-header">
+          <div className="admin-header-inner">
+            <div className="admin-header-left">
+              <button onClick={() => navigate("/")} className="admin-back-btn">←</button>
+              <span className="admin-logo-text">Admin Panel</span>
             </div>
-            <div style={{ width: '1px', height: '40px', background: '#e7e5e4' }}></div>
-            <div>
-              <div style={{ fontSize: '0.875rem', fontWeight: '600', color: '#1c1917' }}>
-                {videoStats.lastUpload ? '✓' : '○'}
-              </div>
-              <div style={{ fontSize: '0.75rem', color: '#78716c', maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {videoStats.lastUpload || "Yo'q"}
-              </div>
+            <div className={`admin-badge-online ${serverConnected ? "connected" : "disconnected"}`}>
+              <span className="admin-badge-dot" />
+              {serverConnected ? "Online" : "Offline"}
             </div>
           </div>
         </div>
 
-        {/* Message */}
+        {/* ===== STATS ===== */}
+        <div className="admin-stats-grid">
+          <div className="admin-stat-card videos">
+            <div className="admin-stat-icon">📹</div>
+            <div className="admin-stat-value">{stats.videos}</div>
+            <div className="admin-stat-label">Videolar</div>
+          </div>
+          <div className="admin-stat-card music">
+            <div className="admin-stat-icon">🎵</div>
+            <div className="admin-stat-value">{stats.music}</div>
+            <div className="admin-stat-label">Musiqalar</div>
+          </div>
+          <div className="admin-stat-card disk">
+            <div className="admin-stat-icon">💾</div>
+            <div className="admin-stat-value" style={{ fontSize: "16px" }}>{stats.diskUsage}</div>
+            <div className="admin-stat-label">Disk</div>
+          </div>
+        </div>
+
+        {/* ===== TOAST ===== */}
         {message.text && (
-          <div className={`admin-message ${message.type}`}>{message.text}</div>
+          <div className={`admin-toast ${message.type}`}>
+            {message.type === "success" ? "✅" : "❌"} {message.text}
+          </div>
         )}
 
-        {/* Tab Navigation */}
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+        {/* ===== TABS ===== */}
+        <div className="admin-tabs">
           <button
+            className={`admin-tab ${activeTab === "video" ? "active-video" : ""}`}
             onClick={() => setActiveTab("video")}
-            className="admin-btn"
-            style={{
-              flex: 1,
-              background: activeTab === "video" ? '#229ed9' : '#e7e5e4',
-              color: activeTab === "video" ? 'white' : '#57534e',
-            }}
           >
             🎬 Video
           </button>
           <button
+            className={`admin-tab ${activeTab === "music" ? "active-music" : ""}`}
             onClick={() => setActiveTab("music")}
-            className="admin-btn"
-            style={{
-              flex: 1,
-              background: activeTab === "music" ? '#a855f7' : '#e7e5e4',
-              color: activeTab === "music" ? 'white' : '#57534e',
-            }}
           >
             🎵 Musiqa
           </button>
         </div>
 
-        {/* ===== VIDEO TAB ===== */}
+        {/* ============================================================== */}
+        {/* VIDEO TAB                                                      */}
+        {/* ============================================================== */}
         {activeTab === "video" && (
           <>
-            {/* Video Upload Form */}
+            {/* Upload Form */}
             <div className="admin-card">
-              <h3 className="admin-card-title">📹 Yangi Video Yuklash</h3>
-              <p className="admin-card-desc">Video va rasm yuklang — avtomatik hostingga joylashadi</p>
+              <div className="admin-card-header">
+                <div className="admin-card-icon video">📹</div>
+                <div>
+                  <div className="admin-card-title">Yangi Video Yuklash</div>
+                  <div className="admin-card-desc">Video va thumbnail rasmni tanlang</div>
+                </div>
+              </div>
 
-              <form onSubmit={handleUpload}>
+              <form onSubmit={handleVideoUpload}>
                 <div className="admin-form-group">
                   <label className="admin-label">Video Nomi</label>
                   <input
                     type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
+                    value={videoTitle}
+                    onChange={(e) => setVideoTitle(e.target.value)}
                     className="admin-input"
                     placeholder="Masalan: Dizayn 50"
                   />
                 </div>
 
+                {/* Thumbnail */}
                 <div className="admin-form-group">
                   <label className="admin-label">Rasm (Thumbnail)</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-                    className="admin-file-input"
-                  />
+                  <div className={`admin-file-drop ${imageFile ? "active" : ""}`}>
+                    <input
+                      ref={imageInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                      className="admin-file-input-hidden"
+                    />
+                    {!imageFile ? (
+                      <>
+                        <span className="admin-file-drop-icon">🖼️</span>
+                        <div className="admin-file-drop-text">Rasmni tanlang yoki tashlang</div>
+                        <div className="admin-file-drop-hint">JPG, PNG, WebP — max 50MB</div>
+                      </>
+                    ) : (
+                      <div className="admin-file-drop-selected">
+                        <span>🖼️</span>
+                        <span className="admin-file-name">{imageFile.name}</span>
+                        <span className="admin-file-size">{formatFileSize(imageFile.size)}</span>
+                      </div>
+                    )}
+                  </div>
+                  {imagePreview && (
+                    <div className="admin-preview-container">
+                      <img src={imagePreview} alt="Preview" className="admin-preview-image" />
+                      <div className="admin-preview-overlay">Thumbnail ko'rinishi</div>
+                    </div>
+                  )}
                 </div>
 
+                {/* Video File */}
                 <div className="admin-form-group">
-                  <label className="admin-label">Video</label>
-                  <input
-                    type="file"
-                    accept="video/*"
-                    onChange={(e) => setVideoFile(e.target.files?.[0] || null)}
-                    className="admin-file-input"
-                  />
+                  <label className="admin-label">Video Fayl</label>
+                  <div className={`admin-file-drop ${videoFile ? "active" : ""}`}>
+                    <input
+                      ref={videoInputRef}
+                      type="file"
+                      accept="video/*"
+                      onChange={(e) => setVideoFile(e.target.files?.[0] || null)}
+                      className="admin-file-input-hidden"
+                    />
+                    {!videoFile ? (
+                      <>
+                        <span className="admin-file-drop-icon">🎥</span>
+                        <div className="admin-file-drop-text">Video faylni tanlang</div>
+                        <div className="admin-file-drop-hint">MP4, MOV, WebM — max 500MB</div>
+                      </>
+                    ) : (
+                      <div className="admin-file-drop-selected">
+                        <span>🎥</span>
+                        <span className="admin-file-name">{videoFile.name}</span>
+                        <span className="admin-file-size">{formatFileSize(videoFile.size)}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <button type="submit" disabled={isUploading} className="admin-btn">
-                  {isUploading ? "⏳ Yuklanmoqda..." : "📤 Videoni Yuklash"}
+                {/* Upload Progress */}
+                {isUploadingVideo && (
+                  <div className="admin-upload-progress">
+                    <div className="admin-progress-bar-bg">
+                      <div
+                        className="admin-progress-bar-fill video-progress"
+                        style={{ width: `${videoUploadProgress}%` }}
+                      />
+                    </div>
+                    <div className="admin-progress-text">
+                      {videoUploadProgress < 100 ? `Yuklanmoqda... ${videoUploadProgress}%` : "Server qayta ishlamoqda..."}
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isUploadingVideo}
+                  className="admin-btn-primary video-btn"
+                  style={{ marginTop: "16px" }}
+                >
+                  {isUploadingVideo ? (
+                    <>⏳ Yuklanmoqda... {videoUploadProgress}%</>
+                  ) : (
+                    <>📤 Video Yuklash</>
+                  )}
                 </button>
               </form>
-            </div>
-
-            {/* Auto Download */}
-            <div className="admin-card" style={{ border: '2px solid #a855f7' }}>
-              <h3 className="admin-card-title" style={{ color: '#a855f7' }}>📥 Instagram/YouTube dan Yuklash</h3>
-              <p className="admin-card-desc">Linkni tashlang, avtomatik yuklab templatesga qo'shiladi</p>
-
-              <form onSubmit={handleAutoDownload}>
-                <div className="admin-form-group">
-                  <label className="admin-label">Instagram yoki YouTube Link</label>
-                  <input
-                    type="url"
-                    value={autoUrl}
-                    onChange={(e) => setAutoUrl(e.target.value)}
-                    className="admin-input"
-                    placeholder="https://www.instagram.com/reel/..."
-                  />
-                </div>
-
-                <button type="submit" disabled={isAutoDownloading} className="admin-btn admin-btn-gradient">
-                  {isAutoDownloading ? "⏳ Yuklanmoqda..." : "🚀 Avto Yuklash"}
-                </button>
-              </form>
-
-              <div style={{ marginTop: '0.75rem', fontSize: '0.7rem', color: '#78716c' }}>
-                ✓ Instagram Reels &nbsp; ✓ YouTube &nbsp; ✓ TikTok
-              </div>
             </div>
 
             {/* Videos List */}
             <div className="admin-card">
-              <h3 className="admin-card-title">📋 Yuklangan Videolar</h3>
-
-              {isLoading ? (
-                <div style={{ textAlign: 'center', padding: '2rem' }}>
-                  <div className="admin-spinner" style={{ margin: '0 auto' }}></div>
+              <div className="admin-list-header">
+                <div className="admin-card-header" style={{ marginBottom: 0 }}>
+                  <div className="admin-card-icon video">📋</div>
+                  <div>
+                    <div className="admin-card-title">Yuklangan Videolar</div>
+                    <div className="admin-card-desc">Barcha yuklangan video shablonlar</div>
+                  </div>
                 </div>
-              ) : uploadedVideos.length === 0 ? (
-                <p className="admin-empty">Hozircha yuklangan videolar yo'q</p>
+                <span className="admin-list-count">{videos.length} ta</span>
+              </div>
+
+              {isLoadingVideos ? (
+                <div className="admin-spinner" />
+              ) : videos.length === 0 ? (
+                <div className="admin-empty">
+                  <div className="admin-empty-icon">📹</div>
+                  <div className="admin-empty-text">Hozircha video yuklanmagan</div>
+                </div>
               ) : (
-                <div className="admin-videos-list">
-                  {uploadedVideos.map((video) => (
-                    <div key={video.id} className="admin-video-item">
+                <div className="admin-items-list">
+                  {[...videos].reverse().map((video) => (
+                    <div key={video.id} className="admin-item">
                       <img
-                        src={video.image.startsWith('http') ? video.image : `${SERVER_URL}${video.image}`}
+                        src={getImageUrl(video.image)}
                         alt={video.title}
-                        className="admin-video-thumb"
+                        className="admin-item-thumb"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect fill='%23e5e5e5' width='64' height='64'/%3E%3Ctext fill='%23999' x='32' y='36' text-anchor='middle' font-size='12'%3E?%3C/text%3E%3C/svg%3E";
+                          (e.target as HTMLImageElement).src =
+                            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect fill='%231a1a26' width='48' height='48' rx='10'/%3E%3Ctext fill='%235a5a72' x='24' y='28' text-anchor='middle' font-size='16'%3E🎬%3C/text%3E%3C/svg%3E";
                         }}
                       />
-                      <div className="admin-video-info">
-                        <p className="admin-video-title">{video.title}</p>
-                        <p className="admin-video-id">ID: {video.id}</p>
+                      <div className="admin-item-info">
+                        <div className="admin-item-title">{video.title}</div>
+                        <div className="admin-item-meta">
+                          ID: {video.id} {video.size ? `• ${video.size}` : ""}
+                        </div>
                       </div>
-                      <div className="admin-video-actions">
-                        <button onClick={() => handleRename(video)} className="admin-action-btn edit" title="Nomini o'zgartirish">✏️</button>
-                        <button onClick={() => handleDelete(video.id, video.title)} className="admin-action-btn delete" title="O'chirish">🗑️</button>
+                      <div className="admin-item-actions">
+                        <button
+                          onClick={() => handleRenameVideo(video)}
+                          className="admin-action-btn"
+                          title="Nomini o'zgartirish"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          onClick={() => handleDeleteVideo(video.id, video.title)}
+                          className="admin-action-btn delete"
+                          title="O'chirish"
+                        >
+                          🗑️
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -460,50 +700,153 @@ export const AdminPage = () => {
           </>
         )}
 
-        {/* ===== MUSIC TAB ===== */}
+        {/* ============================================================== */}
+        {/* MUSIC TAB                                                      */}
+        {/* ============================================================== */}
         {activeTab === "music" && (
-          <div className="admin-card">
-            <h3 className="admin-card-title">🎵 Yangi Musiqa Yuklash</h3>
-            <p className="admin-card-desc">Musiqa faylni yuklang — avtomatik hostingga joylashadi</p>
-
-            <form onSubmit={handleMusicUpload}>
-              <div className="admin-form-group">
-                <label className="admin-label">Musiqa Nomi</label>
-                <input
-                  type="text"
-                  value={musicTitle}
-                  onChange={(e) => setMusicTitle(e.target.value)}
-                  className="admin-input"
-                  placeholder="Masalan: Oshiq yurak"
-                />
+          <>
+            {/* Upload Form */}
+            <div className="admin-card">
+              <div className="admin-card-header">
+                <div className="admin-card-icon music">🎵</div>
+                <div>
+                  <div className="admin-card-title">Yangi Musiqa Yuklash</div>
+                  <div className="admin-card-desc">MP3, M4A, WAV fayllarni yuklang</div>
+                </div>
               </div>
 
-              <div className="admin-form-group">
-                <label className="admin-label">Muallif</label>
-                <input
-                  type="text"
-                  value={musicAuthor}
-                  onChange={(e) => setMusicAuthor(e.target.value)}
-                  className="admin-input"
-                  placeholder="Masalan: Alisher Uzoqov"
-                />
+              <form onSubmit={handleMusicUpload}>
+                <div className="admin-form-group">
+                  <label className="admin-label">Musiqa Nomi</label>
+                  <input
+                    type="text"
+                    value={musicTitle}
+                    onChange={(e) => setMusicTitle(e.target.value)}
+                    className="admin-input music-focus"
+                    placeholder="Masalan: Oshiq yurak"
+                  />
+                </div>
+
+                <div className="admin-form-group">
+                  <label className="admin-label">Muallif</label>
+                  <input
+                    type="text"
+                    value={musicAuthor}
+                    onChange={(e) => setMusicAuthor(e.target.value)}
+                    className="admin-input music-focus"
+                    placeholder="Masalan: Alisher Uzoqov"
+                  />
+                </div>
+
+                <div className="admin-form-group">
+                  <label className="admin-label">Musiqa Fayl</label>
+                  <div className={`admin-file-drop music-drop ${musicFile ? "active" : ""}`}>
+                    <input
+                      ref={musicInputRef}
+                      type="file"
+                      accept="audio/*"
+                      onChange={(e) => setMusicFile(e.target.files?.[0] || null)}
+                      className="admin-file-input-hidden"
+                    />
+                    {!musicFile ? (
+                      <>
+                        <span className="admin-file-drop-icon">🎧</span>
+                        <div className="admin-file-drop-text">Musiqa faylni tanlang</div>
+                        <div className="admin-file-drop-hint">MP3, M4A, WAV, OGG — max 50MB</div>
+                      </>
+                    ) : (
+                      <div className="admin-file-drop-selected music-selected">
+                        <span>🎧</span>
+                        <span className="admin-file-name">{musicFile.name}</span>
+                        <span className="admin-file-size">{formatFileSize(musicFile.size)}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Upload Progress */}
+                {isUploadingMusic && (
+                  <div className="admin-upload-progress">
+                    <div className="admin-progress-bar-bg">
+                      <div
+                        className="admin-progress-bar-fill music-progress"
+                        style={{ width: `${musicUploadProgress}%` }}
+                      />
+                    </div>
+                    <div className="admin-progress-text">
+                      {musicUploadProgress < 100 ? `Yuklanmoqda... ${musicUploadProgress}%` : "Server qayta ishlamoqda..."}
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isUploadingMusic}
+                  className="admin-btn-primary music-btn"
+                  style={{ marginTop: "16px" }}
+                >
+                  {isUploadingMusic ? (
+                    <>⏳ Yuklanmoqda... {musicUploadProgress}%</>
+                  ) : (
+                    <>🎵 Musiqa Yuklash</>
+                  )}
+                </button>
+              </form>
+            </div>
+
+            {/* Music List */}
+            <div className="admin-card">
+              <div className="admin-list-header">
+                <div className="admin-card-header" style={{ marginBottom: 0 }}>
+                  <div className="admin-card-icon music">📋</div>
+                  <div>
+                    <div className="admin-card-title">Yuklangan Musiqalar</div>
+                    <div className="admin-card-desc">Barcha yuklangan musiqa fayllar</div>
+                  </div>
+                </div>
+                <span className="admin-list-count">{musicList.length} ta</span>
               </div>
 
-              <div className="admin-form-group">
-                <label className="admin-label">Musiqa Fayl (MP3/M4A)</label>
-                <input
-                  type="file"
-                  accept="audio/*"
-                  onChange={(e) => setMusicFile(e.target.files?.[0] || null)}
-                  className="admin-file-input admin-music-input"
-                />
-              </div>
-
-              <button type="submit" disabled={isUploadingMusic} className="admin-btn" style={{ background: '#a855f7' }}>
-                {isUploadingMusic ? "⏳ Yuklanmoqda..." : "🎵 Musiqani Yuklash"}
-              </button>
-            </form>
-          </div>
+              {isLoadingMusic ? (
+                <div className="admin-spinner" />
+              ) : musicList.length === 0 ? (
+                <div className="admin-empty">
+                  <div className="admin-empty-icon">🎵</div>
+                  <div className="admin-empty-text">Hozircha musiqa yuklanmagan</div>
+                </div>
+              ) : (
+                <div className="admin-items-list">
+                  {[...musicList].reverse().map((music) => (
+                    <div key={music.id} className="admin-item">
+                      <div className="admin-item-music-icon">🎵</div>
+                      <div className="admin-item-info">
+                        <div className="admin-item-title">{music.title}</div>
+                        <div className="admin-item-meta">
+                          {music.author} {music.size ? `• ${music.size}` : ""}
+                        </div>
+                      </div>
+                      <div className="admin-item-actions">
+                        <button
+                          onClick={() => handleRenameMusic(music)}
+                          className="admin-action-btn"
+                          title="Nomini o'zgartirish"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          onClick={() => handleDeleteMusic(music.id, music.title)}
+                          className="admin-action-btn delete"
+                          title="O'chirish"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
     </div>

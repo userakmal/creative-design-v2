@@ -4,8 +4,6 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
-import { spawn } from 'child_process';
-import * as ftp from 'basic-ftp';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,18 +12,30 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // ============================================================================
-// FTP Configuration — sayt.uz hosting
+// Admin Credentials
 // ============================================================================
-const FTP_CONFIG = {
-  host: 'ns8.sayt.uz',
-  user: 'creative-designuz',
-  password: 'qH9fZ2yF5z',
-  secure: false,
-  remotePath: '/public_html',
+const ADMIN_PASSWORD = 'creative2026';
+
+// ============================================================================
+// Data Paths
+// ============================================================================
+const DATA_DIR = path.join(__dirname, 'public', 'data');
+const VIDEOS_JSON = path.join(DATA_DIR, 'videos.json');
+const MUSIC_JSON = path.join(DATA_DIR, 'music.json');
+const UPLOAD_DIRS = {
+  video: path.join(__dirname, 'public', 'videos'),
+  image: path.join(__dirname, 'public', 'image'),
+  music: path.join(__dirname, 'public', 'music'),
 };
 
-// Hosting CDN base URL
-const CDN_BASE = 'https://creative-design.uz';
+// Ensure all directories exist
+[DATA_DIR, ...Object.values(UPLOAD_DIRS)].forEach(dir => {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+});
+
+// Initialize JSON files if missing
+if (!fs.existsSync(VIDEOS_JSON)) fs.writeFileSync(VIDEOS_JSON, '[]', 'utf-8');
+if (!fs.existsSync(MUSIC_JSON)) fs.writeFileSync(MUSIC_JSON, '[]', 'utf-8');
 
 // ============================================================================
 // Express Configuration
@@ -39,320 +49,262 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ============================================================================
-// Multer File Upload
+// Multer File Upload Configuration
 // ============================================================================
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    let uploadPath = '';
-    if (file.fieldname === 'video') {
-      uploadPath = path.join(__dirname, 'public', 'videos');
-    } else if (file.fieldname === 'image') {
-      uploadPath = path.join(__dirname, 'public', 'image');
-    } else if (file.fieldname === 'music') {
-      uploadPath = path.join(__dirname, 'public', 'music');
-    }
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-    cb(null, uploadPath);
+    const dirMap = { video: UPLOAD_DIRS.video, image: UPLOAD_DIRS.image, music: UPLOAD_DIRS.music };
+    cb(null, dirMap[file.fieldname] || UPLOAD_DIRS.video);
   },
   filename: (req, file, cb) => {
+    const prefix = { video: 'v', image: 'i', music: 'm' }[file.fieldname] || 'f';
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const ext = path.extname(file.originalname);
-    if (file.fieldname === 'video') {
-      cb(null, `v_${uniqueSuffix}${ext}`);
-    } else if (file.fieldname === 'image') {
-      cb(null, `i_${uniqueSuffix}${ext}`);
-    } else if (file.fieldname === 'music') {
-      cb(null, `m_${uniqueSuffix}${ext}`);
-    }
+    cb(null, `${prefix}_${uniqueSuffix}${ext}`);
   },
 });
 
 const upload = multer({
-  storage: storage,
-  limits: { fileSize: 200 * 1024 * 1024 }, // 200MB
+  storage,
+  limits: { fileSize: 500 * 1024 * 1024 }, // 500MB max
+  fileFilter: (req, file, cb) => {
+    const allowedVideo = /\.(mp4|mov|avi|mkv|webm)$/i;
+    const allowedImage = /\.(jpg|jpeg|png|webp|gif|bmp)$/i;
+    const allowedMusic = /\.(mp3|m4a|wav|ogg|aac|flac)$/i;
+
+    if (file.fieldname === 'video' && allowedVideo.test(path.extname(file.originalname))) {
+      cb(null, true);
+    } else if (file.fieldname === 'image' && allowedImage.test(path.extname(file.originalname))) {
+      cb(null, true);
+    } else if (file.fieldname === 'music' && allowedMusic.test(path.extname(file.originalname))) {
+      cb(null, true);
+    } else {
+      cb(new Error(`Noto'g'ri fayl formati: ${file.originalname}`));
+    }
+  }
 });
 
 // ============================================================================
-// FTP Upload Helper
+// Helper Functions
 // ============================================================================
-
-/**
- * Upload a local file to FTP hosting.
- * @param localPath - Absolute path to local file
- * @param remoteDir - Remote directory relative to FTP_CONFIG.remotePath (e.g., 'videos')
- * @param remoteFilename - Filename on remote server
- * @returns Remote URL
- */
-async function uploadToFTP(localPath, remoteDir, remoteFilename) {
-  const client = new ftp.Client();
-  client.ftp.verbose = false;
-
+function readJSON(filePath) {
   try {
-    await client.access({
-      host: FTP_CONFIG.host,
-      user: FTP_CONFIG.user,
-      password: FTP_CONFIG.password,
-      secure: FTP_CONFIG.secure,
-    });
-
-    const remotePath = `${FTP_CONFIG.remotePath}/${remoteDir}`;
-
-    // Ensure remote directory exists
-    await client.ensureDir(remotePath);
-
-    // Upload file
-    await client.uploadFrom(localPath, `${remotePath}/${remoteFilename}`);
-
-    console.log(`✅ FTP uploaded: ${remoteFilename} → ${remotePath}/`);
-    return `${CDN_BASE}/${remoteDir}/${remoteFilename}`;
-  } catch (err) {
-    console.error(`❌ FTP upload failed for ${remoteFilename}:`, err.message);
-    throw err;
-  } finally {
-    client.close();
+    if (!fs.existsSync(filePath)) return [];
+    const content = fs.readFileSync(filePath, 'utf-8');
+    return JSON.parse(content);
+  } catch {
+    return [];
   }
 }
 
-// ============================================================================
-// API Endpoints
-// ============================================================================
+function writeJSON(filePath, data) {
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
+}
 
-// Health check
+function getNextId(items) {
+  if (items.length === 0) return 1;
+  return Math.max(...items.map(i => i.id || 0)) + 1;
+}
+
+function deleteLocalFile(relativePath) {
+  if (!relativePath || relativePath.startsWith('http')) return;
+  const fullPath = path.join(__dirname, 'public', relativePath);
+  if (fs.existsSync(fullPath)) {
+    fs.unlinkSync(fullPath);
+    console.log(`🗑️ Deleted: ${fullPath}`);
+  }
+}
+
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+// ============================================================================
+// API: Health Check
+// ============================================================================
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Upload server is running', ftp: FTP_CONFIG.host });
+  const videos = readJSON(VIDEOS_JSON);
+  const music = readJSON(MUSIC_JSON);
+  res.json({
+    status: 'ok',
+    message: '🚀 Upload server ishlamoqda',
+    stats: {
+      videos: videos.length,
+      music: music.length,
+    },
+    uptime: Math.floor(process.uptime()) + 's',
+  });
 });
 
-// Upload endpoint — saves locally + uploads to FTP hosting
+// ============================================================================
+// API: Dashboard Stats
+// ============================================================================
+app.get('/api/stats', (req, res) => {
+  const videos = readJSON(VIDEOS_JSON);
+  const music = readJSON(MUSIC_JSON);
+
+  // Calculate disk usage
+  let totalSize = 0;
+  const countFiles = (dir) => {
+    if (!fs.existsSync(dir)) return 0;
+    const files = fs.readdirSync(dir);
+    files.forEach(f => {
+      const stat = fs.statSync(path.join(dir, f));
+      totalSize += stat.size;
+    });
+    return files.length;
+  };
+
+  const videoFiles = countFiles(UPLOAD_DIRS.video);
+  const imageFiles = countFiles(UPLOAD_DIRS.image);
+  const musicFiles = countFiles(UPLOAD_DIRS.music);
+
+  res.json({
+    videos: videos.length,
+    music: music.length,
+    files: { videos: videoFiles, images: imageFiles, music: musicFiles },
+    diskUsage: formatFileSize(totalSize),
+    lastVideoUpload: videos.length > 0 ? videos[videos.length - 1].title : null,
+    lastMusicUpload: music.length > 0 ? music[music.length - 1].title : null,
+  });
+});
+
+// ============================================================================
+// API: Video Upload
+// ============================================================================
 app.post('/api/upload', upload.fields([
   { name: 'video', maxCount: 1 },
   { name: 'image', maxCount: 1 },
-]), async (req, res) => {
-  console.log('Upload request received');
-
+]), (req, res) => {
   try {
-    const password = req.body.password;
-    if (password !== 'creative2026') {
-      return res.status(401).json({ error: "Parol noto'g'ri yoki ruxsat yo'q" });
+    const { password, title } = req.body;
+    if (password !== ADMIN_PASSWORD) {
+      return res.status(401).json({ error: "Parol noto'g'ri" });
     }
 
     if (!req.files?.video || !req.files?.image) {
-      return res.status(400).json({ error: "Iltimos, video va rasmni to'liq yuklang" });
+      return res.status(400).json({ error: "Video va rasm fayllarini yuklang" });
     }
 
-    const title = req.body.title || 'Yangi video';
     const videoFile = req.files.video[0];
     const imageFile = req.files.image[0];
-
-    console.log('Files saved locally:', videoFile.filename, imageFile.filename);
-
-    // Upload to FTP hosting
-    let videoUrl, imageUrl;
-    try {
-      console.log('📤 Uploading to FTP hosting...');
-
-      videoUrl = await uploadToFTP(
-        videoFile.path,
-        'videos',
-        videoFile.filename,
-      );
-
-      imageUrl = await uploadToFTP(
-        imageFile.path,
-        'image',
-        imageFile.filename,
-      );
-
-      console.log('✅ FTP upload complete!');
-      console.log('   Video:', videoUrl);
-      console.log('   Image:', imageUrl);
-    } catch (ftpErr) {
-      console.error('⚠️ FTP upload failed, using local paths:', ftpErr.message);
-      // Fallback to local paths
-      videoUrl = `/videos/${videoFile.filename}`;
-      imageUrl = `/image/${imageFile.filename}`;
-    }
-
-    // Save to videos.json
-    const dataDir = path.join(__dirname, 'public', 'data');
-    const dataFile = path.join(dataDir, 'videos.json');
-
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
-
-    let videos = [];
-    if (fs.existsSync(dataFile)) {
-      const content = fs.readFileSync(dataFile, 'utf-8');
-      videos = JSON.parse(content);
-    }
-
-    let maxId = 48;
-    videos.forEach(v => {
-      if (v.id && v.id > maxId) maxId = v.id;
-    });
+    const videos = readJSON(VIDEOS_JSON);
+    const newId = getNextId(videos);
 
     const newVideo = {
-      id: maxId + 1,
-      title: title,
-      image: imageUrl,
-      videoUrl: videoUrl,
+      id: newId,
+      title: title || `Dizayn ${newId}`,
+      image: `/image/${imageFile.filename}`,
+      videoUrl: `/videos/${videoFile.filename}`,
+      uploadedAt: new Date().toISOString(),
+      size: formatFileSize(videoFile.size + imageFile.size),
     };
 
     videos.push(newVideo);
-    fs.writeFileSync(dataFile, JSON.stringify(videos, null, 2), 'utf-8');
+    writeJSON(VIDEOS_JSON, videos);
 
-    console.log(`✅ New video saved: ${title} (ID: ${newVideo.id})`);
+    console.log(`✅ Yangi video yuklandi: "${newVideo.title}" (ID: ${newId})`);
+    console.log(`   📁 Video: ${videoFile.filename} (${formatFileSize(videoFile.size)})`);
+    console.log(`   🖼️ Rasm: ${imageFile.filename} (${formatFileSize(imageFile.size)})`);
 
     res.json({
       success: true,
-      message: 'Video muvaffaqiyatli saqlandi va hostingga yuklandi!',
+      message: `"${newVideo.title}" muvaffaqiyatli yuklandi!`,
       data: newVideo,
+      totalVideos: videos.length,
     });
   } catch (error) {
-    console.error('Upload error:', error);
-    res.status(500).json({ error: error.message || 'Serverda xatolik yuz berdi' });
+    console.error('❌ Upload error:', error);
+    res.status(500).json({ error: error.message || 'Server xatosi' });
   }
 });
 
-// Get all videos
+// ============================================================================
+// API: Get All Videos
+// ============================================================================
 app.get('/api/videos', (req, res) => {
   try {
-    const dataFile = path.join(__dirname, 'public', 'data', 'videos.json');
-    if (!fs.existsSync(dataFile)) {
-      return res.json([]);
-    }
-    const content = fs.readFileSync(dataFile, 'utf-8');
-    res.json(JSON.parse(content));
+    const videos = readJSON(VIDEOS_JSON);
+    res.json(videos);
   } catch (error) {
     console.error('Error reading videos:', error);
-    res.status(500).json({ error: 'Failed to read videos' });
+    res.status(500).json({ error: 'Videolarni o\'qishda xatolik' });
   }
 });
 
-// Delete video
+// ============================================================================
+// API: Delete Video
+// ============================================================================
 app.delete('/api/videos/:id', (req, res) => {
   try {
     const videoId = parseInt(req.params.id);
-    const dataFile = path.join(__dirname, 'public', 'data', 'videos.json');
+    const videos = readJSON(VIDEOS_JSON);
+    const index = videos.findIndex(v => v.id === videoId);
 
-    if (!fs.existsSync(dataFile)) {
-      return res.status(404).json({ error: 'Videos file not found' });
+    if (index === -1) {
+      return res.status(404).json({ error: 'Video topilmadi' });
     }
 
-    const content = fs.readFileSync(dataFile, 'utf-8');
-    let videos = JSON.parse(content);
+    const video = videos[index];
 
-    const videoIndex = videos.findIndex(v => v.id === videoId);
-    if (videoIndex === -1) {
-      return res.status(404).json({ error: 'Video not found' });
-    }
+    // Delete local files
+    deleteLocalFile(video.videoUrl);
+    deleteLocalFile(video.image);
 
-    const video = videos[videoIndex];
+    videos.splice(index, 1);
+    writeJSON(VIDEOS_JSON, videos);
 
-    // Delete local files if they exist
-    if (!video.videoUrl.startsWith('http')) {
-      const videoPath = path.join(__dirname, 'public', 'videos', path.basename(video.videoUrl));
-      if (fs.existsSync(videoPath)) fs.unlinkSync(videoPath);
-    }
-    if (!video.image.startsWith('http')) {
-      const imagePath = path.join(__dirname, 'public', 'image', path.basename(video.image));
-      if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
-    }
+    console.log(`🗑️ Video o'chirildi: "${video.title}" (ID: ${videoId})`);
 
-    videos.splice(videoIndex, 1);
-    fs.writeFileSync(dataFile, JSON.stringify(videos, null, 2), 'utf-8');
-
-    console.log(`Video deleted: ${video.title} (ID: ${videoId})`);
-    res.json({ success: true, message: "Video o'chirildi", deletedId: videoId });
+    res.json({
+      success: true,
+      message: `"${video.title}" o'chirildi`,
+      deletedId: videoId,
+      totalVideos: videos.length,
+    });
   } catch (error) {
     console.error('Delete error:', error);
-    res.status(500).json({ error: error.message || 'Serverda xatolik yuz berdi' });
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Rename video
+// ============================================================================
+// API: Rename Video
+// ============================================================================
 app.put('/api/videos/:id', (req, res) => {
   try {
     const videoId = parseInt(req.params.id);
     const { title } = req.body;
-    const dataFile = path.join(__dirname, 'public', 'data', 'videos.json');
+    const videos = readJSON(VIDEOS_JSON);
+    const index = videos.findIndex(v => v.id === videoId);
 
-    if (!fs.existsSync(dataFile) || !title?.trim()) {
-      return res.status(400).json({ error: 'Nom kiritish kerak' });
-    }
+    if (index === -1) return res.status(404).json({ error: 'Video topilmadi' });
+    if (!title?.trim()) return res.status(400).json({ error: 'Nom kiritish kerak' });
 
-    const content = fs.readFileSync(dataFile, 'utf-8');
-    let videos = JSON.parse(content);
+    const oldTitle = videos[index].title;
+    videos[index].title = title.trim();
+    writeJSON(VIDEOS_JSON, videos);
 
-    const videoIndex = videos.findIndex(v => v.id === videoId);
-    if (videoIndex === -1) {
-      return res.status(404).json({ error: 'Video not found' });
-    }
+    console.log(`✏️ Video nomi o'zgartirildi: "${oldTitle}" → "${title.trim()}"`);
 
-    videos[videoIndex].title = title.trim();
-    fs.writeFileSync(dataFile, JSON.stringify(videos, null, 2), 'utf-8');
-
-    console.log(`Video renamed: ${videoId} - ${title}`);
-    res.json({ success: true, message: "Nom o'zgartirildi", data: videos[videoIndex] });
+    res.json({ success: true, message: "Nom o'zgartirildi", data: videos[index] });
   } catch (error) {
     console.error('Update error:', error);
-    res.status(500).json({ error: error.message || 'Serverda xatolik yuz berdi' });
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Auto Download from Instagram/YouTube
-app.post('/api/auto-download', async (req, res) => {
-  try {
-    const { url, password } = req.body;
-
-    if (password !== 'creative2026') {
-      return res.status(401).json({ error: "Parol noto'g'ri" });
-    }
-    if (!url?.trim()) {
-      return res.status(400).json({ error: 'URL kiriting' });
-    }
-
-    console.log(`[INFO] Auto download started: ${url}`);
-
-    const scriptPath = path.join(__dirname, 'telegram-video-bot', 'auto_template_downloader.py');
-    if (!fs.existsSync(scriptPath)) {
-      return res.status(500).json({ error: 'Auto downloader script topilmadi' });
-    }
-
-    const pythonProcess = spawn('python', [scriptPath, url], {
-      env: { ...process.env, PYTHONIOENCODING: 'utf-8' },
-    });
-
-    let output = '';
-    let errorOutput = '';
-
-    pythonProcess.stdout.on('data', (data) => { output += data.toString(); });
-    pythonProcess.stderr.on('data', (data) => { errorOutput += data.toString(); });
-
-    pythonProcess.on('close', (code) => {
-      if (code === 0) {
-        res.json({ success: true, message: "Video muvaffaqiyatli yuklandi va templatesga qo'shildi" });
-      } else {
-        res.status(500).json({ error: 'Video yuklashda xatolik', details: errorOutput });
-      }
-    });
-  } catch (error) {
-    console.error('Auto download error:', error);
-    res.status(500).json({ error: error.message || 'Serverda xatolik yuz berdi' });
-  }
-});
-
-// Music upload endpoint
+// ============================================================================
+// API: Music Upload
+// ============================================================================
 app.post('/api/upload-music', upload.fields([
   { name: 'music', maxCount: 1 },
-]), async (req, res) => {
-  console.log('Music upload request received');
-
+]), (req, res) => {
   try {
-    const password = req.body.password;
-    if (password !== 'creative2026') {
+    const { password, title, author } = req.body;
+    if (password !== ADMIN_PASSWORD) {
       return res.status(401).json({ error: "Parol noto'g'ri" });
     }
 
@@ -360,68 +312,154 @@ app.post('/api/upload-music', upload.fields([
       return res.status(400).json({ error: 'Musiqa faylni yuklang' });
     }
 
-    const title = req.body.title || 'Yangi musiqa';
-    const author = req.body.author || 'Noma\'lum';
     const musicFile = req.files.music[0];
-
-    console.log('Music file saved locally:', musicFile.filename);
-
-    // Upload to FTP hosting
-    let musicUrl;
-    try {
-      musicUrl = await uploadToFTP(musicFile.path, 'music', musicFile.filename);
-      console.log('✅ Music FTP upload:', musicUrl);
-    } catch (ftpErr) {
-      console.error('⚠️ Music FTP failed, using local:', ftpErr.message);
-      musicUrl = `/music/${musicFile.filename}`;
-    }
-
-    // Save to music.json
-    const dataDir = path.join(__dirname, 'public', 'data');
-    const dataFile = path.join(dataDir, 'music.json');
-    if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-
-    let musicList = [];
-    if (fs.existsSync(dataFile)) {
-      musicList = JSON.parse(fs.readFileSync(dataFile, 'utf-8'));
-    }
-
-    let maxId = 10;
-    musicList.forEach(m => { if (m.id > maxId) maxId = m.id; });
+    const musicList = readJSON(MUSIC_JSON);
+    const newId = getNextId(musicList);
 
     const newMusic = {
-      id: maxId + 1,
-      title: title,
-      author: author,
+      id: newId,
+      title: title || 'Yangi musiqa',
+      author: author || "Noma'lum",
       duration: '0:00',
-      url: musicUrl,
+      url: `/music/${musicFile.filename}`,
+      uploadedAt: new Date().toISOString(),
+      size: formatFileSize(musicFile.size),
     };
 
     musicList.push(newMusic);
-    fs.writeFileSync(dataFile, JSON.stringify(musicList, null, 2), 'utf-8');
+    writeJSON(MUSIC_JSON, musicList);
 
-    console.log(`✅ Music saved: ${title} (ID: ${newMusic.id})`);
+    console.log(`🎵 Yangi musiqa yuklandi: "${newMusic.title}" by ${newMusic.author} (ID: ${newId})`);
+    console.log(`   📁 Fayl: ${musicFile.filename} (${formatFileSize(musicFile.size)})`);
 
     res.json({
       success: true,
-      message: 'Musiqa muvaffaqiyatli yuklandi!',
+      message: `"${newMusic.title}" muvaffaqiyatli yuklandi!`,
       data: newMusic,
+      totalMusic: musicList.length,
     });
   } catch (error) {
     console.error('Music upload error:', error);
-    res.status(500).json({ error: error.message || 'Serverda xatolik' });
+    res.status(500).json({ error: error.message || 'Server xatosi' });
   }
 });
 
-// Serve static files
-app.use('/videos', express.static(path.join(__dirname, 'public', 'videos')));
-app.use('/image', express.static(path.join(__dirname, 'public', 'image')));
-app.use('/music', express.static(path.join(__dirname, 'public', 'music')));
-app.use('/data', express.static(path.join(__dirname, 'public', 'data')));
+// ============================================================================
+// API: Get All Music
+// ============================================================================
+app.get('/api/music', (req, res) => {
+  try {
+    const music = readJSON(MUSIC_JSON);
+    res.json(music);
+  } catch (error) {
+    console.error('Error reading music:', error);
+    res.status(500).json({ error: 'Musiqalarni o\'qishda xatolik' });
+  }
+});
 
-// Start server
+// ============================================================================
+// API: Delete Music
+// ============================================================================
+app.delete('/api/music/:id', (req, res) => {
+  try {
+    const musicId = parseInt(req.params.id);
+    const musicList = readJSON(MUSIC_JSON);
+    const index = musicList.findIndex(m => m.id === musicId);
+
+    if (index === -1) {
+      return res.status(404).json({ error: 'Musiqa topilmadi' });
+    }
+
+    const music = musicList[index];
+    deleteLocalFile(music.url);
+
+    musicList.splice(index, 1);
+    writeJSON(MUSIC_JSON, musicList);
+
+    console.log(`🗑️ Musiqa o'chirildi: "${music.title}" (ID: ${musicId})`);
+
+    res.json({
+      success: true,
+      message: `"${music.title}" o'chirildi`,
+      deletedId: musicId,
+      totalMusic: musicList.length,
+    });
+  } catch (error) {
+    console.error('Music delete error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================================================
+// API: Rename Music
+// ============================================================================
+app.put('/api/music/:id', (req, res) => {
+  try {
+    const musicId = parseInt(req.params.id);
+    const { title, author } = req.body;
+    const musicList = readJSON(MUSIC_JSON);
+    const index = musicList.findIndex(m => m.id === musicId);
+
+    if (index === -1) return res.status(404).json({ error: 'Musiqa topilmadi' });
+
+    if (title?.trim()) musicList[index].title = title.trim();
+    if (author?.trim()) musicList[index].author = author.trim();
+    writeJSON(MUSIC_JSON, musicList);
+
+    console.log(`✏️ Musiqa yangilandi: ID ${musicId}`);
+
+    res.json({ success: true, message: "Musiqa yangilandi", data: musicList[index] });
+  } catch (error) {
+    console.error('Music update error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================================================
+// Error Handler for Multer
+// ============================================================================
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({ error: 'Fayl hajmi juda katta (max 500MB)' });
+    }
+    return res.status(400).json({ error: `Upload xatosi: ${err.message}` });
+  }
+  if (err) {
+    return res.status(400).json({ error: err.message });
+  }
+  next();
+});
+
+// ============================================================================
+// Serve Static Files
+// ============================================================================
+app.use('/videos', express.static(UPLOAD_DIRS.video));
+app.use('/image', express.static(UPLOAD_DIRS.image));
+app.use('/music', express.static(UPLOAD_DIRS.music));
+app.use('/data', express.static(DATA_DIR));
+
+// ============================================================================
+// Start Server
+// ============================================================================
 app.listen(PORT, () => {
-  console.log(`🚀 Upload server running on http://localhost:${PORT}`);
-  console.log(`📤 FTP Host: ${FTP_CONFIG.host}`);
-  console.log(`🌐 CDN Base: ${CDN_BASE}`);
+  const videos = readJSON(VIDEOS_JSON);
+  const music = readJSON(MUSIC_JSON);
+
+  console.log('');
+  console.log('╔══════════════════════════════════════════════════╗');
+  console.log('║    🚀 Creative Design Upload Server             ║');
+  console.log('╠══════════════════════════════════════════════════╣');
+  console.log(`║  🌐 Server:  http://localhost:${PORT}              ║`);
+  console.log(`║  📹 Videos:  ${String(videos.length).padEnd(36)}║`);
+  console.log(`║  🎵 Music:   ${String(music.length).padEnd(36)}║`);
+  console.log('╠══════════════════════════════════════════════════╣');
+  console.log('║  📤 POST /api/upload        - Video yuklash     ║');
+  console.log('║  📤 POST /api/upload-music   - Musiqa yuklash   ║');
+  console.log('║  📋 GET  /api/videos         - Videolar          ║');
+  console.log('║  📋 GET  /api/music          - Musiqalar         ║');
+  console.log('║  📊 GET  /api/stats          - Statistika        ║');
+  console.log('║  💚 GET  /api/health         - Health check      ║');
+  console.log('╚══════════════════════════════════════════════════╝');
+  console.log('');
 });
