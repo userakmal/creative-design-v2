@@ -18,31 +18,36 @@ const renderApp = () => {
   );
 };
 
-// Fetch dynamic videos from the online server JSON before rendering
-// Try upload server first (port 3001), then fallback to Vite (port 5173)
+// Detect environment
+const isProduction = window.location.hostname === 'creative-design.uz';
+const CDN_BASE = 'https://creative-design.uz';
+
+// Fetch dynamic videos from the server JSON
 const fetchVideos = async () => {
-  try {
-    // Try upload server first
-    const response = await fetch("http://localhost:3001/data/videos.json");
-    if (response.ok) {
-      const data = await response.json();
-      console.log('✅ Upload server videos loaded:', data.length);
-      return data;
+  if (!isProduction) {
+    // Local development: try upload server first
+    try {
+      const response = await fetch("http://localhost:3001/data/videos.json");
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ Upload server videos loaded:', data.length);
+        return data;
+      }
+    } catch (err) {
+      console.log("⚠ Upload server not available, trying Vite...");
     }
-  } catch (err) {
-    console.log("⚠ Upload server not available, trying Vite...");
   }
 
-  // Fallback to Vite
+  // Production or Vite fallback
   try {
     const res = await fetch("/data/videos.json");
     if (res.ok) {
       const data = await res.json();
-      console.log('✅ Vite videos loaded:', data.length);
+      console.log('✅ Videos loaded:', data.length);
       return data;
     }
   } catch (err) {
-    console.error("⚠ Could not load videos from Vite:", err);
+    console.error("⚠ Could not load videos.json:", err);
   }
 
   console.log('ℹ️ No additional videos found, using config only');
@@ -53,11 +58,12 @@ const fetchVideos = async () => {
 fetchVideos()
   .then((data) => {
     if (Array.isArray(data) && data.length > 0) {
-      // Rewrite paths to use upload server for uploaded videos
+      // Rewrite relative paths: use CDN in production, localhost in dev
+      const baseUrl = isProduction ? CDN_BASE : 'http://localhost:3001';
       const rewrittenData = data.map(video => ({
         ...video,
-        image: video.image.startsWith('http') ? video.image : `http://localhost:3001${video.image}`,
-        videoUrl: video.videoUrl.startsWith('http') ? video.videoUrl : `http://localhost:3001${video.videoUrl}`
+        image: video.image.startsWith('http') ? video.image : `${baseUrl}${video.image}`,
+        videoUrl: video.videoUrl.startsWith('http') ? video.videoUrl : `${baseUrl}${video.videoUrl}`
       }));
 
       // Append the newly uploaded online videos to the end of the config
