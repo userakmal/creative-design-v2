@@ -3,7 +3,7 @@
 // =========================================================================================
 
 // Hosting CDN base URL — barcha media fayllar shu yerda saqlanadi
-const CDN = "https://creative-design.uz/media";
+const CDN = "https://creative-design.uz";
 
 export const config = {
   // 1. SAYT HAQIDA MA'LUMOTLAR

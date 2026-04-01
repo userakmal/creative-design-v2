@@ -21,11 +21,11 @@ const FTP_CONFIG = {
   user: 'creative-designuz',
   password: 'qH9fZ2yF5z',
   secure: false,
-  remotePath: '/public_html/media',
+  remotePath: '/public_html',
 };
 
 // Hosting CDN base URL
-const CDN_BASE = 'https://creative-design.uz/media';
+const CDN_BASE = 'https://creative-design.uz';
 
 // ============================================================================
 // Express Configuration
