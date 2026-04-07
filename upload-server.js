@@ -6,37 +6,29 @@ import { fileURLToPath } from 'url';
 import fs from 'fs';
 import * as ftp from 'basic-ftp';
 
-// FTP Configuration for auto-sync
-const FTP_CONFIG = {
-  host: 'ns8.sayt.uz',
-  user: 'creative-designuz',
-  password: 'qH9fZ2yF5z',
-  secure: false,
-};
 
-// Async FTP upload function (Runs in background)
-async function autoSyncToFTP(filesToUpload) {
-  const client = new ftp.Client();
+import { spawn } from 'child_process';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Async FTP upload function (Runs in background via Smart Sync script)
+async function autoSyncToFTP() {
+  console.log(`☁️ FTP Smart Auto-Sync started in background...`);
   try {
-    await client.access(FTP_CONFIG);
-    console.log(`☁️ FTP Auto-Sync started for ${filesToUpload.length} files...`);
-    
-    for (const file of filesToUpload) {
-      // file.remoteDir is like '/public_html/videos'
-      await client.ensureDir(file.remoteDir);
-      await client.uploadFrom(file.localPath, `${file.remoteDir}/${path.basename(file.localPath)}`);
-      console.log(`   ✅ Synced to: ${file.remoteDir}/${path.basename(file.localPath)}`);
-    }
+    const child = spawn('node', [path.join(__dirname, 'upload-to-hosting.js')], {
+      detached: true,
+      stdio: 'inherit' // Bu orqali loglarni upload-server oynamizda ham ko'ramiz
+    });
+    child.unref(); // Server yopilmasligi uchun
   } catch (err) {
-    console.error('❌ FTP Auto-Sync failed:', err.message);
-  } finally {
-    client.close();
+    console.error('❌ FTP Auto-Sync trigger failed:', err.message);
   }
 }
 
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -256,11 +248,7 @@ app.post('/api/upload', upload.fields([
     });
 
     // Run auto-sync to production in background without blocking response
-    autoSyncToFTP([
-      { localPath: videoFile.path, remoteDir: '/public_html/videos' },
-      { localPath: imageFile.path, remoteDir: '/public_html/image' },
-      { localPath: VIDEOS_JSON, remoteDir: '/public_html/data' }
-    ]);
+    autoSyncToFTP();
   } catch (error) {
     console.error('❌ Upload error:', error);
     res.status(500).json({ error: error.message || 'Server xatosi' });
