@@ -11,7 +11,7 @@ current_starter.bat
 Bu bitta fayl:
 1. Node.js va Python kutubxonalarni o'rnatadi (birinchi marta)
 2. Barcha 4 xizmatni ishga tushiradi
-
+w
 ## Xizmatlar
 
 | Xizmat | Port | Manzil |
