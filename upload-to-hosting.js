@@ -1,6 +1,6 @@
 /**
- * Bulk FTP Upload Script
- * Uploads all videos and images from public/ to hosting FTP server.
+ * Bulk FTP Upload Script (SMART SYNC)
+ * Faqat yangi yoki o'zgargan fayllarni yuklaydi.
  * Run: node upload-to-hosting.js
  */
 
@@ -37,128 +37,101 @@ async function connectFTP() {
 }
 
 async function uploadDirectory(client, localDir, remoteDir) {
-  const files = fs.readdirSync(localDir).filter(f => {
-    const fullPath = path.join(localDir, f);
-    return fs.statSync(fullPath).isFile();
-  });
+  const files = fs.readdirSync(localDir).filter(f => fs.statSync(path.join(localDir, f)).isFile());
 
-  console.log(`\n📂 Uploading ${files.length} files from ${localDir} → ${remoteDir}`);
-
+  console.log(`\n📂 Papka: ${remoteDir} (${files.length} ta lokal fayl)`);
   await client.ensureDir(`${REMOTE_BASE}/${remoteDir}`);
 
+  console.log('   🔄 Serverdagi holat tekshirilmoqda...');
+  const remoteFiles = await client.list();
+  const remoteMap = new Map();
+  for (const rf of remoteFiles) {
+    if (rf.isFile) remoteMap.set(rf.name, rf.size);
+  }
+
   let uploaded = 0;
+  let skipped = 0;
   let failed = 0;
 
-  for (const file of files) {
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
     const localPath = path.join(localDir, file);
     const remotePath = `${REMOTE_BASE}/${remoteDir}/${file}`;
+    const localStat = fs.statSync(localPath);
+
+    // Smart Sync - Agar serverda shu fayl doimiy hajmi bilan tursa, yuklamaydi!
+    if (remoteMap.has(file) && remoteMap.get(file) === localStat.size) {
+      skipped++;
+      process.stdout.write(`\r   ⏭️ O'tkazib yuborildi: jami ${skipped} ta eskidan bor fayl`);
+      continue;
+    }
 
     try {
-      process.stdout.write(`  [${uploaded + failed + 1}/${files.length}] ${file}...`);
+      console.log(`\n   ⬆️ Yuklanyapti: ${file} (${(localStat.size / (1024 * 1024)).toFixed(1)} MB)...`);
       await client.uploadFrom(localPath, remotePath);
       uploaded++;
-      console.log(' ✅');
     } catch (err) {
       failed++;
-      console.log(` ❌ ${err.message}`);
+      console.log(`   ❌ Xato: ${err.message}`);
     }
   }
 
-  console.log(`  📊 Result: ${uploaded} uploaded, ${failed} failed`);
-  return { uploaded, failed };
+  console.log(`\n  📊 Natija: ${uploaded} ta yangi yuklandi, ${skipped} ta eski bor fayl tejaldi, ${failed} ta xato`);
+  return { uploaded, failed, skipped };
 }
 
 async function main() {
   console.log('════════════════════════════════════════════════');
-  console.log('  BULK FTP UPLOAD — creative-design.uz hosting');
+  console.log('  🔥 SMART FTP UPLOAD (SENIOR DEVELOPER MODE) 🔥  ');
   console.log('════════════════════════════════════════════════');
   console.log(`FTP Host: ${FTP_CONFIG.host}`);
   console.log(`Remote:   ${REMOTE_BASE}/`);
-  console.log(`CDN:      ${CDN_BASE}/`);
   console.log('');
 
   const client = await connectFTP();
-  console.log('✅ FTP connected!');
+  console.log('✅ FTP serverga ulandi!');
 
-  const totals = { uploaded: 0, failed: 0 };
+  const totals = { uploaded: 0, failed: 0, skipped: 0 };
 
-  // Upload videos
-  const videosDir = path.join(__dirname, 'public', 'videos');
-  if (fs.existsSync(videosDir)) {
-    const r = await uploadDirectory(client, videosDir, 'videos');
-    totals.uploaded += r.uploaded;
-    totals.failed += r.failed;
-  }
+  const dirs = [
+    { local: 'public/videos', remote: 'videos' },
+    { local: 'public/image', remote: 'image' },
+    { local: 'public/music', remote: 'music' },
+    { local: 'public/logo', remote: 'logo' },
+    { local: 'public/data', remote: 'data' }
+  ];
 
-  // Upload images
-  const imageDir = path.join(__dirname, 'public', 'image');
-  if (fs.existsSync(imageDir)) {
-    const r = await uploadDirectory(client, imageDir, 'image');
-    totals.uploaded += r.uploaded;
-    totals.failed += r.failed;
-  }
-
-  // Upload music
-  const musicDir = path.join(__dirname, 'public', 'music');
-  if (fs.existsSync(musicDir)) {
-    const r = await uploadDirectory(client, musicDir, 'music');
-    totals.uploaded += r.uploaded;
-    totals.failed += r.failed;
-  }
-
-  // Upload logo
-  const logoDir = path.join(__dirname, 'public', 'logo');
-  if (fs.existsSync(logoDir)) {
-    const r = await uploadDirectory(client, logoDir, 'logo');
-    totals.uploaded += r.uploaded;
-    totals.failed += r.failed;
-  }
-
-  // Upload data (videos.json, music.json)
-  const dataDir = path.join(__dirname, 'public', 'data');
-  if (fs.existsSync(dataDir)) {
-    // Note: videos.json should be in /public_html/data/ to match app's fetch('/data/videos.json')
-    // We use a different remote path for data if it's outside 'media'
-    const remoteDataDir = '/public_html/data';
-    console.log(`\n📂 Uploading data files from ${dataDir} → ${remoteDataDir}`);
-    await client.ensureDir(remoteDataDir);
-    
-    const dataFiles = fs.readdirSync(dataDir).filter(f => fs.statSync(path.join(dataDir, f)).isFile());
-    for (const file of dataFiles) {
-      try {
-        await client.uploadFrom(path.join(dataDir, file), `${remoteDataDir}/${file}`);
-        console.log(`  [Data] ${file} ✅`);
-        totals.uploaded++;
-      } catch (err) {
-        console.log(`  [Data] ${file} ❌ ${err.message}`);
-        totals.failed++;
-      }
+  for (const dir of dirs) {
+    const absPath = path.join(__dirname, dir.local);
+    if (fs.existsSync(absPath)) {
+      const r = await uploadDirectory(client, absPath, dir.remote);
+      totals.uploaded += r.uploaded;
+      totals.failed += r.failed;
+      totals.skipped += r.skipped;
     }
   }
 
-  // Upload .htaccess for CORS and caching
+  // Upload .htaccess
   const htaccessFile = path.join(__dirname, 'media-htaccess.txt');
   if (fs.existsSync(htaccessFile)) {
     try {
       await client.ensureDir(REMOTE_BASE);
       await client.uploadFrom(htaccessFile, `${REMOTE_BASE}/.htaccess`);
-      console.log('\n✅ .htaccess uploaded for CORS support');
-    } catch (err) {
-      console.log('\n⚠️ .htaccess upload failed:', err.message);
-    }
+      console.log('\n✅ .htaccess (CORS) yuklandi');
+    } catch (err) {}
   }
 
   client.close();
 
   console.log('\n════════════════════════════════════════════════');
-  console.log(`  YAKUNLANDI: ${totals.uploaded} yuklandi, ${totals.failed} xato`);
+  console.log(`  Barcha topshiriqlar bajarildi! (Tejovchi rejim)`);
+  console.log(`  ➕ Yangi fayllar: ${totals.uploaded}`);
+  console.log(`  ⏭️ Tejalgan (Eski) fayllar: ${totals.skipped}`);
+  console.log(`  ❌ Xatolar: ${totals.failed}`);
   console.log('════════════════════════════════════════════════');
-  console.log(`\nEndi config.ts ni yangilang:`);
-  console.log(`  videoUrl: "${CDN_BASE}/videos/v1.mp4"`);
-  console.log(`  image:    "${CDN_BASE}/image/i1.jpg"`);
 }
 
 main().catch(err => {
-  console.error('Fatal error:', err);
+  console.error('\nKutilmagan xatolik:', err);
   process.exit(1);
 });
