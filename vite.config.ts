@@ -21,5 +21,18 @@ export default defineConfig(({ mode }) => {
       },
       // Serve static files from public directory
       publicDir: 'public',
+      build: {
+        target: 'esnext',
+        minify: 'esbuild',
+        rollupOptions: {
+          output: {
+            manualChunks(id) {
+              if (id.includes('node_modules')) {
+                return 'vendor';
+              }
+            }
+          }
+        }
+      }
     };
 });

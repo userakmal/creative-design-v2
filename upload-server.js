@@ -4,6 +4,36 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import * as ftp from 'basic-ftp';
+
+// FTP Configuration for auto-sync
+const FTP_CONFIG = {
+  host: 'ns8.sayt.uz',
+  user: 'creative-designuz',
+  password: 'qH9fZ2yF5z',
+  secure: false,
+};
+
+// Async FTP upload function (Runs in background)
+async function autoSyncToFTP(filesToUpload) {
+  const client = new ftp.Client();
+  try {
+    await client.access(FTP_CONFIG);
+    console.log(`☁️ FTP Auto-Sync started for ${filesToUpload.length} files...`);
+    
+    for (const file of filesToUpload) {
+      // file.remoteDir is like '/public_html/videos'
+      await client.ensureDir(file.remoteDir);
+      await client.uploadFrom(file.localPath, `${file.remoteDir}/${path.basename(file.localPath)}`);
+      console.log(`   ✅ Synced to: ${file.remoteDir}/${path.basename(file.localPath)}`);
+    }
+  } catch (err) {
+    console.error('❌ FTP Auto-Sync failed:', err.message);
+  } finally {
+    client.close();
+  }
+}
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -85,33 +115,35 @@ const upload = multer({
 });
 
 // ============================================================================
-// Helper Functions
+// Helper Functions (Asynchronous)
 // ============================================================================
-function readJSON(filePath) {
+async function readJSONAsync(filePath) {
   try {
-    if (!fs.existsSync(filePath)) return [];
-    const content = fs.readFileSync(filePath, 'utf-8');
+    const content = await fs.promises.readFile(filePath, 'utf-8');
     return JSON.parse(content);
   } catch {
     return [];
   }
 }
 
-function writeJSON(filePath, data) {
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
+async function writeJSONAsync(filePath, data) {
+  await fs.promises.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
 }
 
 function getNextId(items) {
-  if (items.length === 0) return 1;
-  return Math.max(...items.map(i => i.id || 0)) + 1;
+  if (items.length === 0) return 1000;
+  return Math.max(1000, ...items.map(i => i.id || 0)) + 1;
 }
 
-function deleteLocalFile(relativePath) {
+async function deleteLocalFileAsync(relativePath) {
   if (!relativePath || relativePath.startsWith('http')) return;
   const fullPath = path.join(__dirname, 'public', relativePath);
-  if (fs.existsSync(fullPath)) {
-    fs.unlinkSync(fullPath);
+  try {
+    await fs.promises.access(fullPath);
+    await fs.promises.unlink(fullPath);
     console.log(`🗑️ Deleted: ${fullPath}`);
+  } catch {
+    // Silent fail if file doesn't exist
   }
 }
 
@@ -124,9 +156,11 @@ function formatFileSize(bytes) {
 // ============================================================================
 // API: Health Check
 // ============================================================================
-app.get('/api/health', (req, res) => {
-  const videos = readJSON(VIDEOS_JSON);
-  const music = readJSON(MUSIC_JSON);
+app.get('/api/health', async (req, res) => {
+  const [videos, music] = await Promise.all([
+    readJSONAsync(VIDEOS_JSON),
+    readJSONAsync(MUSIC_JSON)
+  ]);
   res.json({
     status: 'ok',
     message: '🚀 Upload server ishlamoqda',
@@ -141,25 +175,30 @@ app.get('/api/health', (req, res) => {
 // ============================================================================
 // API: Dashboard Stats
 // ============================================================================
-app.get('/api/stats', (req, res) => {
-  const videos = readJSON(VIDEOS_JSON);
-  const music = readJSON(MUSIC_JSON);
+app.get('/api/stats', async (req, res) => {
+  const [videos, music] = await Promise.all([
+    readJSONAsync(VIDEOS_JSON),
+    readJSONAsync(MUSIC_JSON)
+  ]);
 
-  // Calculate disk usage
   let totalSize = 0;
-  const countFiles = (dir) => {
-    if (!fs.existsSync(dir)) return 0;
-    const files = fs.readdirSync(dir);
-    files.forEach(f => {
-      const stat = fs.statSync(path.join(dir, f));
-      totalSize += stat.size;
-    });
-    return files.length;
+  const countFilesAsync = async (dir) => {
+    try {
+      const files = await fs.promises.readdir(dir);
+      const statsPromises = files.map(f => fs.promises.stat(path.join(dir, f)));
+      const stats = await Promise.all(statsPromises);
+      stats.forEach(stat => { totalSize += stat.size; });
+      return files.length;
+    } catch {
+      return 0;
+    }
   };
 
-  const videoFiles = countFiles(UPLOAD_DIRS.video);
-  const imageFiles = countFiles(UPLOAD_DIRS.image);
-  const musicFiles = countFiles(UPLOAD_DIRS.music);
+  const [videoFiles, imageFiles, musicFiles] = await Promise.all([
+    countFilesAsync(UPLOAD_DIRS.video),
+    countFilesAsync(UPLOAD_DIRS.image),
+    countFilesAsync(UPLOAD_DIRS.music)
+  ]);
 
   res.json({
     videos: videos.length,
@@ -177,7 +216,7 @@ app.get('/api/stats', (req, res) => {
 app.post('/api/upload', upload.fields([
   { name: 'video', maxCount: 1 },
   { name: 'image', maxCount: 1 },
-]), (req, res) => {
+]), async (req, res) => {
   try {
     const { password, title } = req.body;
     if (password !== ADMIN_PASSWORD) {
@@ -190,7 +229,7 @@ app.post('/api/upload', upload.fields([
 
     const videoFile = req.files.video[0];
     const imageFile = req.files.image[0];
-    const videos = readJSON(VIDEOS_JSON);
+    const videos = await readJSONAsync(VIDEOS_JSON);
     const newId = getNextId(videos);
 
     const newVideo = {
@@ -203,7 +242,7 @@ app.post('/api/upload', upload.fields([
     };
 
     videos.push(newVideo);
-    writeJSON(VIDEOS_JSON, videos);
+    await writeJSONAsync(VIDEOS_JSON, videos);
 
     console.log(`✅ Yangi video yuklandi: "${newVideo.title}" (ID: ${newId})`);
     console.log(`   📁 Video: ${videoFile.filename} (${formatFileSize(videoFile.size)})`);
@@ -211,10 +250,17 @@ app.post('/api/upload', upload.fields([
 
     res.json({
       success: true,
-      message: `"${newVideo.title}" muvaffaqiyatli yuklandi!`,
+      message: `"${newVideo.title}" muvaffaqiyatli yuklandi va serverga yuborilmoqda!`,
       data: newVideo,
       totalVideos: videos.length,
     });
+
+    // Run auto-sync to production in background without blocking response
+    autoSyncToFTP([
+      { localPath: videoFile.path, remoteDir: '/public_html/videos' },
+      { localPath: imageFile.path, remoteDir: '/public_html/image' },
+      { localPath: VIDEOS_JSON, remoteDir: '/public_html/data' }
+    ]);
   } catch (error) {
     console.error('❌ Upload error:', error);
     res.status(500).json({ error: error.message || 'Server xatosi' });
@@ -224,9 +270,9 @@ app.post('/api/upload', upload.fields([
 // ============================================================================
 // API: Get All Videos
 // ============================================================================
-app.get('/api/videos', (req, res) => {
+app.get('/api/videos', async (req, res) => {
   try {
-    const videos = readJSON(VIDEOS_JSON);
+    const videos = await readJSONAsync(VIDEOS_JSON);
     res.json(videos);
   } catch (error) {
     console.error('Error reading videos:', error);
@@ -237,10 +283,10 @@ app.get('/api/videos', (req, res) => {
 // ============================================================================
 // API: Delete Video
 // ============================================================================
-app.delete('/api/videos/:id', (req, res) => {
+app.delete('/api/videos/:id', async (req, res) => {
   try {
     const videoId = parseInt(req.params.id);
-    const videos = readJSON(VIDEOS_JSON);
+    const videos = await readJSONAsync(VIDEOS_JSON);
     const index = videos.findIndex(v => v.id === videoId);
 
     if (index === -1) {
@@ -250,11 +296,13 @@ app.delete('/api/videos/:id', (req, res) => {
     const video = videos[index];
 
     // Delete local files
-    deleteLocalFile(video.videoUrl);
-    deleteLocalFile(video.image);
+    await Promise.all([
+      deleteLocalFileAsync(video.videoUrl),
+      deleteLocalFileAsync(video.image)
+    ]);
 
     videos.splice(index, 1);
-    writeJSON(VIDEOS_JSON, videos);
+    await writeJSONAsync(VIDEOS_JSON, videos);
 
     console.log(`🗑️ Video o'chirildi: "${video.title}" (ID: ${videoId})`);
 
@@ -273,11 +321,11 @@ app.delete('/api/videos/:id', (req, res) => {
 // ============================================================================
 // API: Rename Video
 // ============================================================================
-app.put('/api/videos/:id', (req, res) => {
+app.put('/api/videos/:id', async (req, res) => {
   try {
     const videoId = parseInt(req.params.id);
     const { title } = req.body;
-    const videos = readJSON(VIDEOS_JSON);
+    const videos = await readJSONAsync(VIDEOS_JSON);
     const index = videos.findIndex(v => v.id === videoId);
 
     if (index === -1) return res.status(404).json({ error: 'Video topilmadi' });
@@ -285,7 +333,7 @@ app.put('/api/videos/:id', (req, res) => {
 
     const oldTitle = videos[index].title;
     videos[index].title = title.trim();
-    writeJSON(VIDEOS_JSON, videos);
+    await writeJSONAsync(VIDEOS_JSON, videos);
 
     console.log(`✏️ Video nomi o'zgartirildi: "${oldTitle}" → "${title.trim()}"`);
 
@@ -301,7 +349,7 @@ app.put('/api/videos/:id', (req, res) => {
 // ============================================================================
 app.post('/api/upload-music', upload.fields([
   { name: 'music', maxCount: 1 },
-]), (req, res) => {
+]), async (req, res) => {
   try {
     const { password, title, author } = req.body;
     if (password !== ADMIN_PASSWORD) {
@@ -313,7 +361,7 @@ app.post('/api/upload-music', upload.fields([
     }
 
     const musicFile = req.files.music[0];
-    const musicList = readJSON(MUSIC_JSON);
+    const musicList = await readJSONAsync(MUSIC_JSON);
     const newId = getNextId(musicList);
 
     const newMusic = {
@@ -327,7 +375,7 @@ app.post('/api/upload-music', upload.fields([
     };
 
     musicList.push(newMusic);
-    writeJSON(MUSIC_JSON, musicList);
+    await writeJSONAsync(MUSIC_JSON, musicList);
 
     console.log(`🎵 Yangi musiqa yuklandi: "${newMusic.title}" by ${newMusic.author} (ID: ${newId})`);
     console.log(`   📁 Fayl: ${musicFile.filename} (${formatFileSize(musicFile.size)})`);
@@ -347,9 +395,9 @@ app.post('/api/upload-music', upload.fields([
 // ============================================================================
 // API: Get All Music
 // ============================================================================
-app.get('/api/music', (req, res) => {
+app.get('/api/music', async (req, res) => {
   try {
-    const music = readJSON(MUSIC_JSON);
+    const music = await readJSONAsync(MUSIC_JSON);
     res.json(music);
   } catch (error) {
     console.error('Error reading music:', error);
@@ -360,10 +408,10 @@ app.get('/api/music', (req, res) => {
 // ============================================================================
 // API: Delete Music
 // ============================================================================
-app.delete('/api/music/:id', (req, res) => {
+app.delete('/api/music/:id', async (req, res) => {
   try {
     const musicId = parseInt(req.params.id);
-    const musicList = readJSON(MUSIC_JSON);
+    const musicList = await readJSONAsync(MUSIC_JSON);
     const index = musicList.findIndex(m => m.id === musicId);
 
     if (index === -1) {
@@ -371,10 +419,10 @@ app.delete('/api/music/:id', (req, res) => {
     }
 
     const music = musicList[index];
-    deleteLocalFile(music.url);
+    await deleteLocalFileAsync(music.url);
 
     musicList.splice(index, 1);
-    writeJSON(MUSIC_JSON, musicList);
+    await writeJSONAsync(MUSIC_JSON, musicList);
 
     console.log(`🗑️ Musiqa o'chirildi: "${music.title}" (ID: ${musicId})`);
 
@@ -393,18 +441,18 @@ app.delete('/api/music/:id', (req, res) => {
 // ============================================================================
 // API: Rename Music
 // ============================================================================
-app.put('/api/music/:id', (req, res) => {
+app.put('/api/music/:id', async (req, res) => {
   try {
     const musicId = parseInt(req.params.id);
     const { title, author } = req.body;
-    const musicList = readJSON(MUSIC_JSON);
+    const musicList = await readJSONAsync(MUSIC_JSON);
     const index = musicList.findIndex(m => m.id === musicId);
 
     if (index === -1) return res.status(404).json({ error: 'Musiqa topilmadi' });
 
     if (title?.trim()) musicList[index].title = title.trim();
     if (author?.trim()) musicList[index].author = author.trim();
-    writeJSON(MUSIC_JSON, musicList);
+    await writeJSONAsync(MUSIC_JSON, musicList);
 
     console.log(`✏️ Musiqa yangilandi: ID ${musicId}`);
 
@@ -442,9 +490,9 @@ app.use('/data', express.static(DATA_DIR));
 // ============================================================================
 // Start Server
 // ============================================================================
-app.listen(PORT, () => {
-  const videos = readJSON(VIDEOS_JSON);
-  const music = readJSON(MUSIC_JSON);
+app.listen(PORT, async () => {
+  const videos = await readJSONAsync(VIDEOS_JSON);
+  const music = await readJSONAsync(MUSIC_JSON);
 
   console.log('');
   console.log('╔══════════════════════════════════════════════════╗');

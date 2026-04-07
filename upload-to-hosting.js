@@ -19,8 +19,8 @@ const FTP_CONFIG = {
   secure: false,
 };
 
-const REMOTE_BASE = '/public_html/media';
-const CDN_BASE = 'https://creative-design.uz/media';
+const REMOTE_BASE = '/public_html';
+const CDN_BASE = 'https://creative-design.uz';
 
 async function connectFTP() {
   const client = new ftp.Client();

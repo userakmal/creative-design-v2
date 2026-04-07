@@ -1,11 +1,19 @@
 import { BrowserRouter, Route, Routes as Switch } from "react-router-dom";
+import React, { useState, Suspense } from "react";
 import { MainPage } from "./pages/main.page";
-import { TemplatesPage } from "./pages/templates.page";
-import { useState } from "react";
-import { MusicPage } from "./pages/music.page";
-import { CustomPage } from "./pages/custom.page";
-import { VideoDownloaderPage } from "./pages/downloader.page";
-import { AdminPage } from "./pages/admin.page";
+
+// Lazy loading large components to optimize main bundle size
+const TemplatesPage = React.lazy(() => import("./pages/templates.page").then(m => ({ default: m.TemplatesPage })));
+const MusicPage = React.lazy(() => import("./pages/music.page").then(m => ({ default: m.MusicPage })));
+const CustomPage = React.lazy(() => import("./pages/custom.page").then(m => ({ default: m.CustomPage })));
+const VideoDownloaderPage = React.lazy(() => import("./pages/downloader.page").then(m => ({ default: m.VideoDownloaderPage })));
+const AdminPage = React.lazy(() => import("./pages/admin.page").then(m => ({ default: m.AdminPage })));
+
+const LoadingSpinnerFallback = () => (
+  <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: "white" }}>
+    Yuklanmoqda...
+  </div>
+);
 
 export const Routes = () => {
   const [likedVideos, setLikedVideos] = useState<number[]>(() => {
@@ -38,35 +46,38 @@ export const Routes = () => {
 
   return (
     <BrowserRouter>
-      <Switch>
-        <Route path="/" element={<MainPage />} />
-        <Route
-          path="/templates"
-          element={
-            <TemplatesPage
-              title="Hamma Dizaynlar"
-              filter="all"
-              likedVideos={likedVideos}
-              onToggleLike={toggleLike}
-            />
-          }
-        />
-        <Route
-          path="/popular"
-          element={
-            <TemplatesPage
-              title="Ommabop Dizaynlar"
-              filter="popular"
-              likedVideos={likedVideos}
-              onToggleLike={toggleLike}
-            />
-          }
-        />
-        <Route path="/music" element={<MusicPage />} />
-        <Route path="/custom" element={<CustomPage />} />
-        <Route path="/video-downloader" element={<VideoDownloaderPage />} />
-        <Route path="/admin" element={<AdminPage />} />
-      </Switch>
+      <Suspense fallback={<LoadingSpinnerFallback />}>
+        <Switch>
+          {/* Dashboard is eagerly loaded for fastest Time To Interactive */}
+          <Route path="/" element={<MainPage />} />
+          <Route
+            path="/templates"
+            element={
+              <TemplatesPage
+                title="Hamma Dizaynlar"
+                filter="all"
+                likedVideos={likedVideos}
+                onToggleLike={toggleLike}
+              />
+            }
+          />
+          <Route
+            path="/popular"
+            element={
+              <TemplatesPage
+                title="Ommabop Dizaynlar"
+                filter="popular"
+                likedVideos={likedVideos}
+                onToggleLike={toggleLike}
+              />
+            }
+          />
+          <Route path="/music" element={<MusicPage />} />
+          <Route path="/custom" element={<CustomPage />} />
+          <Route path="/video-downloader" element={<VideoDownloaderPage />} />
+          <Route path="/admin" element={<AdminPage />} />
+        </Switch>
+      </Suspense>
     </BrowserRouter>
   );
 };
