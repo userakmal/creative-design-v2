@@ -1,3 +1,7 @@
+# =============================================================================
+# Creative Design Platform - Gitignore
+# =============================================================================
+
 # Dependencies
 node_modules/
 npm-debug.log*
@@ -22,8 +26,6 @@ htmlcov/
 
 # IDE
 .vscode/
-.idea/
-.qwen/
 *.swp
 *.swo
 *~
@@ -31,13 +33,13 @@ htmlcov/
 # Logs
 logs/
 *.log
+api-server/*.log
 
 # Environment variables
 .env
 .env.local
 .env.production
 .env.*.local
-telegram-video-bot/.env
 !.env.example
 
 # Database
@@ -45,44 +47,44 @@ telegram-video-bot/.env
 *.sqlite
 *.sqlite3
 
-# Downloads (temp files)
-telegram-video-bot/downloads/*.mp4
-telegram-video-bot/downloads/*.part
-telegram-video-bot/downloads/*.ytdl
-telegram-video-bot/downloads/hls_*/
-downloads/*
-!downloads/.gitkeep
+# Downloads (video downloader temp files)
+api-server/video-downloader/downloads/*.mp4
+api-server/video-downloader/downloads/*.part
+api-server/video-downloader/downloads/*.ytdl
+api-server/video-downloader/downloads/hls_*/
+
+# Uploaded media (stored on hosting CDN, not in git)
+api-server/public/videos/
+api-server/public/image/
+api-server/public/music/
 
 # Sensitive files
 cookies.txt
-telegram-video-bot/cookies.txt
 
 # Cache
 .cache/
 *.cache
-telegram-video-bot/cache.db
+api-server/video-downloader/cache.db
+api-server/video-downloader/downloads/*.db
 
 # OS
 Thumbs.db
 .DS_Store
 desktop.ini
 
-# Build
+# Build output
 dist/
+client/dist/
 
 # Temporary
 tmp/
 temp/
-echo/
-$null
-'[]'/
-
-# Video files (stored on hosting CDN, not in git)
-public/videos/*.mp4
+*.tmp
 
 # Test files
 test-*.mjs
 test-*.js
+test_*.py
 
 # Backup files
 *.bak

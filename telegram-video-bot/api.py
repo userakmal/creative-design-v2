@@ -138,11 +138,12 @@ class DownloadRequest(BaseModel):
 
 class DownloadResponse(BaseModel):
     success: bool
-    download_type: str  # "direct" or "file"
+    download_type: str  # "direct" or "file" or "hls"
     direct_url: Optional[str] = None
     file_path: Optional[str] = None
     filename: Optional[str] = None
     file_url: Optional[str] = None
+    task_id: Optional[str] = None
     message: str
 
 
@@ -473,7 +474,7 @@ async def download_video(request: DownloadRequest):
                     # FFmpegVideoConvertor handles format conversion automatically
                     "postprocessors": [{
                         "key": "FFmpegVideoConvertor",
-                        "preferedformat": "mp4",
+                        "preferedformat": "mp4",  # Note: yt-dlp uses 'preferedformat' (not 'preferredformat')
                     }],
                     # Keep intermediate files until merge is complete
                     "keepvideo": False,
@@ -525,6 +526,7 @@ async def download_video(request: DownloadRequest):
             file_path=str(file_path),
             filename=filename,
             file_url=f"/api/files/{file_path.name}",
+            task_id=task_id,
             message="File tayyor",
         )
 
@@ -552,19 +554,37 @@ async def serve_file(filename: str):
     download_dir = Path(config.downloader.DOWNLOAD_DIR)
     file_path = download_dir / safe_name
 
+    logger.info(f"File requested: {safe_name}")
+    logger.info(f"Download dir: {download_dir}")
+    logger.info(f"Full path: {file_path}")
+    logger.info(f"File exists: {file_path.exists()}")
+
     if not file_path.exists() or not file_path.is_file():
+        logger.error(f"File not found: {file_path}")
         raise HTTPException(status_code=404, detail="File not found or expired")
 
-    mime_type = "video/mp4" if file_path.suffix == ".mp4" else "application/octet-stream"
+    file_size = file_path.stat().st_size
+    logger.info(f"Serving file: {file_path.name} ({file_size} bytes)")
 
-    logger.info(f"Serving file: {file_path.name}")
+    # Determine MIME type
+    if file_path.suffix == ".mp4":
+        mime_type = "video/mp4"
+    elif file_path.suffix == ".mp3":
+        mime_type = "audio/mpeg"
+    elif file_path.suffix in [".webm", ".mkv"]:
+        mime_type = "video/webm"
+    else:
+        mime_type = "application/octet-stream"
 
     return FileResponse(
         path=file_path,
         filename=file_path.name,
         media_type=mime_type,
         headers={
-            "Content-Disposition": f'attachment; filename="{file_path.name}"',
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+            "Content-Disposition": f'inline; filename="{file_path.name}"',
         },
     )
 

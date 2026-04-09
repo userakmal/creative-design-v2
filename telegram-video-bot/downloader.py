@@ -177,12 +177,11 @@ class VideoDownloader:
             # CRITICAL: Static cookies for YouTube authentication
             **get_ytdlp_cookies(),
             # CRITICAL: FFmpeg post-processor for DASH merge
+            # FIX: Remove FFmpegMerger on Windows (causes file not found errors)
+            # FFmpegVideoConvertor handles merge automatically
             "postprocessors": [{
                 "key": "FFmpegVideoConvertor",
-                "preferedformat": "mp4",
-            }, {
-                # Ensure proper merge for all format combinations
-                "key": "FFmpegMerger",
+                "preferedformat": "mp4",  # Note: yt-dlp uses 'preferedformat' (not 'preferredformat')
             }],
         }
 

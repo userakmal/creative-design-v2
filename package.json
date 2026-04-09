@@ -1,37 +1,31 @@
 {
   "name": "creative-design-platform",
+  "version": "2.0.0",
   "private": true,
-  "version": "1.0.0",
   "type": "module",
-  "description": "Video taklifnomalar va dizayn ko'rgazmasi platformasi",
+  "description": "Creative Design Platform - Video Templates, Music & Universal Video Downloader",
+  "workspaces": [
+    "api-server",
+    "client"
+  ],
   "scripts": {
-    "dev": "vite",
-    "server": "node upload-server.js",
-    "admin": "node admin-server.js",
-    "start": "concurrently \"npm run server\" \"npm run dev\"",
-    "build": "vite build",
-    "preview": "vite preview",
-    "lint": "tsc --noEmit",
-    "clean": "rmdir /s /q dist 2>nul & rmdir /s /q node_modules 2>nul"
-  },
-  "dependencies": {
-    "@google/generative-ai": "^0.24.1",
-    "basic-ftp": "^5.2.0",
-    "cors": "^2.8.6",
-    "express": "^5.2.1",
-    "lucide-react": "^0.555.0",
-    "multer": "^2.1.1",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "react-router-dom": "^7.10.1"
+    "install:all": "npm install && cd api-server && npm install",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\" --names \"SERVER,CLIENT\" --prefix-colors \"green,blue\"",
+    "dev:server": "cd api-server && npm start",
+    "dev:client": "cd client && npm run dev",
+    "dev:video": "cd api-server/video-downloader && python api_enhanced.py",
+    "build": "cd client && npm run build",
+    "preview": "cd client && npm run preview",
+    "server": "cd api-server && npm start",
+    "client": "cd client && npm run dev",
+    "lint": "cd client && npm run lint",
+    "clean": "rimraf node_modules api-server/node_modules client/node_modules client/dist dist"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
-    "@types/react": "^19.2.7",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^5.0.0",
-    "concurrently": "^9.2.1",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "concurrently": "^9.2.1"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   }
 }
