@@ -19,7 +19,8 @@ const FTP_CONFIG = {
   secure: false,
 };
 
-const REMOTE_BASE = '/public_html';
+// ✅ TO'G'RI PATH: /www/creative-design.uz/
+const REMOTE_BASE = '/www/creative-design.uz';
 const CDN_BASE = 'https://creative-design.uz';
 
 async function connectFTP() {

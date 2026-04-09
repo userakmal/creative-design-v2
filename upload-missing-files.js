@@ -19,7 +19,8 @@ const FTP_CONFIG = {
   secure: false,
 };
 
-const REMOTE_BASE = '/public_html';
+// ✅ TO'G'RI PATH: /www/creative-design.uz/ (NOT /public_html/)
+const REMOTE_BASE = '/www/creative-design.uz';
 
 // Only the files that are MISSING from hosting
 const FILES_TO_UPLOAD = [
