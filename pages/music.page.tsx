@@ -14,10 +14,21 @@ import {
 } from "lucide-react";
 import { config } from "../config";
 import type { MusicItem } from "../types";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export const MusicPage = () => {
-  const [currentTrack, setCurrentTrack] = useState<MusicItem | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  
+  // Initialize currentTrack from URL parameter if exists
+  const [currentTrack, setCurrentTrack] = useState<MusicItem | null>(() => {
+    const trackId = searchParams.get("trackId");
+    if (trackId) {
+      const track = config.music.find((t) => t.id === parseInt(trackId));
+      return track || null;
+    }
+    return null;
+  });
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
@@ -27,8 +38,6 @@ export const MusicPage = () => {
   const [isCopied, setIsCopied] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -56,6 +65,8 @@ export const MusicPage = () => {
       setIsPlaying(!isPlaying);
     } else {
       setCurrentTrack(track);
+      // Update URL with track ID for deep linking
+      setSearchParams({ trackId: track.id.toString() }, { replace: true });
       setIsPlaying(true);
       setCurrentTime(0);
       setShowShareSheet(false);
@@ -78,7 +89,10 @@ export const MusicPage = () => {
       newIndex = (currentIndex - 1 + config.music.length) % config.music.length;
     }
 
-    setCurrentTrack(config.music[newIndex]);
+    const newTrack = config.music[newIndex];
+    setCurrentTrack(newTrack);
+    // Update URL with new track ID for deep linking
+    setSearchParams({ trackId: newTrack.id.toString() }, { replace: true });
     setIsPlaying(true);
     setCurrentTime(0);
   };
@@ -118,36 +132,70 @@ export const MusicPage = () => {
   };
 
   const handleCopyLink = async () => {
+    if (!currentTrack) return;
+    
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      // Create a deep link to the specific music track
+      const musicUrl = `${window.location.origin}/music?trackId=${currentTrack.id}`;
+      await navigator.clipboard.writeText(musicUrl);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
     } catch (err) {
-      console.error("Failed to copy", err);
+      console.error("Failed to copy:", err);
+      // Fallback for older browsers
+      try {
+        const musicUrl = `${window.location.origin}/music?trackId=${currentTrack.id}`;
+        const textArea = document.createElement("textarea");
+        textArea.value = musicUrl;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+      } catch (fallbackErr) {
+        console.error("Fallback copy also failed:", fallbackErr);
+      }
     }
   };
 
   const handleTelegramShare = () => {
     if (!currentTrack) return;
-    const text = `Assalomu alaykum, taklifnoma uchun ushbu musiqani tanladim: \n\n🎵 ${currentTrack.title} (${currentTrack.author})`;
-    const url = `${config.telegramLink}?text=${encodeURIComponent(text)}`;
-    window.open(url, "_blank");
+    
+    // Create a deep link to the specific music track
+    const musicUrl = `${window.location.origin}/music?trackId=${currentTrack.id}`;
+    const text = `Assalomu alaykum, taklifnoma uchun ushbu musiqani tanladim: \n\n🎵 ${currentTrack.title} - ${currentTrack.author}\n\n🔗 ${musicUrl}`;
+    
+    // Use Telegram direct message or share URL
+    const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(musicUrl)}&text=${encodeURIComponent(text)}`;
+    window.open(telegramUrl, "_blank", "noopener,noreferrer");
   };
 
   const handleSystemShare = async () => {
     if (!currentTrack) return;
+    
+    // Create a deep link to the specific music track
+    const musicUrl = `${window.location.origin}/music?trackId=${currentTrack.id}`;
+    
     const shareData = {
       title: "Taklifnoma Musiqasi",
-      text: `Musiqa: ${currentTrack.title} - ${currentTrack.author}`,
-      url: window.location.href,
+      text: `🎵 ${currentTrack.title} - ${currentTrack.author}`,
+      url: musicUrl,
     };
+    
     if (navigator.share) {
       try {
         await navigator.share(shareData);
       } catch (err) {
-        console.log("Share skipped");
+        // User cancelled share or error occurred
+        if ((err as Error).name !== "AbortError") {
+          console.error("Share failed:", err);
+          // Fallback to copy link
+          handleCopyLink();
+        }
       }
     } else {
+      // Fallback for browsers that don't support Web Share API
       handleCopyLink();
     }
   };
