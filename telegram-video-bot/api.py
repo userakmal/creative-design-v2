@@ -122,7 +122,7 @@ class ExtractResponse(BaseModel):
     success: bool
     title: str
     thumbnail: Optional[str]
-    duration: Optional[int]
+    duration: Optional[float]  # Changed from int to float (yt-dlp returns fractional seconds)
     duration_formatted: str
     uploader: Optional[str]
     formats: List[FormatInfo]
@@ -133,6 +133,7 @@ class DownloadRequest(BaseModel):
     url: str
     format_id: Optional[str] = None
     quality: Optional[str] = "best"
+    type: Optional[str] = "video"  # "video" or "audio"
 
 
 class DownloadResponse(BaseModel):
@@ -180,19 +181,52 @@ async def periodic_cleanup():
 # ============================================================================
 
 def extract_available_formats(info: dict) -> List[FormatInfo]:
-    """Extract available formats from yt-dlp info dict."""
+    """Extract ACTUAL available formats from yt-dlp info dict."""
     formats = []
     raw_formats = info.get("formats", [])
+    
+    if not raw_formats:
+        # No individual formats - only has 'requested_formats' (DASH)
+        requested = info.get("requested_formats", [])
+        if requested:
+            # DASH stream - will be merged automatically
+            logger.info(f"DASH formats detected: {len(requested)} streams")
+            # Return a single "best" option
+            total_size = sum(f.get("filesize") or f.get("filesize_approx", 0) for f in requested)
+            formats.append(FormatInfo(
+                format_id="best",
+                quality="best",
+                height=info.get("height"),
+                filesize=total_size if total_size > 0 else None,
+                filesize_formatted=format_file_size(total_size) if total_size > 0 else "Unknown",
+                ext=info.get("ext", "mp4"),
+                url=None,
+            ))
+        else:
+            # Single format available
+            formats.append(FormatInfo(
+                format_id="best",
+                quality="best",
+                height=info.get("height"),
+                filesize=info.get("filesize") or info.get("filesize_approx"),
+                filesize_formatted=format_file_size(info.get("filesize") or info.get("filesize_approx", 0)),
+                ext=info.get("ext", "mp4"),
+                url=info.get("url"),
+            ))
+        return formats
+    
+    # Parse individual formats
     quality_map = {}
-
     for fmt in raw_formats:
+        # Skip audio-only formats
         if fmt.get("vcodec") == "none":
             continue
-
+        
         height = fmt.get("height")
         if not height:
             continue
-
+        
+        # Group by quality
         if height <= 360:
             quality = "360p"
         elif height <= 480:
@@ -201,14 +235,18 @@ def extract_available_formats(info: dict) -> List[FormatInfo]:
             quality = "720p"
         elif height <= 1080:
             quality = "1080p"
+        elif height <= 1440:
+            quality = "1440p"
         else:
             quality = f"{height}p"
-
-        filesize = fmt.get("filesize") or fmt.get("filesize_approx", 0)
-
-        if quality not in quality_map or filesize > quality_map[quality].get("filesize", 0):
+        
+        filesize = fmt.get("filesize") or fmt.get("filesize_approx", 0) or 0
+        
+        # Keep largest file for each quality
+        if quality not in quality_map or filesize > (quality_map[quality].get("filesize") or 0):
             quality_map[quality] = fmt
-
+    
+    # Build format list
     for quality, fmt in sorted(
         quality_map.items(),
         key=lambda x: int(re.search(r'\d+', x[0]).group()) if re.search(r'\d+', x[0]) else 0,
@@ -222,17 +260,20 @@ def extract_available_formats(info: dict) -> List[FormatInfo]:
             ext=fmt.get("ext", "mp4"),
             url=fmt.get("url"),
         ))
-
+    
+    # If no video formats found, return "best" only
     if not formats:
         formats.append(FormatInfo(
             format_id="best",
             quality="best",
-            height=None,
-            filesize=None,
-            filesize_formatted="Unknown",
-            ext="mp4",
+            height=info.get("height"),
+            filesize=info.get("filesize") or info.get("filesize_approx"),
+            filesize_formatted=format_file_size(info.get("filesize") or info.get("filesize_approx", 0)),
+            ext=info.get("ext", "mp4"),
+            url=info.get("url"),
         ))
-
+    
+    logger.info(f"Extracted {len(formats)} formats: {[f.quality for f in formats]}")
     return formats
 
 
@@ -291,14 +332,17 @@ async def extract_video(request: ExtractRequest):
         loop = asyncio.get_event_loop()
 
         def extract_sync():
+            # NO format restriction - get ALL available formats for YouTube
             opts = {
                 "quiet": True,
                 "no_warnings": True,
                 "extract_flat": False,
                 "noplaylist": True,
-                "format": build_format_string(),
-                "socket_timeout": 15,
-                "retries": 3,
+                # Get all formats without filtering
+                "format": "all",
+                "socket_timeout": 20,
+                "retries": 5,
+                "fragment_retries": 5,
                 **get_ytdlp_cookies(),
             }
             import yt_dlp
@@ -342,25 +386,27 @@ async def extract_video(request: ExtractRequest):
 @app.post("/api/download", response_model=DownloadResponse)
 async def download_video(request: DownloadRequest):
     """
-    Download video and return direct URL or serve file.
-    - Direct URL (Instagram, TikTok): Return for browser download
-    - Requires merge (YouTube): Download locally and serve via /api/files/
+    Download video/audio and serve file directly.
+    ALWAYS downloads locally - no direct URLs (prevents stream issues).
     """
-    logger.info(f"Download request: {request.url[:100]}... (quality: {request.quality})")
+    logger.info(f"📥 Download request: URL={request.url[:80]}... | Type={request.type or 'video'} | Quality={request.quality or 'best'}")
 
     try:
         loop = asyncio.get_event_loop()
         task_id = str(uuid.uuid4())[:8]
 
+        # Get video info first
+        logger.info(f"🔍 Extracting info...")
         def extract_sync():
             opts = {
                 "quiet": True,
                 "no_warnings": True,
                 "extract_flat": False,
                 "noplaylist": True,
-                "format": build_format_string(),
-                "socket_timeout": 15,
-                "retries": 3,
+                "format": "all",
+                "socket_timeout": 20,
+                "retries": 5,
+                "fragment_retries": 5,
                 **get_ytdlp_cookies(),
             }
             import yt_dlp
@@ -368,62 +414,110 @@ async def download_video(request: DownloadRequest):
                 return ydl.extract_info(request.url, download=False)
 
         info = await loop.run_in_executor(None, extract_sync)
-
+        
         if not info:
-            raise HTTPException(status_code=400, detail="Failed to extract video information")
+            raise HTTPException(status_code=400, detail="Video ma'lumotlarini olib bo'lmadi")
+        
+        logger.info(f"✅ Video info extracted: {info.get('title', 'Unknown')[:50]}")
 
-        direct_url = get_direct_download_url(info)
-
-        if direct_url:
-            logger.info(f"Direct URL available for: {info.get('title', 'video')[:50]}")
-            return DownloadResponse(
-                success=True,
-                download_type="direct",
-                direct_url=direct_url,
-                filename=f"{info.get('title', 'video')}.mp4",
-                message="Direct download URL generated",
-            )
-
-        # No direct URL — download locally and serve
-        logger.info("No direct URL — downloading locally for merge...")
-
+        # Setup download
         download_dir = Path(config.downloader.DOWNLOAD_DIR)
         download_dir.mkdir(parents=True, exist_ok=True)
-
+        
         safe_title = re.sub(r'[<>:"/\\|?*]', "_", info.get("title", "video"))[:100]
-        output_template = str(download_dir / f"{task_id}_{safe_title}.%(ext)s")
+        download_type = request.type or "video"
 
-        def download_sync():
-            opts = {
-                "format": build_format_string(request.quality),
-                "outtmpl": output_template,
-                "merge_output_format": "mp4",
-                "noplaylist": True,
-                "no_warnings": True,
-                "quiet": True,
-                "socket_timeout": 15,
-                "retries": 3,
-                **get_ytdlp_cookies(),
-                "postprocessors": [{
-                    "key": "FFmpegVideoConvertor",
-                    "preferedformat": "mp4",
-                }],
-            }
-            import yt_dlp
-            with yt_dlp.YoutubeDL(opts) as ydl:
-                return ydl.extract_info(request.url, download=True)
+        if download_type == "audio":
+            # AUDIO: Extract MP3
+            logger.info(f"🎵 Downloading as AUDIO (MP3)")
+            output_template = str(download_dir / f"{task_id}_{safe_title}.%(ext)s")
+            
+            def download_sync():
+                opts = {
+                    "format": "bestaudio/best",
+                    "outtmpl": output_template,
+                    "noplaylist": True,
+                    "no_warnings": False,  # Show warnings for debugging
+                    "quiet": False,
+                    "socket_timeout": 20,
+                    "retries": 5,
+                    "postprocessors": [{
+                        "key": "FFmpegExtractAudio",
+                        "preferredcodec": "mp3",
+                        "preferredquality": "192",
+                    }],
+                    **get_ytdlp_cookies(),
+                }
+                import yt_dlp
+                with yt_dlp.YoutubeDL(opts) as ydl:
+                    return ydl.extract_info(request.url, download=True)
+        else:
+            # VIDEO: Download with quality selection
+            logger.info(f"🎬 Downloading as VIDEO (quality: {request.quality})")
+            output_template = str(download_dir / f"{task_id}_{safe_title}.%(ext)s")
+            
+            def download_sync():
+                opts = {
+                    "format": build_format_string(request.quality),
+                    "outtmpl": output_template,
+                    "merge_output_format": "mp4",
+                    "noplaylist": True,
+                    "no_warnings": False,
+                    "quiet": False,
+                    "socket_timeout": 20,
+                    "retries": 5,
+                    "fragment_retries": 5,
+                    "concurrent_fragment_downloads": 2,
+                    **get_ytdlp_cookies(),
+                    # FIX: Remove FFmpegMerger postprocessor (causes file not found on Windows)
+                    # FFmpegVideoConvertor handles format conversion automatically
+                    "postprocessors": [{
+                        "key": "FFmpegVideoConvertor",
+                        "preferedformat": "mp4",
+                    }],
+                    # Keep intermediate files until merge is complete
+                    "keepvideo": False,
+                    "prefer_ffmpeg": True,
+                }
+                import yt_dlp
+                with yt_dlp.YoutubeDL(opts) as ydl:
+                    return ydl.extract_info(request.url, download=True)
 
+        # Execute download
+        logger.info(f"⬇️ Starting download...")
         await loop.run_in_executor(None, download_sync)
-
+        
+        # Find downloaded file
         downloaded_files = list(download_dir.glob(f"{task_id}_*"))
-
+        logger.info(f"📁 Downloaded files: {[f.name for f in downloaded_files]}")
+        
         if not downloaded_files:
-            raise HTTPException(status_code=500, detail="Download completed but file not found")
-
+            # Try broader search
+            all_files = list(download_dir.iterdir())
+            recent_files = [f for f in all_files if (datetime.now().timestamp() - f.stat().st_mtime) < 60]
+            logger.error(f"❌ Task file not found. Recent files: {[f.name for f in recent_files]}")
+            raise HTTPException(status_code=500, detail="Download tugallandi lekin fayl topilmadi")
+        
         file_path = downloaded_files[0]
-        filename = f"{safe_title}.mp4"
-
-        logger.info(f"Download complete: {file_path}")
+        file_size = file_path.stat().st_size
+        
+        # Determine correct filename and extension
+        if download_type == "audio":
+            filename = f"{safe_title}.mp3"
+            # Rename if wrong extension
+            if file_path.suffix != ".mp3":
+                new_path = file_path.with_suffix(".mp3")
+                file_path.rename(new_path)
+                file_path = new_path
+        else:
+            filename = f"{safe_title}.mp4"
+            # Rename if wrong extension
+            if file_path.suffix not in [".mp4", ".mkv", ".webm"]:
+                new_path = file_path.with_suffix(".mp4")
+                file_path.rename(new_path)
+                file_path = new_path
+        
+        logger.info(f"✅ Download successful: {file_path.name} ({file_size / 1024 / 1024:.2f} MB)")
 
         return DownloadResponse(
             success=True,
@@ -431,20 +525,23 @@ async def download_video(request: DownloadRequest):
             file_path=str(file_path),
             filename=filename,
             file_url=f"/api/files/{file_path.name}",
-            message="File ready for download",
+            message="File tayyor",
         )
 
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Download failed: {str(e)}")
+        logger.error(f"❌ Download failed: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        
         error_msg = str(e)
         if "sign in to confirm" in error_msg.lower() or "no video formats" in error_msg.lower():
             raise HTTPException(
                 status_code=400,
-                detail="YouTube vaqtinchalik bu videoni yuklashga ruxsat bermayapti. Iltimos birozdan so'ng urinib ko'ring.",
+                detail="YouTube bu videoni bloklagan. Boshqa video urinib ko'ring.",
             )
-        raise HTTPException(status_code=400, detail=f"Download failed: {str(e)[:200]}")
+        raise HTTPException(status_code=500, detail=f"Download xato: {error_msg[:200]}")
 
 
 @app.get("/api/files/{filename}")

@@ -41,9 +41,15 @@ async function uploadDirectory(client, localDir, remoteDir) {
   const files = fs.readdirSync(localDir).filter(f => fs.statSync(path.join(localDir, f)).isFile());
 
   console.log(`\n📂 Papka: ${remoteDir} (${files.length} ta lokal fayl)`);
+  
+  // Ensure remote directory exists
   await client.ensureDir(`${REMOTE_BASE}/${remoteDir}`);
 
   console.log('   🔄 Serverdagi holat tekshirilmoqda...');
+  
+  // Navigate to the correct remote directory before listing
+  await client.cd(`${REMOTE_BASE}/${remoteDir}`);
+  
   const remoteFiles = await client.list();
   const remoteMap = new Map();
   for (const rf of remoteFiles) {

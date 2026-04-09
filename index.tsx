@@ -36,6 +36,11 @@ const Environment = {
   isProduction: window.location.hostname === 'creative-design.uz',
 
   get cdnUrl(): string {
+    // LOCAL: Use localhost for development
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'http://localhost:3001'; // Upload server
+    }
+    // PRODUCTION: Use CDN
     return 'https://creative-design.uz';
   },
 

@@ -22,7 +22,10 @@
       "Bash(start *)",
       "Bash(type *)",
       "Bash(echo.)",
-      "Bash(do *)"
+      "Bash(do *)",
+      "Bash(f *)",
+      "Bash(=== *)",
+      "Bash(pip show *)"
     ]
   },
   "$version": 3

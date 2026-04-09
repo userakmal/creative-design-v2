@@ -1,9 +1,41 @@
 version: '3.8'
 
 services:
+  # ============================================================================
+  # Video Downloader API (FastAPI + yt-dlp + FFmpeg)
+  # Port: 8000
+  # Supports: YouTube, Instagram, TikTok, 1000+ sites
+  # ============================================================================
+  video-downloader-api:
+    build: .
+    container_name: creative-design-video-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persist downloads across container restarts
+      - ./downloads:/app/downloads
+      # Mount cookies if available (optional)
+      - ./cookies.txt:/app/cookies.txt:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - bot-network
+
+  # ============================================================================
+  # Telegram Bot API Server (Official)
+  # Port: 8081
+  # Required for Telegram Bot functionality
+  # ============================================================================
   telegram-bot-api:
     image: aiogram/telegram-bot-api:latest
-    container_name: telegram-bot-api-server
+    container_name: creative-design-telegram-api
     restart: unless-stopped
     ports:
       - "8081:8081"
@@ -22,3 +54,4 @@ volumes:
 networks:
   bot-network:
     driver: bridge
+

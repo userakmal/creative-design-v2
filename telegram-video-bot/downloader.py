@@ -89,24 +89,24 @@ def get_ytdlp_cookies() -> dict:
 
 def build_format_string(resolution: Optional[str] = None) -> str:
     """
-    Build dynamic yt-dlp format string for robust download.
-    
-    Args:
-        resolution: Target resolution ("360", "720", "1080", "best") or None
-    
-    Returns:
-        yt-dlp format string with proper fallbacks
+    Build smart yt-dlp format string.
+    Returns BEST AVAILABLE format - ignores non-existent qualities.
     """
     if resolution and resolution != "best":
         try:
             height = int(resolution)
-            # Dynamic format: DASH merge → pre-merged → any available
-            return f'bestvideo[height<={height}][ext=mp4]+bestaudio[ext=m4a]/best[height<={height}]/best'
+            # Try requested quality with fallbacks
+            return (
+                f'bestvideo[height<={height}]+bestaudio/'
+                f'bestvideo[height<={int(height * 1.5)}]+bestaudio/'  # Try next quality up
+                f'bestvideo+bestaudio/'  # Any DASH
+                f'best'  # Last resort
+            )
         except (ValueError, TypeError):
             pass
     
-    # Default: best available with DASH merge
-    return 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best/best'
+    # Default: best available
+    return 'bestvideo+bestaudio/best'
 
 
 # ============================================================================
@@ -146,6 +146,7 @@ class VideoDownloader:
     ) -> dict:
         """
         Create yt-dlp options dictionary with dynamic format selection.
+        OPTIMIZED FOR YOUTUBE: Accepts ALL formats with proper fallbacks.
 
         Args:
             output_path: Output file path template
@@ -167,16 +168,21 @@ class VideoDownloader:
             "writesubtitles": False,
             "writethumbnail": False,
             # FIX #3: Prevent yt-dlp hangs with socket timeout and retries
-            "socket_timeout": 15,
-            "retries": 3,
-            "fragment_retries": 3,
+            "socket_timeout": 20,
+            "retries": 5,
+            "fragment_retries": 5,
             "http_chunk_size": 10485760,  # 10MB
+            # YouTube optimization
+            "concurrent_fragment_downloads": 2,
             # CRITICAL: Static cookies for YouTube authentication
             **get_ytdlp_cookies(),
             # CRITICAL: FFmpeg post-processor for DASH merge
             "postprocessors": [{
                 "key": "FFmpegVideoConvertor",
                 "preferedformat": "mp4",
+            }, {
+                # Ensure proper merge for all format combinations
+                "key": "FFmpegMerger",
             }],
         }
 
@@ -349,20 +355,23 @@ class VideoDownloader:
     async def extract_info(self, url: str) -> VideoInfo:
         """
         Extract video information without downloading.
-        CRITICAL: Uses static cookies.txt for YouTube authentication.
+        CRITICAL: Uses static cookies.txt and NO format restrictions for YouTube.
         """
         logger.info(f"Extracting info for URL: {url[:50]}...")
 
         def extract():
+            # NO format restriction - get ALL available formats
             opts = {
                 "quiet": True,
                 "no_warnings": True,
                 "extract_flat": False,
                 "noplaylist": True,
-                "format": build_format_string(),
+                # Get format list without filtering
+                "format": "all",
                 # FIX #3: Prevent yt-dlp hangs with socket timeout and retries
-                "socket_timeout": 15,
-                "retries": 3,
+                "socket_timeout": 20,
+                "retries": 5,
+                "fragment_retries": 5,
                 **get_ytdlp_cookies(),
             }
 

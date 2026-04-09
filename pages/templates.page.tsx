@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { VideoCard } from "../components/VideoCard";
 import { config } from "../config";
-import type { VideoItem, MusicItem } from "../types";
+import type { VideoItem } from "../types";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 interface TemplatesPageProps {

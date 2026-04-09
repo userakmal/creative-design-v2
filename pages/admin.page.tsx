@@ -57,7 +57,7 @@ export const AdminPage = () => {
   const navigate = useNavigate();
 
   // Auth - Local development da login kerak emas
-  const isAuthenticated = true; // Always authenticated on localhost
+  // const isAuthenticated = true; // Always authenticated on localhost
 
   // Server
   const [serverConnected, setServerConnected] = useState(false);
@@ -82,11 +82,19 @@ export const AdminPage = () => {
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
   const [videoUploadProgress, setVideoUploadProgress] = useState(0);
 
-  // Instagram Download
-  const [instagramUrl, setInstagramUrl] = useState("");
-  const [instagramTitle, setInstagramTitle] = useState("");
-  const [isDownloadingInstagram, setIsDownloadingInstagram] = useState(false);
-  const [instagramDownloadProgress, setInstagramDownloadProgress] = useState(0);
+  // Universal Video Downloader (uses FastAPI at port 8000)
+  const [videoDownloaderUrl, setVideoDownloaderUrl] = useState("");
+  const [customVideoTitle, setCustomVideoTitle] = useState("");
+  const [isExtractingVideo, setIsExtractingVideo] = useState(false);
+  const [isDownloadingVideo, setIsDownloadingVideo] = useState(false);
+  const [isUploadingDownloadedVideo, setIsUploadingDownloadedVideo] = useState(false);
+  const [videoExtractResult, setVideoExtractResult] = useState<any>(null);
+  const [selectedVideoQuality, setSelectedVideoQuality] = useState("best");
+  const [selectedMediaType, setSelectedMediaType] = useState<"video" | "audio">("video");
+  const [videoDownloaderStatus, setVideoDownloaderStatus] = useState<"checking" | "online" | "offline">("checking");
+  const [videoDownloaderMessage, setVideoDownloaderMessage] = useState<string | null>(null);
+  const [downloadedVideoPath, setDownloadedVideoPath] = useState<string | null>(null);
+  const [downloadedVideoFilename, setDownloadedVideoFilename] = useState<string | null>(null);
 
   // Music Upload
   const [musicTitle, setMusicTitle] = useState("");
@@ -111,6 +119,336 @@ export const AdminPage = () => {
     setMessage({ type, text });
     setTimeout(() => setMessage({ type: "", text: "" }), 4000);
   }, []);
+
+  // ========================================================================
+  // Universal Video Downloader API Calls (Port 8000)
+  // ========================================================================
+
+  const checkVideoDownloaderServer = useCallback(async () => {
+    setVideoDownloaderStatus("checking");
+    try {
+      const res = await fetch('http://localhost:8000/api/health', { signal: AbortSignal.timeout(3000) });
+      if (res.ok) {
+        setVideoDownloaderStatus("online");
+      } else {
+        setVideoDownloaderStatus("offline");
+      }
+    } catch {
+      setVideoDownloaderStatus("offline");
+    }
+  }, []);
+
+  const handleVideoExtract = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!videoDownloaderUrl.trim()) { showToast("error", "Video URL kiriting"); return; }
+
+    setIsExtractingVideo(true);
+    setVideoDownloaderMessage(null);
+    setVideoExtractResult(null);
+
+    try {
+      const res = await fetch('http://localhost:8000/api/extract', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: videoDownloaderUrl.trim() }),
+        signal: AbortSignal.timeout(120000),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.detail || "Video ma'lumotlarini olib bo'lmadi");
+      }
+
+      setVideoExtractResult(data);
+      
+      // Auto-fill custom title
+      if (data.title) {
+        setCustomVideoTitle(data.title);
+      }
+      
+      if (data.formats && data.formats.length > 0) {
+        const bestFormat = data.formats[data.formats.length - 1];
+        setSelectedVideoQuality(bestFormat.quality);
+      }
+      showToast("success", `✅ "${data.title}" topildi!`);
+    } catch (err: any) {
+      showToast("error", err.message || "Video qidirishda xatolik");
+    } finally {
+      setIsExtractingVideo(false);
+    }
+  };
+
+  const handleVideoDownload = async () => {
+    if (!videoDownloaderUrl.trim() || !videoExtractResult) return;
+
+    setIsDownloadingVideo(true);
+    setVideoDownloaderMessage("⏳ Video yuklanmoqda...");
+    setDownloadedVideoPath(null);
+    setDownloadedVideoFilename(null);
+
+    try {
+      const res = await fetch('http://localhost:8000/api/download', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: videoDownloaderUrl.trim(),
+          quality: selectedVideoQuality,
+          type: selectedMediaType, // "video" or "audio"
+        }),
+        signal: AbortSignal.timeout(300000),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Yuklashda xatolik");
+      }
+
+      if (data.download_type === "file" && data.file_url) {
+        setVideoDownloaderMessage("✅ Video muvaffaqiyatli yuklab olindi! Endi nomini o'zgartirib upload qilishingiz mumkin.");
+
+        // Save downloaded file info for upload
+        const fileUrl = `http://localhost:8000${data.file_url}`;
+        setDownloadedVideoPath(fileUrl);
+        setDownloadedVideoFilename(data.filename || "video.mp4");
+
+        showToast("success", `✅ "${videoExtractResult.title}" yuklab olindi!`);
+      } else if (data.download_type === "direct" && data.direct_url) {
+        setVideoDownloaderMessage("✅ Video muvaffaqiyatli yuklab olindi! Endi nomini o'zgartirib upload qilishingiz mumkin.");
+
+        // Save downloaded file info for upload
+        setDownloadedVideoPath(data.direct_url);
+        setDownloadedVideoFilename(data.filename || "video.mp4");
+
+        showToast("success", `✅ "${videoExtractResult.title}" yuklab olindi!`);
+      } else {
+        setVideoDownloaderMessage("✅ " + data.message);
+      }
+
+      setTimeout(() => setVideoDownloaderMessage(null), 5000);
+    } catch (err: any) {
+      showToast("error", err.message || "Yuklashda xatolik");
+      setVideoDownloaderMessage(null);
+    } finally {
+      setIsDownloadingVideo(false);
+    }
+  };
+
+  const handleUploadDownloadedVideo = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!serverConnected) {
+      showToast("error", "Upload server ishlamayapti! CRrunner.bat ni ishga tushiring.");
+      return;
+    }
+
+    if (!downloadedVideoPath || !downloadedVideoFilename) {
+      showToast("error", "Avval videoni yuklab oling");
+      return;
+    }
+
+    if (!customVideoTitle.trim()) {
+      showToast("error", "Video nomini kiriting");
+      return;
+    }
+
+    setIsUploadingDownloadedVideo(true);
+    setVideoUploadProgress(0);
+
+    try {
+      console.log('📥 Step 1: Downloading video from FastAPI server...', downloadedVideoPath);
+      
+      // Step 1: Download video from the FastAPI server to a blob
+      const response = await fetch(downloadedVideoPath);
+      if (!response.ok) {
+        throw new Error(`Videoni yuklab olib bo'lmadi: ${response.status} ${response.statusText}`);
+      }
+
+      const blob = await response.blob();
+      console.log('✅ Video blob created:', blob.size, 'bytes, type:', blob.type);
+      
+      const videoFile = new File([blob], downloadedVideoFilename, { type: blob.type || "video/mp4" });
+      console.log('📹 Video file created:', videoFile.name, videoFile.size, 'bytes');
+
+      // Step 2: Generate thumbnail from video or use default
+      console.log('🖼️ Step 2: Generating thumbnail...');
+      const thumbnailFile = await generateThumbnailFromVideo(videoFile);
+      console.log('✅ Thumbnail created:', thumbnailFile.name, thumbnailFile.size, 'bytes');
+
+      // Step 3: Upload to the server
+      console.log('📤 Step 3: Uploading to server...', SERVER_URL);
+      
+      const formData = new FormData();
+      formData.append("title", customVideoTitle.trim());
+      formData.append("video", videoFile);
+      formData.append("image", thumbnailFile);
+      formData.append("password", ADMIN_PASSWORD);
+      
+      // Log FormData entries for debugging
+      console.log('FormData entries:');
+      for (let pair of formData.entries()) {
+        if (pair[1] instanceof File) {
+          console.log(`  ${pair[0]}: File(${pair[1].name}, ${pair[1].size} bytes)`);
+        } else {
+          console.log(`  ${pair[0]}: ${pair[1]}`);
+        }
+      }
+
+      const xhr = new XMLHttpRequest();
+
+      const uploadPromise = new Promise<any>((resolve, reject) => {
+        xhr.upload.addEventListener("progress", (e) => {
+          if (e.lengthComputable) {
+            const pct = Math.round((e.loaded / e.total) * 100);
+            setVideoUploadProgress(pct);
+            console.log(`📊 Upload progress: ${pct}%`);
+          }
+        });
+
+        xhr.addEventListener("load", () => {
+          console.log('📡 XHR load completed, status:', xhr.status);
+          console.log('Response:', xhr.responseText);
+          
+          try {
+            const data = JSON.parse(xhr.responseText);
+            if (xhr.status >= 200 && xhr.status < 300) {
+              console.log('✅ Upload successful:', data);
+              resolve(data);
+            } else {
+              console.error('❌ Upload failed with status:', xhr.status, data);
+              reject(new Error(data.error || `Upload xatosi: ${xhr.status}`));
+            }
+          } catch {
+            console.error('❌ Failed to parse response:', xhr.responseText);
+            reject(new Error("Server javobini o'qib bo'lmadi"));
+          }
+        });
+
+        xhr.addEventListener("error", (err) => {
+          console.error('❌ XHR error:', err);
+          reject(new Error("Tarmoq xatosi"));
+        });
+        
+        xhr.addEventListener("abort", () => {
+          console.warn('⚠️ Upload aborted');
+          reject(new Error("Upload bekor qilindi"));
+        });
+
+        xhr.open("POST", `${SERVER_URL}/api/upload`);
+        xhr.send(formData);
+      });
+
+      await uploadPromise;
+
+      showToast("success", `✅ "${customVideoTitle.trim()}" muvaffaqiyatli yuklandi!`);
+
+      // Reset form
+      setCustomVideoTitle("");
+      setDownloadedVideoPath(null);
+      setDownloadedVideoFilename(null);
+      setVideoDownloaderMessage(null);
+
+      // Refresh
+      console.log('🔄 Refreshing video list...');
+      await loadVideos();
+      await loadStats();
+      console.log('✅ Video list refreshed');
+    } catch (err: any) {
+      console.error('❌ Upload error:', err);
+      showToast("error", `Upload xatosi: ${err.message || 'Noma\'lum xatolik'}`);
+    } finally {
+      setIsUploadingDownloadedVideo(false);
+      setVideoUploadProgress(0);
+    }
+  };
+
+  // Helper function to generate thumbnail from video
+  const generateThumbnailFromVideo = async (videoFile: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const video = document.createElement("video");
+      video.preload = "metadata";
+      video.muted = true; // Mute to avoid autoplay issues
+      video.src = URL.createObjectURL(videoFile);
+
+      let timeout: NodeJS.Timeout;
+
+      video.onloadeddata = () => {
+        console.log('📹 Video loaded, duration:', video.duration, 'width:', video.videoWidth, 'height:', video.videoHeight);
+        // Seek to 2 seconds or 25% of video for better thumbnail
+        video.currentTime = Math.min(2, video.duration * 0.25);
+      };
+
+      video.onseeked = () => {
+        console.log('✅ Video seeked to:', video.currentTime);
+        clearTimeout(timeout);
+        
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 360;
+
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          console.log('🖼️ Thumbnail drawn to canvas');
+        }
+
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const thumbnailFile = new File([blob], "thumbnail.jpg", { type: "image/jpeg" });
+            console.log('✅ Thumbnail file created:', blob.size, 'bytes');
+            URL.revokeObjectURL(video.src);
+            resolve(thumbnailFile);
+          } else {
+            console.error('❌ Canvas toBlob failed');
+            URL.revokeObjectURL(video.src);
+            reject(new Error("Thumbnail yaratib bo'lmadi"));
+          }
+        }, "image/jpeg", 0.8);
+      };
+
+      video.onerror = (err) => {
+        console.error('❌ Video loading error, using fallback thumbnail', err);
+        clearTimeout(timeout);
+        URL.revokeObjectURL(video.src);
+        
+        // Fallback: create a simple colored placeholder
+        const canvas = document.createElement("canvas");
+        canvas.width = 640;
+        canvas.height = 360;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+          gradient.addColorStop(0, "#667eea");
+          gradient.addColorStop(1, "#764ba2");
+          ctx.fillStyle = gradient;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          
+          // Add text
+          ctx.fillStyle = "white";
+          ctx.font = "bold 30px Arial";
+          ctx.textAlign = "center";
+          ctx.fillText("VIDEO", canvas.width / 2, canvas.height / 2);
+        }
+
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const thumbnailFile = new File([blob], "thumbnail.jpg", { type: "image/jpeg" });
+            console.log('✅ Fallback thumbnail created:', blob.size, 'bytes');
+            resolve(thumbnailFile);
+          } else {
+            reject(new Error("Thumbnail yaratib bo'lmadi"));
+          }
+        }, "image/jpeg", 0.8);
+      };
+
+      // Timeout fallback after 10 seconds
+      timeout = setTimeout(() => {
+        console.warn('⏱️ Thumbnail generation timeout, using fallback');
+        (video.onerror as any)(new Event('timeout'));
+      }, 10000);
+    });
+  };
 
   const checkServer = useCallback(async () => {
     try {
@@ -173,14 +511,17 @@ export const AdminPage = () => {
         loadVideos();
         loadMusic();
       }
+      // Check video downloader server
+      checkVideoDownloaderServer();
     };
     init();
     const interval = setInterval(async () => {
       const connected = await checkServer();
       if (connected) loadStats();
+      checkVideoDownloaderServer();
     }, 8000);
     return () => clearInterval(interval);
-  }, [checkServer, loadStats, loadVideos, loadMusic]);
+  }, [checkServer, loadStats, loadVideos, loadMusic, checkVideoDownloaderServer]);
 
   // Image preview
   useEffect(() => {
@@ -196,64 +537,6 @@ export const AdminPage = () => {
   // ========================================================================
   // Upload Handlers
   // ========================================================================
-
-  const handleInstagramDownload = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!instagramUrl.trim()) { showToast("error", "Instagram URL kiriting"); return; }
-    if (!instagramUrl.includes("instagram.com")) { showToast("error", "To'g'ri Instagram URL emas"); return; }
-
-    setIsDownloadingInstagram(true);
-    setInstagramDownloadProgress(0);
-
-    try {
-      // Simulate progress
-      const progressInterval = setInterval(() => {
-        setInstagramDownloadProgress(prev => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + 5;
-        });
-      }, 500);
-
-      const response = await fetch(`${SERVER_URL}/api/download-instagram`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          password: ADMIN_PASSWORD,
-          instagramUrl: instagramUrl.trim(),
-          customTitle: instagramTitle.trim() || undefined,
-        }),
-      });
-
-      clearInterval(progressInterval);
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Download xatosi");
-      }
-
-      setInstagramDownloadProgress(100);
-      showToast("success", `✅ "${data.data.title}" Instagram dan muvaffaqiyatli yuklandi!`);
-
-      // Reset form
-      setInstagramUrl("");
-      setInstagramTitle("");
-
-      // Refresh
-      setTimeout(() => {
-        loadVideos();
-        loadStats();
-      }, 1000);
-    } catch (err: any) {
-      showToast("error", err.message || "Instagram dan yuklab olishda xatolik");
-    } finally {
-      setIsDownloadingInstagram(false);
-      setInstagramDownloadProgress(0);
-    }
-  };
 
   const handleVideoUpload = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -547,65 +830,233 @@ export const AdminPage = () => {
         {/* ============================================================== */}
         {activeTab === "video" && (
           <>
-            {/* Instagram Download Card */}
-            <div className="admin-card" style={{ marginBottom: "20px", border: "2px solid #229ED9" }}>
+            {/* Universal Video Downloader Card */}
+            <div className="admin-card" style={{ marginBottom: "20px", border: "2px solid #10b981" }}>
               <div className="admin-card-header">
-                <div className="admin-card-icon" style={{ background: "#229ED9", color: "white" }}>📱</div>
-                <div>
-                  <div className="admin-card-title">Instagram dan Video Yuklash</div>
-                  <div className="admin-card-desc">URL qo'ying - avtomatik yuklab olinadi va yuklanadi</div>
+                <div className="admin-card-icon" style={{ background: "#10b981", color: "white" }}>🎬</div>
+                <div style={{ flex: 1 }}>
+                  <div className="admin-card-title">Universal Video Downloader</div>
+                  <div className="admin-card-desc">YouTube, Instagram, TikTok va 1000+ saytlar</div>
                 </div>
+                <button
+                  onClick={checkVideoDownloaderServer}
+                  className={`admin-badge-online ${videoDownloaderStatus === "online" ? "connected" : videoDownloaderStatus === "offline" ? "disconnected" : ""}`}
+                  style={{ marginLeft: "auto", cursor: "pointer" }}
+                >
+                  <span className="admin-badge-dot" />
+                  {videoDownloaderStatus === "online" ? "Online" : videoDownloaderStatus === "offline" ? "Offline" : "..."}
+                </button>
               </div>
 
-              <form onSubmit={handleInstagramDownload}>
+              <form onSubmit={handleVideoExtract}>
                 <div className="admin-form-group">
-                  <label className="admin-label">Instagram Video URL</label>
+                  <label className="admin-label">Video URL (YouTube, Instagram, TikTok, etc.)</label>
                   <input
                     type="url"
-                    value={instagramUrl}
-                    onChange={(e) => setInstagramUrl(e.target.value)}
+                    value={videoDownloaderUrl}
+                    onChange={(e) => setVideoDownloaderUrl(e.target.value)}
                     className="admin-input"
-                    placeholder="https://www.instagram.com/reel/... yoki https://www.instagram.com/p/..."
+                    placeholder="https://youtube.com/watch?v=... yoki https://www.instagram.com/reel/..."
                     required
                   />
                 </div>
 
-                <div className="admin-form-group">
-                  <label className="admin-label">Video Nomi (ixtiyoriy)</label>
-                  <input
-                    type="text"
-                    value={instagramTitle}
-                    onChange={(e) => setInstagramTitle(e.target.value)}
-                    className="admin-input"
-                    placeholder="Bo'sh qoldirilsa - original nom ishlatiladi"
-                  />
-                </div>
+                {/* Video Downloader Message */}
+                {videoDownloaderMessage && (
+                  <div className="admin-toast success" style={{ marginBottom: "16px" }}>
+                    {videoDownloaderMessage}
+                  </div>
+                )}
 
-                {/* Download Progress */}
-                {isDownloadingInstagram && (
-                  <div className="admin-upload-progress">
-                    <div className="admin-progress-bar-bg">
-                      <div
-                        className="admin-progress-bar-fill"
-                        style={{ width: `${instagramDownloadProgress}%`, background: "#229ED9" }}
+                {/* Extract Result */}
+                {videoExtractResult && (
+                  <div style={{ marginBottom: "16px", padding: "16px", background: "#f0fdf4", borderRadius: "12px", border: "1px solid #86efac" }}>
+                    <div style={{ display: "flex", gap: "12px", marginBottom: "12px" }}>
+                      {videoExtractResult.thumbnail && (
+                        <img
+                          src={videoExtractResult.thumbnail}
+                          alt={videoExtractResult.title}
+                          style={{ width: "120px", height: "80px", objectFit: "cover", borderRadius: "8px" }}
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                        />
+                      )}
+                      <div>
+                        <div style={{ fontWeight: "600", fontSize: "14px", marginBottom: "4px" }}>{videoExtractResult.title}</div>
+                        <div style={{ fontSize: "12px", color: "#6b7280" }}>
+                          {videoExtractResult.uploader && <span>{videoExtractResult.uploader} • </span>}
+                          {videoExtractResult.duration_formatted && <span>{videoExtractResult.duration_formatted}</span>}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Custom Video Title Input */}
+                    <div className="admin-form-group" style={{ marginBottom: "12px" }}>
+                      <label className="admin-label">Video Nomi (o'zgartirishingiz mumkin)</label>
+                      <input
+                        type="text"
+                        value={customVideoTitle}
+                        onChange={(e) => setCustomVideoTitle(e.target.value)}
+                        className="admin-input"
+                        placeholder="Video nomi..."
+                        style={{ fontWeight: "500" }}
                       />
                     </div>
-                    <div className="admin-progress-text">
-                      {instagramDownloadProgress < 100 ? `Yuklab olinmoqda... ${instagramDownloadProgress}%` : "Tayyorlanmoqda..."}
+
+                    {/* Video/Audio Type Selection */}
+                    <div style={{ marginBottom: "12px" }}>
+                      <label className="admin-label">Format:</label>
+                      <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedMediaType("video")}
+                          style={{
+                            flex: 1,
+                            padding: "12px",
+                            borderRadius: "8px",
+                            border: selectedMediaType === "video" ? "2px solid #10b981" : "1px solid #e5e7eb",
+                            background: selectedMediaType === "video" ? "#f0fdf4" : "white",
+                            color: selectedMediaType === "video" ? "#059669" : "#374151",
+                            fontSize: "14px",
+                            fontWeight: "600",
+                            cursor: "pointer",
+                          }}
+                        >
+                          🎬 Video
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedMediaType("audio")}
+                          style={{
+                            flex: 1,
+                            padding: "12px",
+                            borderRadius: "8px",
+                            border: selectedMediaType === "audio" ? "2px solid #10b981" : "1px solid #e5e7eb",
+                            background: selectedMediaType === "audio" ? "#f0fdf4" : "white",
+                            color: selectedMediaType === "audio" ? "#059669" : "#374151",
+                            fontSize: "14px",
+                            fontWeight: "600",
+                            cursor: "pointer",
+                          }}
+                        >
+                          🎵 Audio (MP3)
+                        </button>
+                      </div>
                     </div>
+
+                    {/* Quality Selection (only for video) */}
+                    {selectedMediaType === "video" && videoExtractResult.formats && videoExtractResult.formats.length > 1 && (
+                      <div style={{ marginBottom: "12px" }}>
+                        <label className="admin-label">Video sifati:</label>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: "8px", marginTop: "8px" }}>
+                          {videoExtractResult.formats.map((fmt: any) => (
+                            <button
+                              key={fmt.format_id}
+                              type="button"
+                              onClick={() => setSelectedVideoQuality(fmt.quality)}
+                              style={{
+                                padding: "10px",
+                                borderRadius: "8px",
+                                border: selectedVideoQuality === fmt.quality ? "2px solid #10b981" : "1px solid #e5e7eb",
+                                background: selectedVideoQuality === fmt.quality ? "#f0fdf4" : "white",
+                                color: selectedVideoQuality === fmt.quality ? "#059669" : "#374151",
+                                fontSize: "13px",
+                                fontWeight: "500",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <div>{fmt.quality}</div>
+                              <div style={{ fontSize: "11px", color: "#9ca3af", marginTop: "2px" }}>{fmt.filesize_formatted}</div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Single format info */}
+                    {selectedMediaType === "video" && videoExtractResult.formats && videoExtractResult.formats.length === 1 && (
+                      <div style={{ marginBottom: "12px", padding: "10px", background: "#f8fafc", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                        <div style={{ fontSize: "12px", color: "#64748b" }}>
+                          ℹ️ Bu video faqat <strong>1 ta formatda</strong> mavjud: <strong>{videoExtractResult.formats[0].quality}</strong> ({videoExtractResult.formats[0].filesize_formatted})
+                        </div>
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={handleVideoDownload}
+                      disabled={isDownloadingVideo}
+                      className="admin-btn-primary"
+                      style={{ width: "100%", background: "#10b981" }}
+                    >
+                      {isDownloadingVideo ? (
+                        <>⏳ Yuklanmoqda...</>
+                      ) : (
+                        <>⬇️ {selectedMediaType === "video" ? "Video yuklash" : "Audio (MP3) yuklash"}</>
+                      )}
+                    </button>
+
+                    {/* Upload Downloaded Video Section */}
+                    {downloadedVideoPath && (
+                      <div style={{ marginTop: "16px", padding: "16px", background: "#fef3c7", borderRadius: "12px", border: "2px solid #f59e0b" }}>
+                        <div style={{ fontWeight: "600", fontSize: "14px", marginBottom: "12px", color: "#92400e" }}>
+                          ✅ Video yuklab olindi! Endi upload qiling
+                        </div>
+
+                        {/* Upload Progress */}
+                        {isUploadingDownloadedVideo && (
+                          <div className="admin-upload-progress" style={{ marginBottom: "12px" }}>
+                            <div className="admin-progress-bar-bg">
+                              <div
+                                className="admin-progress-bar-fill"
+                                style={{ width: `${videoUploadProgress}%`, background: "#f59e0b" }}
+                              />
+                            </div>
+                            <div className="admin-progress-text" style={{ color: "#92400e" }}>
+                              {videoUploadProgress < 100 ? `Upload qilinmoqda... ${videoUploadProgress}%` : "Tayyorlanmoqda..."}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Upload Button Form */}
+                        <form onSubmit={handleUploadDownloadedVideo}>
+                          <button
+                            type="submit"
+                            disabled={isUploadingDownloadedVideo || !customVideoTitle.trim() || !serverConnected}
+                            className="admin-btn-primary"
+                            style={{ 
+                              width: "100%", 
+                              background: isUploadingDownloadedVideo ? "#d97706" : "#f59e0b",
+                              opacity: (!customVideoTitle.trim() || !serverConnected) ? 0.5 : 1
+                            }}
+                          >
+                            {isUploadingDownloadedVideo ? (
+                              <>⏳ Upload qilinmoqda... {videoUploadProgress}%</>
+                            ) : (
+                              <>📤 Video nomini saqlash va upload qilish</>
+                            )}
+                          </button>
+                        </form>
+
+                        {!serverConnected && (
+                          <div style={{ fontSize: "11px", color: "#dc2626", marginTop: "8px" }}>
+                            ⚠️ Upload server ishlamayapti! CRrunner.bat ni ishga tushiring.
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
 
                 <button
                   type="submit"
-                  disabled={isDownloadingInstagram || !instagramUrl.trim()}
+                  disabled={isExtractingVideo || !videoDownloaderUrl.trim() || videoDownloaderStatus === "offline"}
                   className="admin-btn-primary"
-                  style={{ marginTop: "16px", background: "#229ED9" }}
+                  style={{ marginTop: "16px", background: "#10b981" }}
                 >
-                  {isDownloadingInstagram ? (
-                    <>⏳ Yuklab olinmoqda... {instagramDownloadProgress}%</>
+                  {isExtractingVideo ? (
+                    <>⏳ Qidirilmoqda...</>
                   ) : (
-                    <>📱 Instagram dan Yuklash</>
+                    <>🔍 Video Qidirish</>
                   )}
                 </button>
               </form>

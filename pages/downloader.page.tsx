@@ -18,6 +18,8 @@ import {
   Clock,
   User,
   Film,
+  Instagram,
+  Edit3,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -62,13 +64,15 @@ type ServerStatus = "checking" | "online" | "offline";
 // ============================================================================
 
 // Detect environment and set API base URL
-const isProduction = window.location.hostname === 'creative-design.uz';
+const isLocalhost = window.location.hostname === 'localhost' ||
+                   window.location.hostname === '127.0.0.1';
 
-// In production, video downloader may not work (needs Python backend)
-// In development, use localhost:8000
-const API_BASE = isProduction 
-  ? '' // Production: disable or configure proxy
-  : 'http://localhost:8000'; // Development: use local Python server
+// API configuration
+// In production: assumes video API is hosted at /api endpoint (proxy or same domain)
+// In development: use localhost:8000 (FastAPI server)
+const API_BASE = isLocalhost
+  ? 'http://localhost:8000' // Development: local Python server
+  : '/api-video'; // Production: use relative path (requires nginx proxy to port 8000)
 
 // ============================================================================
 // COMPONENT
@@ -77,16 +81,18 @@ const API_BASE = isProduction
 export const VideoDownloaderPage: React.FC = () => {
   const navigate = useNavigate();
 
-  // Check if API is available
-  const isApiAvailable = API_BASE !== '';
+  // API is always configured (either localhost or production proxy)
+  const isApiAvailable = true;
 
   const [url, setUrl] = useState("");
+  const [videoTitle, setVideoTitle] = useState("");
   const [isExtracting, setIsExtracting] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [serverStatus, setServerStatus] = useState<ServerStatus>(isApiAvailable ? "checking" : "offline");
   const [extractResult, setExtractResult] = useState<ExtractResult | null>(null);
   const [selectedQuality, setSelectedQuality] = useState("best");
+  const [selectedMediaType, setSelectedMediaType] = useState<"video" | "audio">("video");
   const [downloadMessage, setDownloadMessage] = useState<string | null>(null);
 
   // ============================================================================
@@ -172,6 +178,11 @@ export const VideoDownloaderPage: React.FC = () => {
 
       setExtractResult(data);
 
+      // Auto-fill title
+      if (data.title) {
+        setVideoTitle(data.title);
+      }
+
       // Auto-select best quality
       if (data.formats && data.formats.length > 0) {
         const bestFormat = data.formats[data.formats.length - 1];
@@ -193,7 +204,7 @@ export const VideoDownloaderPage: React.FC = () => {
 
     setIsDownloading(true);
     setError(null);
-    setDownloadMessage("⏳ Video yuklanmoqda...");
+    setDownloadMessage("⏳ Yuklanmoqda...");
 
     try {
       const res = await fetch(`${API_BASE}/api/download`, {
@@ -202,6 +213,7 @@ export const VideoDownloaderPage: React.FC = () => {
         body: JSON.stringify({
           url: url.trim(),
           quality: selectedQuality,
+          type: selectedMediaType, // "video" or "audio"
         }),
         signal: AbortSignal.timeout(300000), // 5 min timeout
       });
@@ -212,22 +224,26 @@ export const VideoDownloaderPage: React.FC = () => {
         throw new Error(data.message || "Yuklashda xatolik");
       }
 
-      if (data.download_type === "direct" && data.direct_url) {
-        // Direct URL — open in new tab for browser download
-        setDownloadMessage("✅ To'g'ridan-to'g'ri yuklash boshlanmoqda...");
-        window.open(data.direct_url, "_blank");
-      } else if (data.download_type === "file" && data.file_url) {
-        // File served from our API
-        setDownloadMessage("✅ Video tayyor! Yuklab olish boshlanmoqda...");
-
+      // DIRECT DOWNLOAD - no new window
+      if (data.download_type === "file" && data.file_url) {
+        setDownloadMessage("✅ Tayyor! Yuklab olish boshlanmoqda...");
         const fileUrl = `${API_BASE}${data.file_url}`;
-        const link = document.createElement("a");
-        link.href = fileUrl;
-        link.download = data.filename || "video.mp4";
-        link.style.display = "none";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const a = document.createElement("a");
+        a.href = fileUrl;
+        a.download = data.filename || "video.mp4";
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } else if (data.download_type === "direct" && data.direct_url) {
+        setDownloadMessage("✅ Tayyor! Yuklab olish boshlanmoqda...");
+        const a = document.createElement("a");
+        a.href = data.direct_url;
+        a.download = data.filename || "video.mp4";
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
       } else {
         setDownloadMessage("✅ " + data.message);
       }
@@ -251,29 +267,32 @@ export const VideoDownloaderPage: React.FC = () => {
   // ============================================================================
 
   return (
-    <div className="w-full min-h-screen bg-cream animate-fade-in pb-10 max-w-md mx-auto">
-      {/* Header */}
-      <div className="sticky top-0 z-20 bg-[#FAF9F6]/90 backdrop-blur-xl px-6 py-4 flex items-center justify-between mb-2 shadow-sm">
+    <div className="w-full min-h-screen bg-gradient-to-br from-purple-900 via-pink-800 to-orange-700 animate-fade-in pb-10 max-w-md mx-auto">
+      {/* Header - Instagram Reels Style */}
+      <div className="sticky top-0 z-20 bg-gradient-to-r from-purple-900/95 via-pink-800/95 to-orange-700/95 backdrop-blur-xl px-6 py-4 flex items-center justify-between mb-2 shadow-lg border-b border-white/10">
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate("/")}
-            className="p-2 -ml-2 rounded-full hover:bg-stone-100 transition-colors text-stone-600 active:scale-95"
+            className="p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors text-white active:scale-95"
           >
             <ArrowLeft size={20} />
           </button>
-          <h2 className="text-lg font-serif font-medium text-stone-800">
-            Video Downloader
-          </h2>
+          <div className="flex items-center gap-2">
+            <Instagram size={22} className="text-pink-300" />
+            <h2 className="text-lg font-bold text-white">
+              Reels Downloader
+            </h2>
+          </div>
         </div>
 
         <button
           onClick={checkServer}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-semibold uppercase tracking-wider transition-all active:scale-95 ${
             serverStatus === "online"
-              ? "bg-green-50 text-green-600 border border-green-100"
+              ? "bg-green-500/20 text-green-300 border border-green-400/30"
               : serverStatus === "offline"
-              ? "bg-red-50 text-red-500 border border-red-100"
-              : "bg-stone-50 text-stone-400 border border-stone-100 animate-pulse"
+              ? "bg-red-500/20 text-red-300 border border-red-400/30"
+              : "bg-white/10 text-white/60 border border-white/20 animate-pulse"
           }`}
         >
           {serverStatus === "online" && <Wifi size={12} />}
@@ -284,41 +303,41 @@ export const VideoDownloaderPage: React.FC = () => {
       </div>
 
       <div className="px-5 mt-6">
-        {/* Info Card */}
-        <div className="bg-white p-5 rounded-2xl border border-stone-100 shadow-sm mb-6 flex gap-4">
-          <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-500 shrink-0">
+        {/* Info Card - Instagram Style */}
+        <div className="bg-white/10 backdrop-blur-md p-5 rounded-2xl border border-white/20 shadow-lg mb-6 flex gap-4">
+          <div className="w-12 h-12 bg-gradient-to-tr from-purple-500 via-pink-500 to-orange-500 rounded-full flex items-center justify-center text-white shrink-0 shadow-lg">
             <Download size={24} />
           </div>
           <div>
-            <h3 className="font-semibold text-stone-800 text-sm mb-1">
-              Video Yuklab Olish
+            <h3 className="font-bold text-white text-sm mb-1">
+              Instagram Reels Video Downloader
             </h3>
-            <p className="text-xs text-stone-500 leading-relaxed">
-              YouTube, Instagram, TikTok va boshqa platformalardan bepul video yuklab oling.
+            <p className="text-xs text-white/80 leading-relaxed">
+              Instagram Reels, YouTube, TikTok va boshqa platformalardan yuqori sifatli video yuklab oling.
             </p>
           </div>
         </div>
 
         {/* Server Offline Warning */}
         {serverStatus === "offline" && (
-          <div className="mb-4 p-4 bg-amber-50 rounded-2xl border border-amber-100 animate-fade-in">
+          <div className="mb-4 p-4 bg-red-500/20 backdrop-blur-md rounded-2xl border border-red-400/30 animate-fade-in">
             <div className="flex items-start gap-3">
-              <WifiOff size={18} className="text-amber-500 mt-0.5 shrink-0" />
+              <WifiOff size={18} className="text-red-300 mt-0.5 shrink-0" />
               <div>
-                <p className="text-sm font-medium text-amber-800 mb-1">
-                  {!isApiAvailable 
-                    ? "Video downloader hozircha ishlamayapti" 
+                <p className="text-sm font-bold text-red-200 mb-1">
+                  {!isApiAvailable
+                    ? "Video downloader hozircha ishlamayapti"
                     : "Server ishlamayapti"}
                 </p>
-                <p className="text-xs text-amber-600 leading-relaxed">
-                  {!isApiAvailable 
-                    ? "Video downloader faqat development rejimida ishlaydi" 
+                <p className="text-xs text-red-300/90 leading-relaxed">
+                  {!isApiAvailable
+                    ? "Video downloader faqat development rejimida ishlaydi"
                     : "Video API serverni ishga tushiring"}
                 </p>
                 {isApiAvailable && (
                   <button
                     onClick={checkServer}
-                    className="mt-3 flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg text-xs font-medium transition-colors"
+                    className="mt-3 flex items-center gap-1.5 px-3 py-1.5 bg-red-500/30 hover:bg-red-500/40 text-red-200 rounded-lg text-xs font-bold transition-colors"
                   >
                     <RefreshCw size={12} />
                     Qayta tekshirish
@@ -333,33 +352,49 @@ export const VideoDownloaderPage: React.FC = () => {
         <form onSubmit={handleExtract} className="mb-6">
           <div className="relative mb-4">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Link2 size={18} className="text-stone-400" />
+              <Link2 size={18} className="text-white/60" />
             </div>
             <input
               type="url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://youtube.com/watch?v=..."
-              className="w-full pl-11 pr-20 py-4 bg-white border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all text-stone-700 placeholder:text-stone-300 shadow-inner"
+              placeholder="https://www.instagram.com/reel/... yoki https://youtube.com/watch?v=..."
+              className="w-full pl-11 pr-20 py-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-pink-400/50 focus:border-pink-400/50 transition-all shadow-inner"
             />
             <button
               type="button"
               onClick={handlePaste}
-              className="absolute inset-y-2 right-2 px-3 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded-lg text-xs font-medium transition-colors"
+              className="absolute inset-y-2 right-2 px-3 bg-white/10 hover:bg-white/20 text-white/80 rounded-lg text-xs font-bold transition-colors"
             >
               Paste
             </button>
           </div>
 
+          {/* Video Title Input (shown after extraction) */}
+          {extractResult && (
+            <div className="relative mb-4">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Edit3 size={16} className="text-white/60" />
+              </div>
+              <input
+                type="text"
+                value={videoTitle}
+                onChange={(e) => setVideoTitle(e.target.value)}
+                placeholder="Video nomi..."
+                className="w-full pl-11 pr-4 py-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-pink-400/50 focus:border-pink-400/50 transition-all shadow-inner"
+              />
+            </div>
+          )}
+
           {error && (
-            <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-xl text-xs flex items-start gap-2 border border-red-100 animate-fade-in">
+            <div className="mb-4 p-3 bg-red-500/20 backdrop-blur-md text-red-200 rounded-xl text-xs flex items-start gap-2 border border-red-400/30 animate-fade-in">
               <AlertCircle size={16} className="shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           {downloadMessage && (
-            <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-xl text-xs flex items-start gap-2 border border-green-100 animate-fade-in">
+            <div className="mb-4 p-3 bg-green-500/20 backdrop-blur-md text-green-200 rounded-xl text-xs flex items-start gap-2 border border-green-400/30 animate-fade-in">
               <CheckCircle2 size={16} className="shrink-0 mt-0.5" />
               <span>{downloadMessage}</span>
             </div>
@@ -368,7 +403,7 @@ export const VideoDownloaderPage: React.FC = () => {
           <button
             type="submit"
             disabled={isExtracting || !url.trim() || serverStatus === "offline"}
-            className="w-full py-4 bg-[#229ED9] text-white rounded-xl font-medium text-sm hover:bg-[#1c81b4] focus:ring-4 focus:ring-blue-100 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed transition-all shadow-[0_4px_14px_rgba(34,158,217,0.3)] active:scale-[0.98]"
+            className="w-full py-4 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 text-white rounded-xl font-bold text-sm hover:from-purple-700 hover:via-pink-700 hover:to-orange-700 focus:ring-4 focus:ring-pink-400/30 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed transition-all shadow-lg active:scale-[0.98]"
           >
             {isExtracting ? (
               <>
@@ -386,23 +421,23 @@ export const VideoDownloaderPage: React.FC = () => {
 
         {/* Result */}
         {extractResult && (
-          <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden animate-fade-in-up">
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-lg overflow-hidden animate-fade-in-up">
             {/* Video Info Header */}
-            <div className="p-4 border-b border-stone-100">
+            <div className="p-4 border-b border-white/10">
               <div className="flex gap-3">
                 {extractResult.thumbnail && (
                   <img
                     src={extractResult.thumbnail}
                     alt={extractResult.title}
-                    className="w-20 h-14 rounded-lg object-cover shrink-0"
+                    className="w-20 h-14 rounded-lg object-cover shrink-0 border border-white/20"
                     onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                   />
                 )}
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold text-stone-800 text-sm leading-tight line-clamp-2">
+                  <h4 className="font-bold text-white text-sm leading-tight line-clamp-2">
                     {extractResult.title}
                   </h4>
-                  <div className="flex items-center gap-3 mt-1.5 text-[11px] text-stone-500">
+                  <div className="flex items-center gap-3 mt-1.5 text-[11px] text-white/70">
                     {extractResult.uploader && (
                       <span className="flex items-center gap-1">
                         <User size={11} />
@@ -422,27 +457,66 @@ export const VideoDownloaderPage: React.FC = () => {
 
             {/* Quality Selection */}
             <div className="p-4">
-              {extractResult.formats.length > 1 && (
+              {/* Video/Audio Type Selection */}
+              <div className="mb-4">
+                <label className="block text-[10px] font-bold text-white/60 uppercase tracking-widest mb-2">
+                  Format:
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMediaType("video")}
+                    className={`p-3 rounded-xl border text-sm font-bold transition-all ${
+                      selectedMediaType === "video"
+                        ? "bg-gradient-to-r from-purple-600 to-pink-600 border-pink-400 text-white shadow-lg"
+                        : "bg-white/5 border-white/10 text-white/70 hover:border-white/20 hover:bg-white/10"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Video size={16} />
+                      <span>Video</span>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMediaType("audio")}
+                    className={`p-3 rounded-xl border text-sm font-bold transition-all ${
+                      selectedMediaType === "audio"
+                        ? "bg-gradient-to-r from-purple-600 to-pink-600 border-pink-400 text-white shadow-lg"
+                        : "bg-white/5 border-white/10 text-white/70 hover:border-white/20 hover:bg-white/10"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Film size={16} />
+                      <span>Audio (MP3)</span>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Quality Selection (only for video) */}
+              {selectedMediaType === "video" && extractResult.formats.length > 1 && (
                 <div className="mb-4">
-                  <label className="block text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2">
-                    Sifat tanlang:
+                  <label className="block text-[10px] font-bold text-white/60 uppercase tracking-widest mb-2">
+                    Video sifati:
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     {extractResult.formats.map((fmt) => (
                       <button
                         key={fmt.format_id}
+                        type="button"
                         onClick={() => setSelectedQuality(fmt.quality)}
-                        className={`p-3 rounded-xl border text-sm font-medium transition-all ${
+                        className={`p-3 rounded-xl border text-sm font-bold transition-all ${
                           selectedQuality === fmt.quality
-                            ? "bg-blue-50 border-blue-300 text-blue-700"
-                            : "bg-stone-50 border-stone-100 text-stone-600 hover:border-stone-200"
+                            ? "bg-gradient-to-r from-purple-600 to-pink-600 border-pink-400 text-white shadow-lg"
+                            : "bg-white/5 border-white/10 text-white/70 hover:border-white/20 hover:bg-white/10"
                         }`}
                       >
                         <div className="flex items-center gap-2">
                           <Film size={14} />
                           <span>{fmt.quality}</span>
                         </div>
-                        <div className="text-[10px] text-stone-400 mt-1">
+                        <div className="text-[10px] text-white/50 mt-1">
                           {fmt.filesize_formatted}
                         </div>
                       </button>
@@ -453,9 +527,10 @@ export const VideoDownloaderPage: React.FC = () => {
 
               {/* Download Button */}
               <button
+                type="button"
                 onClick={handleDownload}
                 disabled={isDownloading}
-                className="w-full py-3.5 bg-stone-800 hover:bg-stone-900 text-white rounded-xl font-medium text-sm flex items-center justify-center gap-2 transition-colors disabled:opacity-70 active:scale-[0.98]"
+                className="w-full py-3.5 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 hover:from-purple-700 hover:via-pink-700 hover:to-orange-700 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg disabled:opacity-70 active:scale-[0.98]"
               >
                 {isDownloading ? (
                   <>
@@ -464,8 +539,10 @@ export const VideoDownloaderPage: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <Video size={18} />
-                    {selectedQuality === "best" ? "Eng yaxshi sifatda yuklash" : `${selectedQuality} da yuklash`}
+                    <Download size={18} />
+                    {selectedMediaType === "video"
+                      ? (selectedQuality === "best" ? "Video yuklash" : `${selectedQuality} da yuklash`)
+                      : "Audio (MP3) yuklash"}
                   </>
                 )}
               </button>
@@ -475,12 +552,12 @@ export const VideoDownloaderPage: React.FC = () => {
 
         {/* How it works */}
         <div className="mt-8 text-center px-4">
-          <p className="text-[10px] text-stone-400 font-medium uppercase tracking-widest mb-2">
+          <p className="text-[10px] text-white/50 font-bold uppercase tracking-widest mb-2">
             Qanday ishlaydi?
           </p>
-          <p className="text-xs text-stone-500 leading-relaxed max-w-[280px] mx-auto">
+          <p className="text-xs text-white/60 leading-relaxed max-w-[280px] mx-auto">
             Ijtimoiy tarmoqlardan video linkini nusxalab, shu yerga joylang va yuklab oling.
-            YouTube, Instagram, TikTok va 1000+ saytlar qo'llab-quvvatlanadi.
+            Instagram Reels, YouTube, TikTok va 1000+ saytlar qo'llab-quvvatlanadi.
           </p>
         </div>
       </div>

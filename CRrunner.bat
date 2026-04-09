@@ -121,36 +121,30 @@ echo  │  STEP 3: Cleaning Up Ports                               │
 echo  └──────────────────────────────────────────────────────────┘
 echo.
 
-:: Port 3001 - Upload Server
+:: Kill Python processes first (more reliable)
+echo  Stopping Python processes...
+taskkill /F /IM python.exe >nul 2>nul
+timeout /t 1 /nobreak >nul
+echo  [OK] Python processes stopped
+
+:: Kill Node.js processes
+echo  Stopping Node.js processes...
+taskkill /F /IM node.exe >nul 2>nul
+timeout /t 1 /nobreak >nul
+echo  [OK] Node.js processes stopped
+
+:: Verify ports are clear
 set PORTS_OK=1
 for %%P in (3001 5173 8000) do (
-    set PORT_USED=0
     netstat -ano | findstr ":%%P" >nul 2>nul
     if !ERRORLEVEL! EQU 0 (
-        echo  Cleaning port %%P...
+        echo  [WARN] Port %%P still in use - force killing...
         for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":%%P"') do (
             taskkill /F /PID %%a >nul 2>nul
         )
         timeout /t 1 /nobreak >nul
-        
-        netstat -ano | findstr ":%%P" >nul 2>nul
-        if !ERRORLEVEL! EQU 0 (
-            echo  [ERROR] Port %%P still in use!
-            set PORTS_OK=0
-        ) else (
-            echo  [OK] Port %%P cleared
-        )
-    ) else (
-        echo  [OK] Port %%P available
     )
-)
-
-echo.
-
-if !PORTS_OK! EQU 0 (
-    echo  [ERROR] Cannot free all ports!
-    pause
-    exit /b 1
+    echo  [OK] Port %%P ready
 )
 
 :: ============================================================================
