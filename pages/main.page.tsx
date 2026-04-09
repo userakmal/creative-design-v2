@@ -1,11 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { LayoutGrid, Star, UploadCloud, Music, Download } from "lucide-react";
 import { Header } from "../components/Header";
 import { HeroShowcase } from "../components/HeroShowcase";
 import { MenuButton } from "../components/MenuButton";
-import { TemplatesPage } from "./templates.page";
-import { CustomPage } from "./custom.page";
-import { MusicPage } from "./music.page";
 import type { MenuItem } from "../types";
 import { config } from "../config";
 import { useNavigate } from "react-router-dom";

@@ -3,6 +3,7 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+package-lock.json
 
 # Python
 __pycache__/
@@ -15,8 +16,6 @@ env/
 ENV/
 .venv/
 *.egg-info/
-dist/
-build/
 .pytest_cache/
 .coverage
 htmlcov/
@@ -28,7 +27,6 @@ htmlcov/
 *.swp
 *.swo
 *~
-.DS_Store
 
 # Logs
 logs/
@@ -38,7 +36,9 @@ logs/
 .env
 .env.local
 .env.production
+.env.*.local
 telegram-video-bot/.env
+!.env.example
 
 # Database
 *.db
@@ -50,7 +50,8 @@ telegram-video-bot/downloads/*.mp4
 telegram-video-bot/downloads/*.part
 telegram-video-bot/downloads/*.ytdl
 telegram-video-bot/downloads/hls_*/
-downloads/
+downloads/*
+!downloads/.gitkeep
 
 # Sensitive files
 cookies.txt
@@ -64,6 +65,7 @@ telegram-video-bot/cache.db
 # OS
 Thumbs.db
 .DS_Store
+desktop.ini
 
 # Build
 dist/
@@ -77,3 +79,12 @@ $null
 
 # Video files (stored on hosting CDN, not in git)
 public/videos/*.mp4
+
+# Test files
+test-*.mjs
+test-*.js
+
+# Backup files
+*.bak
+*.backup
+*.old

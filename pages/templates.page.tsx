@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   ArrowLeft,
   Play,
-  Pause,
   X,
   Share2,
   Heart,
@@ -11,7 +10,6 @@ import {
   Link2,
   MoreHorizontal,
   Check,
-  Volume2,
   VolumeX,
   AlertCircle,
 } from "lucide-react";

@@ -36,7 +36,7 @@ export const MusicPage = () => {
       if (isPlaying) {
         const playPromise = audio.play();
         if (playPromise !== undefined) {
-          playPromise.catch((error) => {
+          playPromise.catch(() => {
             console.warn("Audio playback failed");
             setIsPlaying(false);
           });

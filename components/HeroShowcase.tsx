@@ -4,7 +4,7 @@ import { config } from '../config';
 
 export const HeroShowcase: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [isAutoPlaying] = useState(true);
   
   const videos = config.videos;
   const len = videos.length;

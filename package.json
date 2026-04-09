@@ -1,14 +1,18 @@
 {
-  "name": "eleganceinvite",
+  "name": "creative-design-platform",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "description": "Video taklifnomalar va dizayn ko'rgazmasi platformasi",
   "scripts": {
-    "dev": "concurrently \"npm run server\" \"vite\"",
+    "dev": "vite",
     "server": "node upload-server.js",
+    "admin": "node admin-server.js",
+    "start": "concurrently \"npm run server\" \"npm run dev\"",
     "build": "vite build",
-    "deploy": "node deploy.js",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "tsc --noEmit",
+    "clean": "rmdir /s /q dist 2>nul & rmdir /s /q node_modules 2>nul"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -24,6 +28,7 @@
   "devDependencies": {
     "@types/node": "^22.14.0",
     "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.0.0",
     "concurrently": "^9.2.1",
     "typescript": "~5.8.2",
