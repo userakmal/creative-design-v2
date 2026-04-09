@@ -1,0 +1,46 @@
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type, Range"
+</IfModule>
+
+# Proper MIME types for media files
+<IfModule mod_mime.c>
+    AddType video/mp4 .mp4
+    AddType image/jpeg .jpg .jpeg
+    AddType image/png .png
+    AddType image/webp .webp
+    AddType audio/mpeg .mp3
+    AddType audio/mp4 .m4a
+    AddType application/json .json
+</IfModule>
+
+# Enable caching for media files
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType video/mp4 "access plus 30 days"
+    ExpiresByType image/jpeg "access plus 30 days"
+    ExpiresByType image/png "access plus 30 days"
+    ExpiresByType image/webp "access plus 30 days"
+    ExpiresByType audio/mpeg "access plus 30 days"
+    ExpiresByType audio/mp4 "access plus 30 days"
+</IfModule>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Do NOT rewrite actual files (videos, images, music, data, assets)
+  RewriteRule ^index\.html$ - [L]
+
+  # Skip rewrite for media/static file extensions
+  RewriteRule \.(mp4|webm|mov|avi|jpg|jpeg|png|gif|webp|svg|mp3|m4a|ogg|wav|json|js|css|ico|woff|woff2|ttf|eot)$ - [L,NC]
+
+  # Skip rewrite for media directories
+  RewriteRule ^(videos|image|music|data|assets|logo)/ - [L]
+
+  # SPA catch-all — only for non-file non-directory requests
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
