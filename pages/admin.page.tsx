@@ -2,7 +2,20 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "./admin.css";
 
-const SERVER_URL = "http://localhost:3001";
+// ============================================================================
+// SERVER CONFIGURATION
+// ============================================================================
+// Development: http://localhost:3001
+// Production: Upload server must be running on same origin or proxied
+// ============================================================================
+const isProduction = window.location.hostname === 'creative-design.uz';
+
+// For local development, use localhost:3001
+// For production, this requires the upload server to be accessible
+const SERVER_URL = isProduction 
+  ? 'https://creative-design.uz:3001'  // Production API server
+  : 'http://localhost:3001';           // Development server
+
 const ADMIN_PASSWORD = "creative2026";
 
 // ============================================================================

@@ -1,48 +1,53 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Routes } from "./routes";
-import { config } from "./config";
+import { config, type VideoItem, type MusicItem } from "./config";
 
 // ============================================================================
-// Type Definitions
+// TYPE DEFINITIONS (for uploaded content)
 // ============================================================================
-interface VideoData {
+
+interface UploadedVideo {
   id?: number;
   title?: string;
   image?: string;
   videoUrl: string;
+  uploadedAt?: string;
+  size?: string;
   [key: string]: unknown;
 }
 
-interface MusicData {
+interface UploadedMusic {
   id?: number;
   title?: string;
-  duration?: string;
   author?: string;
+  duration?: string;
   url: string;
+  uploadedAt?: string;
+  size?: string;
   [key: string]: unknown;
 }
 
 // ============================================================================
-// Environment Configuration
+// ENVIRONMENT CONFIGURATION
 // ============================================================================
+
 const Environment = {
   isProduction: window.location.hostname === 'creative-design.uz',
-  
-  get baseUrl(): string {
-    return this.isProduction 
-      ? 'https://creative-design.uz' 
-      : 'http://localhost:3001';
+
+  get cdnUrl(): string {
+    return 'https://creative-design.uz';
   },
-  
+
   get timeoutMs(): number {
     return this.isProduction ? 5000 : 3000;
   }
 } as const;
 
 // ============================================================================
-// Error Boundary for graceful error handling
+// ERROR BOUNDARY
 // ============================================================================
+
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
   { hasError: boolean; error: Error | null }
@@ -57,16 +62,43 @@ class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("ErrorBoundary caught:", error, errorInfo);
+    console.error("[ErrorBoundary]", error, errorInfo);
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ padding: '2rem', textAlign: 'center' }}>
-          <h1>Something went wrong</h1>
-          <p>{this.state.error?.message}</p>
-          <button onClick={() => window.location.reload()}>Reload Page</button>
+        <div style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#FAF9F6',
+          padding: '2rem',
+        }}>
+          <div style={{ textAlign: 'center', maxWidth: '400px' }}>
+            <div style={{ fontSize: '48px', marginBottom: '1rem' }}>⚠️</div>
+            <h1 style={{ fontSize: '24px', marginBottom: '0.5rem', color: '#1c1917' }}>
+              Xatolik yuz berdi
+            </h1>
+            <p style={{ color: '#78716c', marginBottom: '1.5rem', fontSize: '14px' }}>
+              {this.state.error?.message || "Noma'lum xatolik"}
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              style={{
+                padding: '12px 24px',
+                background: '#1c1917',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '14px',
+              }}
+            >
+              Sahifani yangilash
+            </button>
+          </div>
         </div>
       );
     }
@@ -75,141 +107,175 @@ class ErrorBoundary extends React.Component<
 }
 
 // ============================================================================
-// Data Fetching Utilities
+// DATA FETCHING UTILITIES
 // ============================================================================
-const fetchWithTimeout = async (
-  url: string, 
-  timeout: number
-): Promise<Response> => {
+
+/**
+ * Fetch JSON from URL with timeout and error handling
+ */
+async function fetchJSON<T>(url: string, timeout: number): Promise<T | null> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
+
   try {
-    const response = await fetch(url, { signal: controller.signal });
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'Accept': 'application/json',
+        'Cache-Control': 'no-cache',
+      },
+    });
+
     clearTimeout(timeoutId);
-    return response;
+
+    if (!response.ok) {
+      console.warn(`[fetchJSON] ${url} returned ${response.status}`);
+      return null;
+    }
+
+    const data = await response.json();
+    console.log(`[fetchJSON] ✅ Loaded from ${url}`, Array.isArray(data) ? `${data.length} items` : 'data');
+    return data as T;
   } catch (error) {
     clearTimeout(timeoutId);
-    throw error;
+    console.warn(`[fetchJSON] ❌ Failed to fetch ${url}:`, error instanceof Error ? error.message : error);
+    return null;
   }
-};
+}
 
-const fetchVideos = async (): Promise<VideoData[]> => {
-  if (!Environment.isProduction) {
-    try {
-      const response = await fetchWithTimeout(
-        `${Environment.baseUrl}/api/videos`, 
-        Environment.timeoutMs
-      );
-      if (response.ok) {
-        const data = await response.json();
-        console.log('✅ Upload server videos loaded:', data.length);
-        return data;
-      }
-    } catch {
-      console.warn("⚠ Upload server not available for videos");
-    }
-  }
+/**
+ * Ensure URL is absolute
+ * - If already starts with http/https, return as-is
+ * - Otherwise, prepend the CDN base URL
+ */
+function ensureAbsoluteUrl(path: string | undefined, baseUrl: string): string {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  // Handle both /path and path formats
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${baseUrl}${cleanPath}`;
+}
 
-  try {
-    const res = await fetch("/data/videos.json");
-    if (res.ok) {
-      const data = await res.json();
-      console.log('✅ videos.json loaded:', data.length);
-      return data;
-    }
-  } catch {
-    console.warn("⚠ Could not load videos.json");
-  }
+/**
+ * Transform uploaded video data to match VideoItem interface
+ */
+function normalizeUploadedVideo(video: UploadedVideo, cdnUrl: string): VideoItem | null {
+  if (!video.videoUrl) return null;
 
-  return [];
-};
+  return {
+    id: video.id || 0,
+    title: video.title || `Video #${video.id || 'unknown'}`,
+    image: ensureAbsoluteUrl(video.image, cdnUrl),
+    videoUrl: ensureAbsoluteUrl(video.videoUrl, cdnUrl),
+    uploadedAt: video.uploadedAt,
+    size: video.size,
+    isUploaded: true,
+  };
+}
 
-const fetchMusic = async (): Promise<MusicData[]> => {
-  if (!Environment.isProduction) {
-    try {
-      const response = await fetchWithTimeout(
-        `${Environment.baseUrl}/api/music`, 
-        Environment.timeoutMs
-      );
-      if (response.ok) {
-        const data = await response.json();
-        console.log('🎵 Upload server music loaded:', data.length);
-        return data;
-      }
-    } catch {
-      console.warn("⚠ Upload server not available for music");
-    }
-  }
+/**
+ * Transform uploaded music data to match MusicItem interface
+ */
+function normalizeUploadedMusic(music: UploadedMusic, cdnUrl: string): MusicItem | null {
+  if (!music.url) return null;
 
-  try {
-    const res = await fetch("/data/music.json");
-    if (res.ok) {
-      const data = await res.json();
-      console.log('🎵 music.json loaded:', data.length);
-      return data;
-    }
-  } catch {
-    console.warn("⚠ Could not load music.json");
-  }
-
-  return [];
-};
+  return {
+    id: music.id || 0,
+    title: music.title || `Track #${music.id || 'unknown'}`,
+    author: music.author || "Noma'lum",
+    duration: music.duration || "0:00",
+    url: ensureAbsoluteUrl(music.url, cdnUrl),
+    uploadedAt: music.uploadedAt,
+    size: music.size,
+    isUploaded: true,
+  };
+}
 
 // ============================================================================
-// URL Rewriting Utilities
+// DATA LOADING
 // ============================================================================
-const rewriteVideoUrls = (videos: VideoData[]): VideoData[] => {
-  return videos.map(video => ({
-    ...video,
-    image: video.image?.startsWith('http') 
-      ? video.image 
-      : `${Environment.baseUrl}${video.image}`,
-    videoUrl: video.videoUrl.startsWith('http') 
-      ? video.videoUrl 
-      : `${Environment.baseUrl}${video.videoUrl}`,
-  }));
-};
 
-const rewriteMusicUrls = (music: MusicData[]): MusicData[] => {
-  return music.map(track => ({
-    ...track,
-    url: track.url.startsWith('http') 
-      ? track.url 
-      : `${Environment.baseUrl}${track.url}`,
-  }));
-};
+/**
+ * Load uploaded videos from videos.json
+ * This file is updated by upload-server.js and synced via FTP
+ */
+async function loadUploadedVideos(): Promise<VideoItem[]> {
+  const url = '/data/videos.json';
+  const data = await fetchJSON<UploadedVideo[]>(url, Environment.timeoutMs);
+
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    return [];
+  }
+
+  return data
+    .map(video => normalizeUploadedVideo(video, Environment.cdnUrl))
+    .filter((v): v is VideoItem => v !== null);
+}
+
+/**
+ * Load uploaded music from music.json
+ * This file is updated by upload-server.js and synced via FTP
+ */
+async function loadUploadedMusic(): Promise<MusicItem[]> {
+  const url = '/data/music.json';
+  const data = await fetchJSON<UploadedMusic[]>(url, Environment.timeoutMs);
+
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    return [];
+  }
+
+  return data
+    .map(music => normalizeUploadedMusic(music, Environment.cdnUrl))
+    .filter((m): m is MusicItem => m !== null);
+}
 
 // ============================================================================
-// Application Initialization
+// APPLICATION INITIALIZATION
 // ============================================================================
-const initializeApp = async (): Promise<void> => {
-  const [videosData, musicData] = await Promise.allSettled([
-    fetchVideos(),
-    fetchMusic()
+
+async function initializeApp(): Promise<void> {
+  console.log('═══════════════════════════════════════════');
+  console.log('🚀 Creative Design Platform - Initializing');
+  console.log('═══════════════════════════════════════════');
+  console.log('📍 Environment:', Environment.isProduction ? 'PRODUCTION' : 'DEVELOPMENT');
+  console.log('🌐 CDN URL:', Environment.cdnUrl);
+
+  // Load uploaded content in parallel
+  const [uploadedVideos, uploadedMusic] = await Promise.all([
+    loadUploadedVideos(),
+    loadUploadedMusic(),
   ]);
 
-  const videos = videosData.status === 'fulfilled' ? videosData.value : [];
-  const music = musicData.status === 'fulfilled' ? musicData.value : [];
+  console.log('');
+  console.log('📊 Content Summary:');
+  console.log('  📹 Built-in videos:', config.videos.length);
+  console.log('  📤 Uploaded videos:', uploadedVideos.length);
+  console.log('  🎵 Built-in music:', config.music.length);
+  console.log('  📤 Uploaded music:', uploadedMusic.length);
 
-  if (videos.length > 0) {
-    const rewrittenVideos = rewriteVideoUrls(videos);
-    // Type assertion: uploaded videos may have partial data
-    config.videos.push(...rewrittenVideos as any);
-    console.log(`✅ Total videos: ${config.videos.length} (${videos.length} from server)`);
+  // Merge uploaded content with config
+  if (uploadedVideos.length > 0) {
+    config.videos.push(...uploadedVideos);
+    console.log('  ✅ Videos merged successfully');
   }
 
-  if (music.length > 0) {
-    const rewrittenMusic = rewriteMusicUrls(music);
-    // Type assertion: uploaded music may have partial data
-    config.music.push(...rewrittenMusic as any);
-    console.log(`🎵 Total music: ${config.music.length} (${music.length} from server)`);
+  if (uploadedMusic.length > 0) {
+    config.music.push(...uploadedMusic);
+    console.log('  ✅ Music merged successfully');
   }
-};
+
+  console.log('');
+  console.log('📈 Final Counts:');
+  console.log('  📹 Total videos:', config.videos.length);
+  console.log('  🎵 Total music:', config.music.length);
+  console.log('═══════════════════════════════════════════');
+  console.log('');
+}
 
 // ============================================================================
-// Render Application
+// RENDER APPLICATION
 // ============================================================================
+
 const rootElement = document.getElementById("root");
 if (!rootElement) {
   throw new Error("Could not find root element to mount to");
@@ -217,6 +283,7 @@ if (!rootElement) {
 
 const root = ReactDOM.createRoot(rootElement);
 
+// Initialize data then render
 initializeApp()
   .then(() => {
     root.render(
@@ -228,8 +295,8 @@ initializeApp()
     );
   })
   .catch((error) => {
-    console.error("❌ Error initializing app:", error);
-    // Still render even if data fetching fails
+    console.error("[initializeApp] Fatal error:", error);
+    // Still render even if data loading fails
     root.render(
       <React.StrictMode>
         <ErrorBoundary>

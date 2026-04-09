@@ -58,10 +58,17 @@ interface DownloadResult {
 type ServerStatus = "checking" | "online" | "offline";
 
 // ============================================================================
-// CONSTANTS
+// ENVIRONMENT CONFIGURATION
 // ============================================================================
 
-const API_BASE = "http://localhost:8000";
+// Detect environment and set API base URL
+const isProduction = window.location.hostname === 'creative-design.uz';
+
+// In production, video downloader may not work (needs Python backend)
+// In development, use localhost:8000
+const API_BASE = isProduction 
+  ? '' // Production: disable or configure proxy
+  : 'http://localhost:8000'; // Development: use local Python server
 
 // ============================================================================
 // COMPONENT
@@ -70,11 +77,14 @@ const API_BASE = "http://localhost:8000";
 export const VideoDownloaderPage: React.FC = () => {
   const navigate = useNavigate();
 
+  // Check if API is available
+  const isApiAvailable = API_BASE !== '';
+
   const [url, setUrl] = useState("");
   const [isExtracting, setIsExtracting] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [serverStatus, setServerStatus] = useState<ServerStatus>("checking");
+  const [serverStatus, setServerStatus] = useState<ServerStatus>(isApiAvailable ? "checking" : "offline");
   const [extractResult, setExtractResult] = useState<ExtractResult | null>(null);
   const [selectedQuality, setSelectedQuality] = useState("best");
   const [downloadMessage, setDownloadMessage] = useState<string | null>(null);
@@ -84,6 +94,11 @@ export const VideoDownloaderPage: React.FC = () => {
   // ============================================================================
 
   const checkServer = useCallback(async () => {
+    if (!isApiAvailable) {
+      setServerStatus("offline");
+      return;
+    }
+    
     setServerStatus("checking");
     try {
       const res = await fetch(`${API_BASE}/api/health`, {
@@ -97,7 +112,7 @@ export const VideoDownloaderPage: React.FC = () => {
     } catch {
       setServerStatus("offline");
     }
-  }, []);
+  }, [isApiAvailable]);
 
   useEffect(() => {
     checkServer();
@@ -118,6 +133,11 @@ export const VideoDownloaderPage: React.FC = () => {
 
   const handleExtract = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isApiAvailable) {
+      setError("Video downloader hozircha ishlamayapti. Iltimos, keyinroq urinib ko'ring.");
+      return;
+    }
 
     if (!url.trim()) {
       setError("Link kiriting");
@@ -169,7 +189,7 @@ export const VideoDownloaderPage: React.FC = () => {
   };
 
   const handleDownload = async () => {
-    if (!url.trim()) return;
+    if (!url.trim() || !isApiAvailable) return;
 
     setIsDownloading(true);
     setError(null);
@@ -285,17 +305,25 @@ export const VideoDownloaderPage: React.FC = () => {
             <div className="flex items-start gap-3">
               <WifiOff size={18} className="text-amber-500 mt-0.5 shrink-0" />
               <div>
-                <p className="text-sm font-medium text-amber-800 mb-1">Server ishlamayapti</p>
-                <p className="text-xs text-amber-600 leading-relaxed">
-                  Video API serverni ishga tushiring (<b>current_starter.bat</b>)
+                <p className="text-sm font-medium text-amber-800 mb-1">
+                  {!isApiAvailable 
+                    ? "Video downloader hozircha ishlamayapti" 
+                    : "Server ishlamayapti"}
                 </p>
-                <button
-                  onClick={checkServer}
-                  className="mt-3 flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg text-xs font-medium transition-colors"
-                >
-                  <RefreshCw size={12} />
-                  Qayta tekshirish
-                </button>
+                <p className="text-xs text-amber-600 leading-relaxed">
+                  {!isApiAvailable 
+                    ? "Video downloader faqat development rejimida ishlaydi" 
+                    : "Video API serverni ishga tushiring"}
+                </p>
+                {isApiAvailable && (
+                  <button
+                    onClick={checkServer}
+                    className="mt-3 flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg text-xs font-medium transition-colors"
+                  >
+                    <RefreshCw size={12} />
+                    Qayta tekshirish
+                  </button>
+                )}
               </div>
             </div>
           </div>

@@ -1,11 +1,15 @@
 import type { LucideIcon } from "lucide-react";
 
+// ============================================================================
+// SHARED TYPE DEFINITIONS
+// ============================================================================
+
 export interface MenuItem {
   id: string;
   label: string;
   icon: LucideIcon;
   action: () => void;
-  delayMs: number; // Changed to number for precise inline style control
+  delayMs: number;
 }
 
 export interface ButtonProps {
@@ -19,8 +23,11 @@ export interface MusicItem {
   id: number;
   title: string;
   author: string;
-  duration?: string; // Optional, calculated automatically
-  url: string; // MP3 file link
+  duration?: string;
+  url: string;
+  uploadedAt?: string;
+  size?: string;
+  isUploaded?: boolean;
 }
 
 export interface VideoItem {
@@ -28,4 +35,7 @@ export interface VideoItem {
   title: string;
   image: string;
   videoUrl: string;
+  uploadedAt?: string;
+  size?: string;
+  isUploaded?: boolean;
 }
