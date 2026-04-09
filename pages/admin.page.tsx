@@ -56,11 +56,8 @@ type MessageType = { type: "success" | "error" | ""; text: string };
 export const AdminPage = () => {
   const navigate = useNavigate();
 
-  // Auth
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [loginError, setLoginError] = useState("");
+  // Auth - Local development da login kerak emas
+  const isAuthenticated = true; // Always authenticated on localhost
 
   // Server
   const [serverConnected, setServerConnected] = useState(false);
@@ -84,6 +81,12 @@ export const AdminPage = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
   const [videoUploadProgress, setVideoUploadProgress] = useState(0);
+
+  // Instagram Download
+  const [instagramUrl, setInstagramUrl] = useState("");
+  const [instagramTitle, setInstagramTitle] = useState("");
+  const [isDownloadingInstagram, setIsDownloadingInstagram] = useState(false);
+  const [instagramDownloadProgress, setInstagramDownloadProgress] = useState(0);
 
   // Music Upload
   const [musicTitle, setMusicTitle] = useState("");
@@ -194,8 +197,74 @@ export const AdminPage = () => {
   // Upload Handlers
   // ========================================================================
 
+  const handleInstagramDownload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!instagramUrl.trim()) { showToast("error", "Instagram URL kiriting"); return; }
+    if (!instagramUrl.includes("instagram.com")) { showToast("error", "To'g'ri Instagram URL emas"); return; }
+
+    setIsDownloadingInstagram(true);
+    setInstagramDownloadProgress(0);
+
+    try {
+      // Simulate progress
+      const progressInterval = setInterval(() => {
+        setInstagramDownloadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + 5;
+        });
+      }, 500);
+
+      const response = await fetch(`${SERVER_URL}/api/download-instagram`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          password: ADMIN_PASSWORD,
+          instagramUrl: instagramUrl.trim(),
+          customTitle: instagramTitle.trim() || undefined,
+        }),
+      });
+
+      clearInterval(progressInterval);
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Download xatosi");
+      }
+
+      setInstagramDownloadProgress(100);
+      showToast("success", `✅ "${data.data.title}" Instagram dan muvaffaqiyatli yuklandi!`);
+
+      // Reset form
+      setInstagramUrl("");
+      setInstagramTitle("");
+
+      // Refresh
+      setTimeout(() => {
+        loadVideos();
+        loadStats();
+      }, 1000);
+    } catch (err: any) {
+      showToast("error", err.message || "Instagram dan yuklab olishda xatolik");
+    } finally {
+      setIsDownloadingInstagram(false);
+      setInstagramDownloadProgress(0);
+    }
+  };
+
   const handleVideoUpload = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Server connection check
+    if (!serverConnected) {
+      showToast("error", "Upload server ishlamayapti! CRrunner.bat ni ishga tushiring.");
+      return;
+    }
+    
+    // Validate inputs
     if (!videoTitle.trim()) { showToast("error", "Video nomini kiriting"); return; }
     if (!videoFile) { showToast("error", "Video faylni tanlang"); return; }
     if (!imageFile) { showToast("error", "Rasm (thumbnail) tanlang"); return; }
@@ -410,66 +479,6 @@ export const AdminPage = () => {
   };
 
   // ========================================================================
-  // LOGIN SCREEN
-  // ========================================================================
-
-  if (!isAuthenticated) {
-    return (
-      <div className="admin-root">
-        <div className="admin-login-bg">
-          <div className="admin-login-card">
-            <div className="admin-login-logo">🎬</div>
-            <h2 className="admin-login-title">Admin Panel</h2>
-            <p className="admin-login-desc">Creative Design boshqaruv tizimi</p>
-
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              if (username === "admin" && password === ADMIN_PASSWORD) {
-                setIsAuthenticated(true);
-                setLoginError("");
-              } else {
-                setLoginError("Login yoki parol noto'g'ri!");
-              }
-            }}>
-              <div className="admin-form-group">
-                <label className="admin-label">Login</label>
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="admin-input"
-                  placeholder="admin"
-                  autoComplete="username"
-                />
-              </div>
-
-              <div className="admin-form-group">
-                <label className="admin-label">Parol</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="admin-input"
-                  placeholder="••••••••"
-                  autoComplete="current-password"
-                />
-              </div>
-
-              <button type="submit" className="admin-login-btn">Kirish →</button>
-
-              {loginError && <div className="admin-login-error">{loginError}</div>}
-            </form>
-
-            <button onClick={() => navigate("/")} className="admin-login-back">
-              ← Bosh sahifaga qaytish
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ========================================================================
   // MAIN ADMIN DASHBOARD
   // ========================================================================
 
@@ -538,6 +547,70 @@ export const AdminPage = () => {
         {/* ============================================================== */}
         {activeTab === "video" && (
           <>
+            {/* Instagram Download Card */}
+            <div className="admin-card" style={{ marginBottom: "20px", border: "2px solid #229ED9" }}>
+              <div className="admin-card-header">
+                <div className="admin-card-icon" style={{ background: "#229ED9", color: "white" }}>📱</div>
+                <div>
+                  <div className="admin-card-title">Instagram dan Video Yuklash</div>
+                  <div className="admin-card-desc">URL qo'ying - avtomatik yuklab olinadi va yuklanadi</div>
+                </div>
+              </div>
+
+              <form onSubmit={handleInstagramDownload}>
+                <div className="admin-form-group">
+                  <label className="admin-label">Instagram Video URL</label>
+                  <input
+                    type="url"
+                    value={instagramUrl}
+                    onChange={(e) => setInstagramUrl(e.target.value)}
+                    className="admin-input"
+                    placeholder="https://www.instagram.com/reel/... yoki https://www.instagram.com/p/..."
+                    required
+                  />
+                </div>
+
+                <div className="admin-form-group">
+                  <label className="admin-label">Video Nomi (ixtiyoriy)</label>
+                  <input
+                    type="text"
+                    value={instagramTitle}
+                    onChange={(e) => setInstagramTitle(e.target.value)}
+                    className="admin-input"
+                    placeholder="Bo'sh qoldirilsa - original nom ishlatiladi"
+                  />
+                </div>
+
+                {/* Download Progress */}
+                {isDownloadingInstagram && (
+                  <div className="admin-upload-progress">
+                    <div className="admin-progress-bar-bg">
+                      <div
+                        className="admin-progress-bar-fill"
+                        style={{ width: `${instagramDownloadProgress}%`, background: "#229ED9" }}
+                      />
+                    </div>
+                    <div className="admin-progress-text">
+                      {instagramDownloadProgress < 100 ? `Yuklab olinmoqda... ${instagramDownloadProgress}%` : "Tayyorlanmoqda..."}
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isDownloadingInstagram || !instagramUrl.trim()}
+                  className="admin-btn-primary"
+                  style={{ marginTop: "16px", background: "#229ED9" }}
+                >
+                  {isDownloadingInstagram ? (
+                    <>⏳ Yuklab olinmoqda... {instagramDownloadProgress}%</>
+                  ) : (
+                    <>📱 Instagram dan Yuklash</>
+                  )}
+                </button>
+              </form>
+            </div>
+
             {/* Upload Form */}
             <div className="admin-card">
               <div className="admin-card-header">
@@ -563,12 +636,20 @@ export const AdminPage = () => {
                 {/* Thumbnail */}
                 <div className="admin-form-group">
                   <label className="admin-label">Rasm (Thumbnail)</label>
-                  <div className={`admin-file-drop ${imageFile ? "active" : ""}`}>
+                  <div 
+                    className={`admin-file-drop ${imageFile ? "active" : ""}`}
+                    onClick={() => imageInputRef.current?.click()}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <input
                       ref={imageInputRef}
                       type="file"
                       accept="image/*"
-                      onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] || null;
+                        setImageFile(file);
+                        console.log('✅ Thumbnail selected:', file?.name);
+                      }}
                       className="admin-file-input-hidden"
                     />
                     {!imageFile ? (
@@ -579,7 +660,7 @@ export const AdminPage = () => {
                       </>
                     ) : (
                       <div className="admin-file-drop-selected">
-                        <span>🖼️</span>
+                        <span>✅</span>
                         <span className="admin-file-name">{imageFile.name}</span>
                         <span className="admin-file-size">{formatFileSize(imageFile.size)}</span>
                       </div>
@@ -596,12 +677,20 @@ export const AdminPage = () => {
                 {/* Video File */}
                 <div className="admin-form-group">
                   <label className="admin-label">Video Fayl</label>
-                  <div className={`admin-file-drop ${videoFile ? "active" : ""}`}>
+                  <div 
+                    className={`admin-file-drop ${videoFile ? "active" : ""}`}
+                    onClick={() => videoInputRef.current?.click()}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <input
                       ref={videoInputRef}
                       type="file"
                       accept="video/*"
-                      onChange={(e) => setVideoFile(e.target.files?.[0] || null)}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] || null;
+                        setVideoFile(file);
+                        console.log('✅ Video selected:', file?.name);
+                      }}
                       className="admin-file-input-hidden"
                     />
                     {!videoFile ? (
@@ -612,7 +701,7 @@ export const AdminPage = () => {
                       </>
                     ) : (
                       <div className="admin-file-drop-selected">
-                        <span>🎥</span>
+                        <span>✅</span>
                         <span className="admin-file-name">{videoFile.name}</span>
                         <span className="admin-file-size">{formatFileSize(videoFile.size)}</span>
                       </div>

@@ -21,7 +21,8 @@
       "Bash(timeout *)",
       "Bash(start *)",
       "Bash(type *)",
-      "Bash(echo.)"
+      "Bash(echo.)",
+      "Bash(do *)"
     ]
   },
   "$version": 3

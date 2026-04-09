@@ -252,6 +252,149 @@ app.post('/api/upload', upload.fields([
 });
 
 // ============================================================================
+// API: Instagram Video Download & Auto-Upload
+// ============================================================================
+app.post('/api/download-instagram', async (req, res) => {
+  try {
+    const { password, instagramUrl, customTitle } = req.body;
+    
+    if (password !== ADMIN_PASSWORD) {
+      return res.status(401).json({ error: "Parol noto'g'ri" });
+    }
+
+    if (!instagramUrl || !instagramUrl.includes('instagram.com')) {
+      return res.status(400).json({ error: "To'g'ri Instagram URL kiriting" });
+    }
+
+    console.log(`📥 Instagram download requested: ${instagramUrl}`);
+
+    // Download directory
+    const downloadDir = path.join(__dirname, 'downloads', 'instagram');
+    if (!fs.existsSync(downloadDir)) {
+      fs.mkdirSync(downloadDir, { recursive: true });
+    }
+
+    // Run Python script to download video (spawn already imported at top)
+    const pythonProcess = spawn('python', [
+      path.join(__dirname, 'instagram-downloader.py'),
+      instagramUrl,
+      downloadDir
+    ]);
+
+    let output = '';
+    let errorOutput = '';
+
+    pythonProcess.stdout.on('data', (data) => {
+      output += data.toString();
+      console.log(`[Downloader] ${data.toString()}`);
+    });
+
+    pythonProcess.stderr.on('data', (data) => {
+      errorOutput += data.toString();
+      console.error(`[Downloader Error] ${data.toString()}`);
+    });
+
+    pythonProcess.on('close', async (code) => {
+      try {
+        if (code !== 0) {
+          return res.status(500).json({
+            error: "Video yuklab olinmadi",
+            details: errorOutput
+          });
+        }
+
+        // Parse result
+        const resultMatch = output.match(/\{[\s\S]*\}/);
+        if (!resultMatch) {
+          return res.status(500).json({
+            error: "Download result parse error",
+            output: output
+          });
+        }
+
+        const result = JSON.parse(resultMatch[0]);
+
+        if (!result.success) {
+          return res.status(500).json({
+            error: result.error || "Download failed"
+          });
+        }
+
+        // Read downloaded files
+        const videoData = fs.readFileSync(result.video_path);
+        const videoFilename = path.basename(result.video_path);
+        
+        let imageData = null;
+        let imageFilename = null;
+        
+        if (result.thumbnail_path && fs.existsSync(result.thumbnail_path)) {
+          imageData = fs.readFileSync(result.thumbnail_path);
+          imageFilename = path.basename(result.thumbnail_path);
+        }
+
+        // Move files to proper locations
+        const finalVideoName = `v_${Date.now()}.mp4`;
+        const finalImageName = `i_${Date.now()}.jpg`;
+        
+        const videoDest = path.join(UPLOAD_DIRS.video, finalVideoName);
+        const imageDest = path.join(UPLOAD_DIRS.image, finalImageName);
+
+        fs.copyFileSync(result.video_path, videoDest);
+        
+        if (imageData) {
+          fs.copyFileSync(result.thumbnail_path, imageDest);
+        } else {
+          // Create a placeholder if no thumbnail
+          const placeholderPath = path.join(UPLOAD_DIRS.image, finalImageName);
+          fs.writeFileSync(placeholderPath, '');
+        }
+
+        // Add to videos.json
+        const videos = await readJSONAsync(VIDEOS_JSON);
+        const newId = getNextId(videos);
+
+        const newVideo = {
+          id: newId,
+          title: customTitle || result.title || `Instagram #${newId}`,
+          image: `/image/${finalImageName}`,
+          videoUrl: `/videos/${finalVideoName}`,
+          uploadedAt: new Date().toISOString(),
+          size: `${result.size_mb || 0} MB`,
+        };
+
+        videos.push(newVideo);
+        await writeJSONAsync(VIDEOS_JSON, videos);
+
+        // Cleanup download directory
+        try {
+          fs.rmSync(result.video_path);
+          if (result.thumbnail_path) fs.rmSync(result.thumbnail_path);
+        } catch (e) { /* ignore cleanup errors */ }
+
+        console.log(`✅ Instagram video uploaded: "${newVideo.title}" (ID: ${newId})`);
+
+        res.json({
+          success: true,
+          message: `"${newVideo.title}" muvaffaqiyatli yuklandi!`,
+          data: newVideo,
+          totalVideos: videos.length,
+        });
+
+        // Auto-sync to production
+        autoSyncToFTP();
+      } catch (err) {
+        console.error('Instagram upload error:', err);
+        res.status(500).json({ error: err.message || 'Server error' });
+      }
+    });
+
+  } catch (error) {
+    console.error('Instagram download endpoint error:', error);
+    res.status(500).json({ error: error.message || 'Server xatosi' });
+  }
+});
+
+// ============================================================================
 // API: Get All Videos
 // ============================================================================
 app.get('/api/videos', async (req, res) => {
