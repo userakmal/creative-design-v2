@@ -449,6 +449,7 @@ app.use('/videos', express.static(UPLOAD_DIRS.video));
 app.use('/image', express.static(UPLOAD_DIRS.image));
 app.use('/music', express.static(UPLOAD_DIRS.music));
 app.use('/data', express.static(DATA_DIR));
+app.use('/webSites', express.static(path.join(__dirname, '..', 'webSites')));
 
 // ============================================================================
 // Start Server

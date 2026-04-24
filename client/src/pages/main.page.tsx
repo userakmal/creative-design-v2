@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { LayoutGrid, Star, UploadCloud, Music, Download } from "lucide-react";
+import { LayoutGrid, Star, UploadCloud, Music, Download, Globe } from "lucide-react";
 import { Header } from "../components/Header";
 import { HeroShowcase } from "../components/HeroShowcase";
 import { MenuButton } from "../components/MenuButton";
@@ -55,6 +55,13 @@ export const MainPage: React.FC = () => {
       icon: Star,
       action: () => navigate("/popular"),
       delayMs: 400,
+    },
+    {
+      id: "websites",
+      label: "webSitelik taklifnomalar",
+      icon: Globe,
+      action: () => navigate("/websites"),
+      delayMs: 450,
     },
     {
       id: "music",

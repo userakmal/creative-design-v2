@@ -8,6 +8,7 @@ const MusicPage = React.lazy(() => import("./pages/music.page").then(m => ({ def
 const CustomPage = React.lazy(() => import("./pages/custom.page").then(m => ({ default: m.CustomPage })));
 const VideoDownloaderPage = React.lazy(() => import("./pages/downloader.page").then(m => ({ default: m.VideoDownloaderPage })));
 const AdminPage = React.lazy(() => import("./pages/admin.page").then(m => ({ default: m.AdminPage })));
+const WebsitesPage = React.lazy(() => import("./pages/websites.page").then(m => ({ default: m.WebsitesPage })));
 
 const LoadingSpinnerFallback = () => (
   <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: "white" }}>
@@ -73,6 +74,7 @@ export const Routes = () => {
             }
           />
           <Route path="/music" element={<MusicPage />} />
+          <Route path="/websites" element={<WebsitesPage />} />
           <Route path="/custom" element={<CustomPage />} />
           <Route path="/video-downloader" element={<VideoDownloaderPage />} />
           <Route path="/admin" element={<AdminPage />} />
