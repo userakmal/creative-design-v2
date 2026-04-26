@@ -7,6 +7,7 @@ import fs from 'fs';
 try {
   const srcDir = path.resolve(__dirname, '..', 'webSites');
   const destDir = path.resolve(__dirname, 'public', 'webSites');
+  // Refreshing copy logic...
   
   function copyDirectorySync(src: string, dest: string) {
     if (!fs.existsSync(dest)) {
