@@ -50,6 +50,7 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
   const [isCopied, setIsCopied] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
 
   // Filter state
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
@@ -60,6 +61,11 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
   const touchStartY = useRef<number | null>(null);
   const touchStartX = useRef<number | null>(null);
   const minSwipeDistance = 50;
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsVisible(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Reset state when video changes
   useEffect(() => {
@@ -279,7 +285,8 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
 
   return (
     <>
-      <div className="w-full animate-fade-in pb-10 max-w-md mx-auto">
+      <div className={`w-full transition-all duration-1000 pb-10 max-w-md mx-auto ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+
         <div className="sticky top-0 z-20 bg-[#FAF9F6]/90 backdrop-blur-xl px-6 py-4 flex items-center justify-between mb-2 border-b border-stone-100/50 shadow-sm transition-all duration-300">
           <div className="flex items-center gap-4">
             <button
@@ -326,7 +333,7 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
               {featuredVideos.map((video, index) => (
                 <div
                   key={`slider-${video.id}`}
-                  className="snap-center shrink-0 w-[85vw] sm:w-[320px] transition-transform duration-500"
+                  className="snap-center shrink-0 w-[68vw] sm:w-[256px] transition-transform duration-500"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <div
@@ -372,19 +379,15 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
           </div>
 
           {displayVideos.length > 0 ? (
-            <div className="grid grid-cols-2 gap-x-4 gap-y-6">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-6 group/list">
               {displayVideos.map((video, index) => (
-                <div
-                  key={video.id}
-                  className="animate-fade-in-up"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
+                <RevealWrapper key={video.id} index={index}>
                   <VideoCard
                     title={video.title}
                     image={video.image}
                     onClick={() => handleVideoClick(video)}
                   />
-                </div>
+                </RevealWrapper>
               ))}
             </div>
           ) : (
@@ -642,5 +645,38 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
         </>
       )}
     </>
+  );
+};
+
+const RevealWrapper = ({ children, index }: { children: React.ReactNode, index: number }) => {
+  const [inView, setInView] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.1, rootMargin: '50px' }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className={`transition-all duration-1000 ease-out ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-16'}`}
+      style={{ transitionDelay: `${(index % 2) * 100}ms` }}
+    >
+      {children}
+    </div>
   );
 };

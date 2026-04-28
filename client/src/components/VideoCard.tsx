@@ -17,14 +17,17 @@ export const VideoCard: React.FC<VideoCardProps> = ({
   return (
     <div
       onClick={onClick}
-      className="group relative flex flex-col gap-2 cursor-pointer active:scale-95 transition-transform duration-200"
+      className="group relative flex flex-col gap-2 cursor-pointer active:scale-95 transition-all duration-500 ease-out 
+                 group-hover/list:scale-[0.94] group-hover/list:opacity-50 group-hover/list:blur-[1px]
+                 hover:!scale-[1.06] hover:!opacity-100 hover:!blur-0"
     >
       <div
         className={`
         relative w-full aspect-[9/16] rounded-2xl overflow-hidden
         bg-stone-200 shadow-sm border border-stone-100
         transition-all duration-500 ease-out
-        group-hover:shadow-lg
+        group-hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.2)]
+        group-hover:border-stone-200
       `}
       >
         {/* Thumbnail Image */}
@@ -33,7 +36,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({
             src={image}
             alt={title}
             onError={() => setImgError(true)}
-            className="absolute inset-0 w-full h-full object-cover opacity-95 transition-transform duration-700 group-hover:scale-110"
+            className="absolute inset-0 w-full h-full object-cover opacity-95 transition-opacity duration-700"
           />
         ) : (
           <div className="absolute inset-0 bg-stone-100 flex items-center justify-center">
