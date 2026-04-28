@@ -34,7 +34,7 @@
   RewriteRule ^index\.html$ - [L]
 
   # Skip rewrite for media/static file extensions
-  RewriteRule \.(mp4|webm|mov|avi|jpg|jpeg|png|gif|webp|svg|mp3|m4a|ogg|wav|json|js|css|ico|woff|woff2|ttf|eot)$ - [L,NC]
+  RewriteRule \.(mp4|webm|mov|avi|jpg|jpeg|png|gif|webp|svg|mp3|m4a|ogg|wav|json|js|css|ico|woff|woff2|ttf|eot|xml)$ - [L,NC]
 
   # Skip rewrite for media directories
   RewriteRule ^(videos|image|music|data|assets|logo)/ - [L]
