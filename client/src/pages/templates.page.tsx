@@ -329,7 +329,7 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
               </span>
             </div>
 
-            <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 px-6 pb-8 no-scrollbar touch-pan-x items-center">
+            <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 px-6 pb-8 no-scrollbar items-center">
               {featuredVideos.map((video, index) => (
                 <div
                   key={`slider-${video.id}`}
@@ -660,7 +660,7 @@ const RevealWrapper = ({ children, index }: { children: React.ReactNode, index: 
           observer.unobserve(entry.target);
         }
       },
-      { threshold: 0.1, rootMargin: '50px' }
+      { threshold: 0.05, rootMargin: '100px' }
     );
 
     if (ref.current) {
