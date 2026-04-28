@@ -81,7 +81,7 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
       const timer = setTimeout(() => {
         setShowOverlay(true);
       }, 500);
-      
+
       // Majburiy yuklash mobil qurilmalar uchu
       if (videoRef.current) {
         // Agar tanlangan muted holati bo'lsa uni ta'minlash:
@@ -89,10 +89,10 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
         videoRef.current.load();
         const playPromise = videoRef.current.play();
         if (playPromise !== undefined) {
-           playPromise.catch(e => {
-               console.warn("Autoplay prevented by browser", e);
-               setIsPlaying(false);
-           });
+          playPromise.catch(e => {
+            console.warn("Autoplay prevented by browser", e);
+            setIsPlaying(false);
+          });
         }
       }
 
@@ -158,10 +158,10 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
   const handleVideoReady = () => {
     setIsLoading(false);
     if (videoRef.current && videoRef.current.paused) {
-         videoRef.current.play().catch(() => {
-            setIsPlaying(false);
-            console.log("Play interrupted");
-         });
+      videoRef.current.play().catch(() => {
+        setIsPlaying(false);
+        console.log("Play interrupted");
+      });
     }
   };
 
@@ -303,10 +303,9 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
             onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
             className={`
               p-2.5 rounded-full transition-all duration-300 active:scale-90 border
-              ${
-                showFavoritesOnly
-                  ? "bg-rose-50 text-rose-500 border-rose-200 shadow-inner"
-                  : "bg-transparent text-stone-400 border-transparent hover:bg-stone-50"
+              ${showFavoritesOnly
+                ? "bg-rose-50 text-rose-500 border-rose-200 shadow-inner"
+                : "bg-transparent text-stone-400 border-transparent hover:bg-stone-50"
               }
             `}
           >
@@ -319,7 +318,7 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
         </div>
 
         {!showFavoritesOnly && (
-          <div className="mb-8 pt-2">
+          <div className={`mb-8 pt-2 transition-all duration-700 ease-in-out ${selectedVideo ? 'scale-90 opacity-0 blur-xl' : 'scale-100 opacity-100 blur-0'}`}>
             <div className="px-6 mb-4 flex items-center justify-between">
               <h3 className="text-sm font-serif font-bold text-stone-800">
                 Top Dizaynlar
@@ -379,7 +378,7 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
           </div>
 
           {displayVideos.length > 0 ? (
-            <div className="grid grid-cols-2 gap-x-4 gap-y-6 group/list">
+            <div className={`grid grid-cols-2 gap-x-4 gap-y-6 transition-all duration-700 ease-in-out ${selectedVideo ? 'scale-90 opacity-0 blur-xl' : 'scale-100 opacity-100 blur-0'}`}>
               {displayVideos.map((video, index) => (
                 <RevealWrapper key={video.id} index={index}>
                   <VideoCard
@@ -494,11 +493,10 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
                 className={`
                 absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-auto
                 transition-all duration-500 ease-out transform
-                ${
-                  showOverlay
+                ${showOverlay
                     ? "opacity-100 translate-y-0"
                     : "opacity-0 translate-y-10"
-                }
+                  }
             `}
               >
                 <h3 className="text-white font-serif text-2xl mb-4 drop-shadow-md">
@@ -553,11 +551,10 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
                     onClick={() => onToggleLike(selectedVideo.id)}
                     className={`
                      w-14 h-14 rounded-xl backdrop-blur-md flex items-center justify-center border transition-all duration-300 active:scale-75
-                     ${
-                       isSelectedLiked
-                         ? "bg-rose-500 text-white border-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.5)]"
-                         : "bg-white/10 text-white border-white/20 hover:bg-white/20"
-                     }
+                     ${isSelectedLiked
+                        ? "bg-rose-500 text-white border-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.5)]"
+                        : "bg-white/10 text-white border-white/20 hover:bg-white/20"
+                      }
                    `}
                   >
                     <Heart

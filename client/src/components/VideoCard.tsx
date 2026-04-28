@@ -17,17 +17,16 @@ export const VideoCard: React.FC<VideoCardProps> = ({
   return (
     <div
       onClick={onClick}
-      className="group relative flex flex-col gap-2 cursor-pointer active:scale-95 transition-all duration-500 ease-out 
-                 group-hover/list:scale-[0.94] group-hover/list:opacity-50 group-hover/list:blur-[1px]
-                 hover:!scale-[1.06] hover:!opacity-100 hover:!blur-0"
+      className={`group relative flex flex-col gap-2 cursor-pointer transition-all duration-500 ease-out active:scale-95`}
     >
       <div
         className={`
-        relative w-full aspect-[9/16] rounded-2xl overflow-hidden
-        bg-stone-200 shadow-sm border border-stone-100
-        transition-all duration-500 ease-out
-        group-hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.2)]
-        group-hover:border-stone-200
+        relative w-full aspect-[9/16] rounded-[32px] overflow-hidden
+        bg-stone-200 border border-stone-100/50
+        transition-all duration-700 ease-out
+        shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)]
+        group-hover:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.5)]
+        group-hover:-translate-y-2
       `}
       >
         {/* Thumbnail Image */}
