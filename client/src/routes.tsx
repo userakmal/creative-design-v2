@@ -1,5 +1,5 @@
-import { BrowserRouter, Route, Routes as Switch } from "react-router-dom";
-import React, { useState, Suspense } from "react";
+import { BrowserRouter, Route, Routes as Switch, useLocation } from "react-router-dom";
+import React, { useState, Suspense, useEffect } from "react";
 import { MainPage } from "./pages/main.page";
 
 // Lazy loading large components to optimize main bundle size
@@ -15,6 +15,17 @@ const LoadingSpinnerFallback = () => (
     Yuklanmoqda...
   </div>
 );
+
+// Har safar sahifa o'zgarganda scrollni tepaga qaytarish uchun komponent
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+};
 
 export const Routes = () => {
   const [likedVideos, setLikedVideos] = useState<number[]>(() => {
@@ -47,6 +58,7 @@ export const Routes = () => {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Suspense fallback={<LoadingSpinnerFallback />}>
         <Switch>
           {/* Dashboard is eagerly loaded for fastest Time To Interactive */}
