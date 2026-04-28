@@ -9,14 +9,12 @@ const websiteDesigns = [
     title: "",
     folder: "dizayn 1",
     ogImage: "/webSites/background/1/dizayn%201.png",
-    hideScreenshots: true,
   },
   {
     id: 2,
     title: "",
     folder: "dizayn 2",
     ogImage: "/webSites/background/2/dizayn%202.png",
-    hideScreenshots: true,
   },
   {
     id: 3,
@@ -103,7 +101,7 @@ const DesignCard = ({ design, index }: { design: any, index: number }) => {
   };
 
   const getScreenshotPath = (folderName: string, fileName: string) => {
-    return `/webSites/screenshots/${folderName}/${fileName}`;
+    return encodeURI(`/webSites/screenshots/${folderName}/${fileName}`);
   };
 
   return (
@@ -135,13 +133,19 @@ const DesignCard = ({ design, index }: { design: any, index: number }) => {
           <>
             {/* Perspective Phones (Left/Center) */}
             <div
-              className="absolute top-[8%] left-[-5%] w-[85%] z-10 pointer-events-none opacity-0"
+              className="absolute top-[8%] left-[0%] w-[55%] z-10 pointer-events-none opacity-0"
               style={{
                 animation: inView ? `phoneAppearLeft 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) 400ms forwards` : 'none',
               }}
             >
               <img
-                src={getScreenshotPath(design.folder, "iPhone 15 Mockup, Perspective (1).png")}
+                src={getScreenshotPath(design.folder, "iPhone 15 Mockup, Perspective.png")}
+                onError={(e) => {
+                  const img = e.target as HTMLImageElement;
+                  if (!img.src.includes("(1).png")) {
+                    img.src = getScreenshotPath(design.folder, "iPhone 15 Mockup, Perspective (1).png");
+                  }
+                }}
                 alt=""
                 className="w-full h-auto drop-shadow-[0_35px_45px_rgba(0,0,0,0.4)]"
               />
@@ -149,13 +153,13 @@ const DesignCard = ({ design, index }: { design: any, index: number }) => {
 
             {/* Close Up Phone (Right/Foreground) */}
             <div
-              className="absolute bottom-[-10%] right-[-10%] w-[95%] z-20 pointer-events-none opacity-0"
+              className="absolute bottom-[0%] right-[10%] w-[40%] z-20 pointer-events-none opacity-0"
               style={{
                 animation: inView ? `phoneAppearRight 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) 800ms forwards` : 'none',
               }}
             >
               <img
-                src={getScreenshotPath(design.folder, "iPhone 15 Mockup Close Up Poster Freepik.png")}
+                src={getScreenshotPath(design.folder, "iPhone 15 Mockup Close Up Poster Freepik (1).png")}
                 alt=""
                 className="w-full h-auto drop-shadow-[0_40px_60px_rgba(0,0,0,0.5)]"
               />
