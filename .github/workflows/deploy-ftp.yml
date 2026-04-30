@@ -39,8 +39,5 @@ jobs:
             **/.git*
             **/.git*/**
             **/node_modules/**
-            api-server/public/videos/**
-            api-server/public/image/**
-            api-server/public/music/**
-            api-server/public/data/**
-            dist/webSites/**
+            videos/**
+            image/**
