@@ -18,8 +18,11 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install dependencies
+      - name: Install root dependencies
         run: npm ci
+
+      - name: Install client dependencies (Tailwind, PostCSS)
+        run: cd client && npm ci
 
       - name: Build
         run: npm run build
@@ -30,10 +33,6 @@ jobs:
           server: 31.184.242.14
           username: gihub-deploy
           password: gM9aH7jD3c
-          # # Optional: ftp | ftps | ftps-legacy
-          # protocol: ${{ secrets.FTP_PROTOCOL }}
-          # # Optional: defaults to 21 if omitted by the action, set if your host requires a specific port
-          # port: ${{ secrets.FTP_PORT }}
           local-dir: dist/
           server-dir: /
           exclude: |

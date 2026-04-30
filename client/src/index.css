@@ -1,7 +1,11 @@
 /* 
  * Creative Design UZ — Global Styles
- * Asosiy CSS fayl. index.html da reference qilingan.
+ * Tailwind CSS build-time compilation
  */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Smooth scroll for all pages */
 html {
@@ -13,6 +17,37 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+}
+
+/* Scrollbar hiding */
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Range input styling */
+input[type=range] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input[type=range]:focus {
+  outline: none;
 }
 
 /* Ensure fill-mode-forwards works for animations */
