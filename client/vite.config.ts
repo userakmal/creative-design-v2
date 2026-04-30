@@ -93,15 +93,17 @@ export default defineConfig(({ mode }) => {
         rollupOptions: {
           output: {
             manualChunks(id) {
-              // React core — alohida cache'lanadi
-              if (id.includes('react-dom')) return 'react-vendor';
+              // React + ReactDOM + Scheduler — bitta chunkda bo'lishi SHART
+              if (id.includes('react') && id.includes('node_modules') && !id.includes('react-router')) {
+                return 'react-vendor';
+              }
+              // Router alohida chunk
               if (id.includes('react-router')) return 'router';
               // Boshqa vendor paketlar
               if (id.includes('node_modules')) return 'vendor';
             }
           }
         },
-        // Rasmlarni inline qilish hajmi (4kb gacha inline)
         assetsInlineLimit: 4096,
       }
     };

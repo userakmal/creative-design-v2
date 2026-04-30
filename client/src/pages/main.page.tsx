@@ -196,7 +196,7 @@ export const MainPage: React.FC = () => {
                   bg-white/90 backdrop-blur-sm
                   text-stone-400 border border-stone-200/60
                   transition-all duration-500 ease-out
-                  active:scale-910
+                  active:scale-95
                   ${social.hoverColor}
                 `}
               >
