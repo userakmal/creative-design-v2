@@ -56,6 +56,7 @@ api-server/video-downloader/downloads/hls_*/
 api-server/public/videos/
 api-server/public/image/
 api-server/public/music/
+api-server/public/data/*.json
 
 # Sensitive files
 cookies.txt
