@@ -87,15 +87,22 @@ export default defineConfig(({ mode }) => {
         outDir: '../dist',
         target: 'esnext',
         minify: 'esbuild',
+        sourcemap: false,
+        cssCodeSplit: true,
+        chunkSizeWarningLimit: 500,
         rollupOptions: {
           output: {
             manualChunks(id) {
-              if (id.includes('node_modules')) {
-                return 'vendor';
-              }
+              // React core — alohida cache'lanadi
+              if (id.includes('react-dom')) return 'react-vendor';
+              if (id.includes('react-router')) return 'router';
+              // Boshqa vendor paketlar
+              if (id.includes('node_modules')) return 'vendor';
             }
           }
-        }
+        },
+        // Rasmlarni inline qilish hajmi (4kb gacha inline)
+        assetsInlineLimit: 4096,
       }
     };
 });

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Play, ImageOff } from "lucide-react";
 
 interface VideoCardProps {
@@ -13,9 +13,32 @@ export const VideoCard: React.FC<VideoCardProps> = ({
   onClick,
 }) => {
   const [imgError, setImgError] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [shouldLoad, setShouldLoad] = useState(false);
+  const imgRef = useRef<HTMLDivElement>(null);
+
+  // IntersectionObserver bilan lazy loading — rasm faqat viewport ga yaqinlashganda yuklanadi
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldLoad(true);
+          observer.unobserve(entry.target);
+        }
+      },
+      { rootMargin: '200px', threshold: 0.01 }
+    );
+
+    if (imgRef.current) {
+      observer.observe(imgRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div
+      ref={imgRef}
       onClick={onClick}
       className={`group relative flex flex-col gap-2 cursor-pointer transition-all duration-500 ease-out active:scale-95`}
     >
@@ -29,19 +52,27 @@ export const VideoCard: React.FC<VideoCardProps> = ({
         group-hover:-translate-y-2
       `}
       >
-        {/* Thumbnail Image */}
-        {!imgError ? (
+        {/* Skeleton Placeholder — Rasm yuklanguncha */}
+        {!isLoaded && !imgError && (
+          <div className="absolute inset-0 bg-gradient-to-b from-stone-200 to-stone-300 animate-pulse" />
+        )}
+
+        {/* Thumbnail Image — Lazy loaded */}
+        {shouldLoad && !imgError ? (
           <img
             src={image}
             alt={title}
+            loading="lazy"
+            decoding="async"
+            onLoad={() => setIsLoaded(true)}
             onError={() => setImgError(true)}
-            className="absolute inset-0 w-full h-full object-cover opacity-95 transition-opacity duration-700"
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
           />
-        ) : (
+        ) : imgError ? (
           <div className="absolute inset-0 bg-stone-100 flex items-center justify-center">
             <ImageOff className="text-stone-300" size={24} />
           </div>
-        )}
+        ) : null}
 
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />

@@ -25,13 +25,13 @@ export const MenuButton: React.FC<ButtonProps> = ({ label, icon: Icon, onClick, 
     >
       <div className="flex items-center gap-5">
         <div className="
-          w-12 h-12 flex items-center justify-center rounded-2xl
-          bg-gradient-to-br from-stone-50 to-stone-100
-          text-stone-600 border border-stone-100
-          group-hover:from-stone-800 group-hover:to-black group-hover:text-white group-hover:border-transparent
+          w-10 h-10 flex items-center justify-center rounded-[20px]
+          bg-stone-100/50 backdrop-blur-md
+          text-stone-600 border border-stone-200/50
+          group-hover:bg-stone-900 group-hover:text-white group-hover:border-transparent
           transition-all duration-500 shadow-sm
         ">
-          <Icon size={22} strokeWidth={1.5} />
+          <Icon size={18} strokeWidth={1.5} />
         </div>
         <span className="text-[15px] font-semibold tracking-wide text-stone-700 group-hover:text-black transition-colors font-sans">
           {label}

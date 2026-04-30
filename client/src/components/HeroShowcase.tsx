@@ -2,6 +2,18 @@
 import React, { useState, useEffect, CSSProperties } from 'react';
 import { config } from '../config';
 
+// Faqat ko'rinadigan 3 ta rasmni render qilish uchun helper
+function getVisibleIndices(activeIndex: number, len: number): Set<number> {
+  if (len === 0) return new Set();
+  const indices = new Set<number>();
+  indices.add(activeIndex);
+  indices.add((activeIndex + 1) % len);
+  indices.add((activeIndex - 1 + len) % len);
+  // Pre-load next one too for smooth transition
+  indices.add((activeIndex + 2) % len);
+  return indices;
+}
+
 export const HeroShowcase: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAutoPlaying] = useState(true);
@@ -70,6 +82,9 @@ export const HeroShowcase: React.FC = () => {
 
   if (len === 0) return null;
 
+  // Faqat aktiv + yonidagi rasmlarni ko'rsatish (48 ta emas, 4 ta!)
+  const visibleIndices = getVisibleIndices(activeIndex, len);
+
   return (
     <div className="relative w-full flex justify-center py-2 mb-4 h-[320px] overflow-visible perspective-1000">
       
@@ -79,6 +94,9 @@ export const HeroShowcase: React.FC = () => {
       {/* Slayd konteyneri */}
       <div className="relative w-full max-w-[200px] h-full flex items-center justify-center">
         {videos.map((video, index) => {
+          // Ko'rinmaydigan kartalarni umuman render qilmaymiz (performance uchun)
+          if (!visibleIndices.has(index)) return null;
+
           const style = getCardStyle(index);
           const isActive = (index - activeIndex + len) % len === 0;
 
@@ -93,6 +111,9 @@ export const HeroShowcase: React.FC = () => {
                 <img
                   src={video.image}
                   alt={video.title}
+                  loading="eager"
+                  decoding="async"
+                  fetchPriority={isActive ? "high" : "low"}
                   className={`
                     w-full h-full object-cover transition-transform duration-[4000ms] ease-linear
                     ${isActive ? 'scale-110' : 'scale-100'}

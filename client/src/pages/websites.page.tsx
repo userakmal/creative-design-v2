@@ -74,6 +74,7 @@ const websiteDesigns = [
 
 const DesignCard = ({ design, index }: { design: any, index: number }) => {
   const [inView, setInView] = useState(false);
+  const [bgLoaded, setBgLoaded] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -84,7 +85,7 @@ const DesignCard = ({ design, index }: { design: any, index: number }) => {
           observer.unobserve(entry.target);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.05, rootMargin: '300px' }
     );
 
     if (cardRef.current) {
@@ -115,21 +116,30 @@ const DesignCard = ({ design, index }: { design: any, index: number }) => {
         className="w-full aspect-[4/3] relative rounded-[40px] overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.6)] hover:shadow-[0_70px_120px_-25px_rgba(0,0,0,0.7)] transition-all duration-700 mb-8 group cursor-pointer border border-gray-100/50 hover:-translate-y-3"
         onClick={() => window.location.href = `/webSites/${design.folder}/index.html`}
       >
-        {/* Background Image */}
+        {/* Skeleton Placeholder */}
+        {!bgLoaded && (
+          <div className="absolute inset-0 bg-gradient-to-br from-stone-200 to-stone-300 animate-pulse" />
+        )}
+
+        {/* Background Image — faqat ko'rinsa yuklaydi */}
         <div className="absolute inset-0 w-full h-full transition-transform duration-1000 group-hover:scale-110">
-          <img
-            src={getBackgroundPath(design.folder)}
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = design.ogImage;
-            }}
-            alt=""
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
+          {inView && (
+            <img
+              src={getBackgroundPath(design.folder)}
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = design.ogImage;
+              }}
+              onLoad={() => setBgLoaded(true)}
+              alt=""
+              className={`w-full h-full object-cover transition-opacity duration-500 ${bgLoaded ? 'opacity-100' : 'opacity-0'}`}
+              loading="lazy"
+              decoding="async"
+            />
+          )}
           <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-500"></div>
         </div>
 
-        {!design.hideScreenshots && (
+        {!design.hideScreenshots && inView && (
           <>
             {/* Perspective Phones (Left/Center) */}
             <div
@@ -147,6 +157,8 @@ const DesignCard = ({ design, index }: { design: any, index: number }) => {
                   }
                 }}
                 alt=""
+                loading="lazy"
+                decoding="async"
                 className="w-full h-auto drop-shadow-[0_35px_45px_rgba(0,0,0,0.4)]"
               />
             </div>
@@ -161,6 +173,8 @@ const DesignCard = ({ design, index }: { design: any, index: number }) => {
               <img
                 src={getScreenshotPath(design.folder, "iPhone 15 Mockup Close Up Poster Freepik (1).png")}
                 alt=""
+                loading="lazy"
+                decoding="async"
                 className="w-full h-auto drop-shadow-[0_40px_60px_rgba(0,0,0,0.5)]"
               />
             </div>

@@ -278,7 +278,7 @@ async function initializeApp(): Promise<void> {
 }
 
 // ============================================================================
-// RENDER APPLICATION
+// RENDER APPLICATION — DARHOL render, ma'lumotlar fon rejimida yuklanadi
 // ============================================================================
 
 const rootElement = document.getElementById("root");
@@ -288,25 +288,17 @@ if (!rootElement) {
 
 const root = ReactDOM.createRoot(rootElement);
 
-// Initialize data then render
-initializeApp()
-  .then(() => {
-    root.render(
-      <React.StrictMode>
-        <ErrorBoundary>
-          <Routes />
-        </ErrorBoundary>
-      </React.StrictMode>
-    );
-  })
-  .catch((error) => {
-    console.error("[initializeApp] Fatal error:", error);
-    // Still render even if data loading fails
-    root.render(
-      <React.StrictMode>
-        <ErrorBoundary>
-          <Routes />
-        </ErrorBoundary>
-      </React.StrictMode>
-    );
-  });
+// Darhol render — foydalanuvchi kutmaydi!
+root.render(
+  <React.StrictMode>
+    <ErrorBoundary>
+      <Routes />
+    </ErrorBoundary>
+  </React.StrictMode>
+);
+
+// Ma'lumotlarni fon rejimida yuklash (render bloklanmaydi)
+initializeApp().catch((error) => {
+  console.error("[initializeApp] Non-critical data loading error:", error);
+});
+

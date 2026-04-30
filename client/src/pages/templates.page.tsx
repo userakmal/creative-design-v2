@@ -342,6 +342,8 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
                     <img
                       src={video.image}
                       alt={video.title}
+                      loading={index < 2 ? "eager" : "lazy"}
+                      decoding="async"
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/10 opacity-80" />
@@ -435,6 +437,7 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
                   webkit-playsinline="true"
                   autoPlay
                   muted={isMuted}
+                  preload="metadata"
                   className="w-full h-full object-cover bg-stone-900"
                   onCanPlay={handleVideoReady}
                   onWaiting={() => setIsLoading(true)}

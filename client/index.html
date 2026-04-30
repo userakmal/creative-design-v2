@@ -51,10 +51,23 @@
     }
     </script>
 
+    <!-- DNS prefetch va preconnect — tezroq ulanish uchun -->
+    <link rel="dns-prefetch" href="https://creative-design.uz" />
+    <link rel="preconnect" href="https://creative-design.uz" crossorigin />
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com" />
+
+    <!-- Tailwind CDN — avval script, keyin config (Tailwind CDN shu tartibda ishlaydi) -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Fontlarni async yuklash — render-blocking emas -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"></noscript>
+
+    <!-- Tailwind config — CDN scriptidan keyin -->
     <script>
       tailwind.config = {
         theme: {
