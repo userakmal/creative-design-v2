@@ -87,9 +87,13 @@ export default defineConfig(({ mode }) => {
         outDir: '../dist',
         target: 'esnext',
         minify: 'esbuild',
+        cssMinify: true,
         sourcemap: false,
         cssCodeSplit: true,
         chunkSizeWarningLimit: 500,
+        modulePreload: {
+          polyfill: false, // Modern browsers only — polyfill kerak emas
+        },
         rollupOptions: {
           output: {
             manualChunks(id) {
@@ -99,6 +103,8 @@ export default defineConfig(({ mode }) => {
               }
               // Router alohida chunk
               if (id.includes('react-router')) return 'router';
+              // Lucide icons — katta kutubxona, alohida chunk
+              if (id.includes('lucide-react')) return 'icons';
               // Boshqa vendor paketlar
               if (id.includes('node_modules')) return 'vendor';
             }

@@ -152,10 +152,10 @@ export const MainPage: React.FC = () => {
 
   return (
     <div className="min-h-screen w-full bg-[#FDFCF8] flex flex-col relative overflow-y-auto overflow-x-hidden">
-      {/* Refined Background Elements */}
-      <div className="fixed top-[-20%] right-[-10%] w-[60vh] h-[60vh] bg-amber-100/30 rounded-full blur-3xl pointer-events-none mix-blend-multiply" />
-      <div className="fixed bottom-[-10%] left-[-20%] w-[70vh] h-[70vh] bg-rose-50/40 rounded-full blur-3xl pointer-events-none mix-blend-multiply" />
-      <div className="fixed top-[40%] left-[20%] w-[30vh] h-[30vh] bg-stone-100/60 rounded-full blur-3xl pointer-events-none" />
+      {/* Refined Background Elements — static, GPU-isolated */}
+      <div className="fixed top-[-20%] right-[-10%] w-[60vh] h-[60vh] rounded-full -z-10 bg-blur-static" style={{ background: 'rgba(254, 243, 199, 0.3)', filter: 'blur(64px)' }} aria-hidden="true" />
+      <div className="fixed bottom-[-10%] left-[-20%] w-[70vh] h-[70vh] rounded-full -z-10 bg-blur-static" style={{ background: 'rgba(255, 228, 230, 0.4)', filter: 'blur(64px)' }} aria-hidden="true" />
+      <div className="fixed top-[40%] left-[20%] w-[30vh] h-[30vh] rounded-full -z-10 bg-blur-static" style={{ background: 'rgba(245, 245, 244, 0.6)', filter: 'blur(64px)' }} aria-hidden="true" />
 
       {/* Main Content Container */}
       <div className="flex-grow flex flex-col w-full max-w-md mx-auto z-10">
@@ -205,7 +205,7 @@ export const MainPage: React.FC = () => {
             );
           })}
         </div>
-        <div className="text-[9px] text-stone-300 font-medium tracking-[0.2em] uppercase">
+        <div className="text-[10px] text-stone-500 font-medium tracking-[0.2em] uppercase">
           {config.footerText}
         </div>
       </footer>

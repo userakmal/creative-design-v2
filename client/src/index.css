@@ -17,6 +17,28 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  /* Mobile touch optimization */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* GPU-accelerated animations — non-composited animations tuzatish */
+.gpu-accelerated {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Off-screen content lazy rendering — FCP/LCP tezlashtirish */
+.content-lazy {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
+}
+
+/* Background blur elementlari uchun — GPU compositing */
+.bg-blur-static {
+  will-change: auto;
+  contain: strict;
+  pointer-events: none;
 }
 
 /* Scrollbar hiding */
@@ -53,4 +75,20 @@ input[type=range]:focus {
 /* Ensure fill-mode-forwards works for animations */
 .fill-mode-forwards {
   animation-fill-mode: forwards;
+}
+
+/* Reduce motion for users who prefer it — accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Image optimization — aspect-ratio saqlab, CLS oldini olish */
+img {
+  max-width: 100%;
+  height: auto;
 }

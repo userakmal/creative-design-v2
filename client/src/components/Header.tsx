@@ -13,7 +13,9 @@ export const Header: React.FC = () => {
         <div className="w-16 h-16 rounded-full border border-white/60 bg-white/40 backdrop-blur-md flex items-center justify-center shadow-[0_4px_20px_rgb(0,0,0,0.04)] relative z-10 ring-1 ring-white/50 overflow-hidden">
            <img 
             src={config.logoUrl} 
-            alt="Logo" 
+            alt="Creative Design Logo" 
+            width={64}
+            height={64}
             className="w-full h-full object-cover"
            />
         </div>
@@ -24,13 +26,13 @@ export const Header: React.FC = () => {
         {config.brandName}
       </h1>
       
-      <div className="flex items-center gap-3 my-2 opacity-60">
+      <div className="flex items-center gap-3 my-2 opacity-60" aria-hidden="true">
         <div className="h-[1px] w-6 bg-gradient-to-r from-transparent to-stone-400"></div>
         <div className="w-0.5 h-0.5 rounded-full bg-stone-400"></div>
         <div className="h-[1px] w-6 bg-gradient-to-l from-transparent to-stone-400"></div>
       </div>
 
-      <p className="text-[9px] text-stone-500 font-semibold tracking-[0.2em] uppercase text-center opacity-80">
+      <p className="text-[10px] text-stone-600 font-semibold tracking-[0.2em] uppercase text-center">
         {config.subTitle}
       </p>
     </header>

@@ -40,7 +40,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({
     <div
       ref={imgRef}
       onClick={onClick}
-      className={`group relative flex flex-col gap-2 cursor-pointer transition-all duration-500 ease-out active:scale-95`}
+      className={`group relative flex flex-col gap-2 cursor-pointer transition-all duration-500 ease-out active:scale-95 gpu-accelerated`}
     >
       <div
         className={`
@@ -62,6 +62,8 @@ export const VideoCard: React.FC<VideoCardProps> = ({
           <img
             src={image}
             alt={title}
+            width={180}
+            height={320}
             loading="lazy"
             decoding="async"
             onLoad={() => setIsLoaded(true)}

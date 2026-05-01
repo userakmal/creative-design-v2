@@ -342,6 +342,8 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
                     <img
                       src={video.image}
                       alt={video.title}
+                      width={256}
+                      height={398}
                       loading={index < 2 ? "eager" : "lazy"}
                       decoding="async"
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -349,9 +351,9 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/10 opacity-80" />
 
                     <div className="absolute bottom-6 left-6 right-6 text-white translate-y-2 group-hover:translate-y-0 transition-transform duration-500 flex justify-center">
-                      <h4 className="inline-block px-4 py-1.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-[10px] font-semibold text-white tracking-[0.2em] uppercase shadow-sm">
+                      <span className="inline-block px-4 py-1.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-[10px] font-semibold text-white tracking-[0.2em] uppercase shadow-sm">
                         {video.title}
-                      </h4>
+                      </span>
                     </div>
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-white/30 backdrop-blur-md border border-white/50 flex items-center justify-center shadow-lg animate-fade-in">
                       <Play
@@ -367,7 +369,7 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
           </div>
         )}
 
-        <div className="px-6 min-h-[50vh]">
+        <div className="px-6 min-h-[50vh] content-lazy">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-serif font-bold text-stone-800 opacity-90">
               {showFavoritesOnly ? "Saqlanganlar" : "Barchasi"}
