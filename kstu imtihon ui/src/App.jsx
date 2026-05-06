@@ -2,12 +2,12 @@ import React, { useState, useEffect, useMemo } from 'react';
 import './index.css';
 import ALL_QUESTIONS from './questions.json';
 
-const TOTAL_QUESTIONS = ALL_QUESTIONS.length;
+const TOTAL_QUESTIONS = 50;
 
 export default function App() {
   const questions = useMemo(
     () =>
-      ALL_QUESTIONS.map((q, i) => ({
+      ALL_QUESTIONS.slice(0, TOTAL_QUESTIONS).map((q, i) => ({
         id: i + 1,
         text: `${i + 1}. ${q.text}`,
         options: q.options,
