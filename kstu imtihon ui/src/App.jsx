@@ -60,7 +60,6 @@ export default function App() {
     setAnswers(newAnswers);
   };
 
-  const currentBatchIndex = Math.floor(activeQuestion / 25);
 
   return (
     <div className="app-container">
@@ -143,23 +142,19 @@ export default function App() {
               <h3>Javoblar</h3>
             </div>
             <div className="answers-grid">
-              {Array.from({ length: 25 }).map((_, idx) => {
-                const absoluteIndex = currentBatchIndex * 25 + idx;
-
-                if (absoluteIndex >= TOTAL_QUESTIONS) return null;
-
-                const isAnswered = answers[absoluteIndex] !== null;
-                const isActive = activeQuestion === absoluteIndex;
+              {Array.from({ length: TOTAL_QUESTIONS }).map((_, idx) => {
+                const isAnswered = answers[idx] !== null;
+                const isActive = activeQuestion === idx;
 
                 return (
                   <button
                     key={idx}
                     className={`grid-circle ${isActive ? 'active' : (isAnswered ? 'answered' : '')}`}
                     onClick={() => {
-                      document.getElementById(`question-${absoluteIndex}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      document.getElementById(`question-${idx}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }}
                   >
-                    {idx + 1}
+                    {isAnswered ? '✓' : idx + 1}
                   </button>
                 );
               })}
