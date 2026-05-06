@@ -91,9 +91,9 @@ export default function App() {
       <div className="main-layout">
         <div className="content-area">
           <div className="exam-info-card">
-            <h2>2023/2024 60110500-Boshlang'ich ta'lim (sirtqi) 1-kurs Umumiy psixologiya</h2>
+            <h2>2025/2026 60110500-Boshlang'ich ta'lim (sirtqi) 1-kurs Umumiy psixologiya</h2>
             <p>
-              2023/2024 60110500-Boshlang'ich ta'lim (sirtqi) 1-kurs Umumiy psixologiya fanidan. Jami {TOTAL_QUESTIONS} ta savol. O'tish bali 30 ball. Buning uchun kamida 15 ta savolga to'g'ri javob berishingiz kerak bo'ladi.
+              2023/2024 60110500-Bitiruv ishi (sirtqi) 5-kurs Umumiy. Jami {TOTAL_QUESTIONS} ta savol. O'tish bali 30 ball. Buning uchun kamida 15 ta savolga to'g'ri javob berishingiz kerak bo'ladi.
             </p>
           </div>
 
