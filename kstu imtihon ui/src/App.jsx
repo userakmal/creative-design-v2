@@ -2,12 +2,12 @@ import React, { useState, useEffect, useMemo } from 'react';
 import './index.css';
 import ALL_QUESTIONS from './questions.json';
 
-const TOTAL_QUESTIONS = 50;
+const TOTAL_QUESTIONS = ALL_QUESTIONS.length;
 
 export default function App() {
   const questions = useMemo(
     () =>
-      ALL_QUESTIONS.slice(0, TOTAL_QUESTIONS).map((q, i) => ({
+      ALL_QUESTIONS.map((q, i) => ({
         id: i + 1,
         text: `${i + 1}. ${q.text}`,
         options: q.options,
@@ -92,7 +92,7 @@ export default function App() {
           <div className="exam-info-card">
             <h2>2025/2026 60110500-Boshlang'ich ta'lim (sirtqi) 1-kurs Umumiy psixologiya</h2>
             <p>
-              2023/2024 60110500-Bitiruv ishi (sirtqi) 5-kurs Umumiy. Jami {TOTAL_QUESTIONS} ta savol. O'tish bali 30 ball. Buning uchun kamida 15 ta savolga to'g'ri javob berishingiz kerak bo'ladi.
+              2023/2024 60110500-Bitiruv ishi (sirtqi) 5-kurs Umumiy. Jami 50 ta savol. O'tish bali 30 ball. Buning uchun kamida 15 ta savolga to'g'ri javob berishingiz kerak bo'ladi.
             </p>
           </div>
 
@@ -142,7 +142,7 @@ export default function App() {
               <h3>Javoblar</h3>
             </div>
             <div className="answers-grid">
-              {Array.from({ length: TOTAL_QUESTIONS }).map((_, idx) => {
+              {Array.from({ length: 50 }).map((_, idx) => {
                 const isAnswered = answers[idx] !== null;
                 const isActive = activeQuestion === idx;
 
@@ -154,7 +154,7 @@ export default function App() {
                       document.getElementById(`question-${idx}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }}
                   >
-                    {isAnswered ? '✓' : idx + 1}
+                    {idx + 1}
                   </button>
                 );
               })}
