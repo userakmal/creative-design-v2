@@ -78,11 +78,14 @@
   # Do NOT rewrite actual files (videos, images, music, data, assets)
   RewriteRule ^index\.html$ - [L]
 
+  # Skip rewrite for PHP files
+  RewriteRule \.php$ - [L,NC]
+
   # Skip rewrite for media/static file extensions
   RewriteRule \.(mp4|webm|mov|avi|jpg|jpeg|png|gif|webp|svg|mp3|m4a|ogg|wav|json|js|css|ico|woff|woff2|ttf|eot|xml)$ - [L,NC]
 
-  # Skip rewrite for media directories
-  RewriteRule ^(videos|image|music|data|assets|logo)/ - [L]
+  # Skip rewrite for media directories and API directory
+  RewriteRule ^(videos|image|music|data|assets|logo|api)/ - [L]
 
   # SPA catch-all — only for non-file non-directory requests
   RewriteCond %{REQUEST_FILENAME} !-f
