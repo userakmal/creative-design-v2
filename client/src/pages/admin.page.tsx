@@ -7,13 +7,17 @@ import "./admin.css";
 // ============================================================================
 const isProduction = window.location.hostname === 'creative-design.uz';
 
+// Local: Node.js upload server, Production: PHP on hosting
 const SERVER_URL = isProduction
-  ? 'https://creative-design.uz:3001'
+  ? 'https://creative-design.uz'
   : 'http://localhost:3001';
 
 const VIDEO_DOWNLOADER_API = isProduction
   ? 'https://creative-design.uz:8000'
   : 'http://localhost:8000';
+
+// Production: PHP endpoints (.php), Local: Node.js endpoints
+const api = (path: string) => isProduction ? `${SERVER_URL}/api/${path}.php` : `${SERVER_URL}/api/${path}`;
 
 const ADMIN_PASSWORD = "creative2026";
 
@@ -104,7 +108,7 @@ export const AdminPage = () => {
 
   const checkServer = useCallback(async () => {
     try {
-      const res = await fetch(`${SERVER_URL}/api/health`, { signal: AbortSignal.timeout(3000) });
+      const res = await fetch(`${api('health')}`, { signal: AbortSignal.timeout(3000) });
       if (res.ok) {
         setServerConnected(true);
         return true;
@@ -116,7 +120,7 @@ export const AdminPage = () => {
 
   const loadStats = useCallback(async () => {
     try {
-      const res = await fetch(`${SERVER_URL}/api/stats`);
+      const res = await fetch(`${api('stats')}`);
       if (res.ok) {
         const data = await res.json();
         setStats(data);
@@ -127,7 +131,7 @@ export const AdminPage = () => {
   const loadVideos = useCallback(async () => {
     setIsLoadingVideos(true);
     try {
-      const res = await fetch(`${SERVER_URL}/api/videos`);
+      const res = await fetch(`${api('videos')}`);
       if (res.ok) {
         const data = await res.json();
         setVideos(data);
@@ -142,7 +146,7 @@ export const AdminPage = () => {
   const loadMusic = useCallback(async () => {
     setIsLoadingMusic(true);
     try {
-      const res = await fetch(`${SERVER_URL}/api/music`);
+      const res = await fetch(`${api('music')}`);
       if (res.ok) {
         const data = await res.json();
         setMusicList(data);
@@ -235,7 +239,7 @@ export const AdminPage = () => {
         xhr.addEventListener("error", () => reject(new Error("Tarmoq xatosi")));
         xhr.addEventListener("abort", () => reject(new Error("Upload bekor qilindi")));
 
-        xhr.open("POST", `${SERVER_URL}/api/upload`);
+        xhr.open("POST", `${api('upload')}`);
         xhr.send(formData);
       });
 
@@ -304,7 +308,7 @@ export const AdminPage = () => {
         xhr.addEventListener("error", () => reject(new Error("Tarmoq xatosi")));
         xhr.addEventListener("abort", () => reject(new Error("Upload bekor qilindi")));
 
-        xhr.open("POST", `${SERVER_URL}/api/upload-music`);
+        xhr.open("POST", `${api('upload-music')}`);
         xhr.send(formData);
       });
 
@@ -337,7 +341,8 @@ export const AdminPage = () => {
     if (!confirm(`"${title}" videosini o'chirishni xohlaysizmi?`)) return;
 
     try {
-      const res = await fetch(`${SERVER_URL}/api/videos/${id}`, { method: "DELETE" });
+      const deleteUrl = isProduction ? `${api('videos')}?id=${id}` : `${api('videos')}/${id}`;
+      const res = await fetch(deleteUrl, { method: "DELETE" });
       const data = await res.json();
 
       if (res.ok) {
@@ -356,7 +361,8 @@ export const AdminPage = () => {
     if (!confirm(`"${title}" musiqasini o'chirishni xohlaysizmi?`)) return;
 
     try {
-      const res = await fetch(`${SERVER_URL}/api/music/${id}`, { method: "DELETE" });
+      const deleteUrl = isProduction ? `${api('music')}?id=${id}` : `${api('music')}/${id}`;
+      const res = await fetch(deleteUrl, { method: "DELETE" });
       const data = await res.json();
 
       if (res.ok) {

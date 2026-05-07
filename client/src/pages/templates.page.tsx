@@ -14,7 +14,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { VideoCard } from "../components/VideoCard";
-import { config } from "../config";
+import { config, UPLOAD_SERVER_URL } from "../config";
 import type { VideoItem } from "../types";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -33,15 +33,7 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
 }) => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(() => {
-    const videoId = searchParams.get("videoId");
-
-    if (videoId) {
-      return config.videos.find((v) => v.id === parseInt(videoId)) ?? null;
-    }
-
-    return null;
-  });
+  const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
   const [showOverlay, setShowOverlay] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
@@ -52,6 +44,9 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
 
+  // Uploaded videos from server
+  const [uploadedVideos, setUploadedVideos] = useState<VideoItem[]>([]);
+
   // Filter state
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
@@ -61,6 +56,43 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
   const touchStartY = useRef<number | null>(null);
   const touchStartX = useRef<number | null>(null);
   const minSwipeDistance = 50;
+
+  // Fetch uploaded videos from server (PHP in production, Node.js locally)
+  const isProd = window.location.hostname === 'creative-design.uz';
+  const videosApiUrl = isProd ? `${UPLOAD_SERVER_URL}/api/videos.php` : `${UPLOAD_SERVER_URL}/api/videos`;
+
+  useEffect(() => {
+    fetch(videosApiUrl)
+      .then((res) => res.ok ? res.json() : [])
+      .then((data: any[]) => {
+        const base = isProd ? '' : UPLOAD_SERVER_URL;
+        const mapped: VideoItem[] = data.map((v) => ({
+          id: v.id,
+          title: v.title,
+          image: `${base}${v.image}`,
+          videoUrl: `${base}${v.videoUrl}`,
+          uploadedAt: v.uploadedAt,
+          size: v.size,
+          isUploaded: true,
+        }));
+        setUploadedVideos(mapped);
+      })
+      .catch(() => {});
+  }, []);
+
+  // All videos: static config + uploaded from server (deduplicated by id)
+  const configIds = new Set(config.videos.map((v) => v.id));
+  const newUploaded = uploadedVideos.filter((v) => !configIds.has(v.id));
+  const allVideos = [...config.videos, ...newUploaded];
+
+  // Resolve videoId from URL after all videos are available
+  useEffect(() => {
+    const videoId = searchParams.get("videoId");
+    if (videoId && !selectedVideo) {
+      const found = allVideos.find((v) => v.id === parseInt(videoId));
+      if (found) setSelectedVideo(found);
+    }
+  }, [allVideos.length, searchParams]);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 100);
@@ -260,7 +292,7 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
 
   const getFilteredVideos = () => {
     let videos =
-      filter === "popular" ? config.videos.slice(0, 4) : config.videos;
+      filter === "popular" ? allVideos.slice(0, 4) : allVideos;
     if (showFavoritesOnly) {
       videos = videos.filter((v) => likedVideos.includes(v.id));
     }
@@ -278,7 +310,7 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
   };
 
   const displayVideos = getFilteredVideos();
-  const featuredVideos = config.videos.slice(0, 5);
+  const featuredVideos = allVideos.slice(0, 5);
   const isSelectedLiked = selectedVideo
     ? likedVideos.includes(selectedVideo.id)
     : false;

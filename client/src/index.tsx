@@ -202,12 +202,13 @@ function normalizeUploadedMusic(music: UploadedMusic, cdnUrl: string): MusicItem
 // ============================================================================
 
 /**
- * Load uploaded videos from videos.json
- * This file is updated by upload-server.js and synced via FTP
+ * Load uploaded videos from API (PHP in production, Node.js locally)
  */
 async function loadUploadedVideos(): Promise<VideoItem[]> {
-  const url = '/data/videos.json';
-  const data = await fetchJSON<UploadedVideo[]>(url, Environment.timeoutMs);
+  const apiUrl = Environment.isProduction
+    ? `${Environment.cdnUrl}/api/videos.php`
+    : `${Environment.cdnUrl}/api/videos`;
+  const data = await fetchJSON<UploadedVideo[]>(apiUrl, Environment.timeoutMs);
 
   if (!data || !Array.isArray(data) || data.length === 0) {
     return [];
@@ -219,12 +220,13 @@ async function loadUploadedVideos(): Promise<VideoItem[]> {
 }
 
 /**
- * Load uploaded music from music.json
- * This file is updated by upload-server.js and synced via FTP
+ * Load uploaded music from API (PHP in production, Node.js locally)
  */
 async function loadUploadedMusic(): Promise<MusicItem[]> {
-  const url = '/data/music.json';
-  const data = await fetchJSON<UploadedMusic[]>(url, Environment.timeoutMs);
+  const apiUrl = Environment.isProduction
+    ? `${Environment.cdnUrl}/api/music.php`
+    : `${Environment.cdnUrl}/api/music`;
+  const data = await fetchJSON<UploadedMusic[]>(apiUrl, Environment.timeoutMs);
 
   if (!data || !Array.isArray(data) || data.length === 0) {
     return [];

@@ -77,13 +77,12 @@ def check_ffmpeg() -> bool:
 def get_ytdlp_cookies() -> dict:
     """
     Get cookies configuration for yt-dlp.
-    Uses static cookies.txt file for maximum reliability.
+    Uses static cookies.txt file if available.
     """
     if COOKIE_FILE.exists() and COOKIE_FILE.stat().st_size > 100:
         logger.debug(f"Using cookies from: {COOKIE_FILE} ({COOKIE_FILE.stat().st_size} bytes)")
         return {"cookiefile": str(COOKIE_FILE)}
     else:
-        logger.warning("⚠️ cookies.txt not found or too small - YouTube downloads may fail")
         return {}
 
 
@@ -174,6 +173,7 @@ class VideoDownloader:
             "http_chunk_size": 10485760,  # 10MB
             # YouTube optimization
             "concurrent_fragment_downloads": 2,
+            "js_runtimes": {"node": {}},
             # CRITICAL: Static cookies for YouTube authentication
             **get_ytdlp_cookies(),
             # CRITICAL: FFmpeg post-processor for DASH merge
@@ -359,18 +359,16 @@ class VideoDownloader:
         logger.info(f"Extracting info for URL: {url[:50]}...")
 
         def extract():
-            # NO format restriction - get ALL available formats
             opts = {
                 "quiet": True,
                 "no_warnings": True,
                 "extract_flat": False,
                 "noplaylist": True,
-                # Get format list without filtering
                 "format": "all",
-                # FIX #3: Prevent yt-dlp hangs with socket timeout and retries
                 "socket_timeout": 20,
                 "retries": 5,
                 "fragment_retries": 5,
+                "js_runtimes": {"node": {}},
                 **get_ytdlp_cookies(),
             }
 

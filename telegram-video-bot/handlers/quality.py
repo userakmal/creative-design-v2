@@ -63,6 +63,7 @@ async def extract_available_resolutions(url: str) -> List[str]:
             "no_warnings": True,
             "extract_flat": False,
             "noplaylist": True,
+            "js_runtimes": {"node": {}},
             **get_ytdlp_cookies(),
         }
         with yt_dlp.YoutubeDL(opts) as ydl:

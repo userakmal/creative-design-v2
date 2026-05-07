@@ -174,6 +174,8 @@ class VideoDownloader:
             "http_chunk_size": 10485760,  # 10MB
             # YouTube optimization
             "concurrent_fragment_downloads": 2,
+            # Node.js runtime for YouTube JS challenge
+            "js_runtimes": {"node": {}},
             # CRITICAL: Static cookies for YouTube authentication
             **get_ytdlp_cookies(),
             # CRITICAL: FFmpeg post-processor for DASH merge
@@ -371,6 +373,7 @@ class VideoDownloader:
                 "socket_timeout": 20,
                 "retries": 5,
                 "fragment_retries": 5,
+                "js_runtimes": {"node": {}},
                 **get_ytdlp_cookies(),
             }
 
@@ -567,6 +570,7 @@ class VideoDownloader:
             # FIX #3: Prevent yt-dlp hangs with socket timeout and retries
             "socket_timeout": 15,
             "retries": 3,
+            "js_runtimes": {"node": {}},
             "postprocessors": [{
                 "key": "FFmpegExtractAudio",
                 "preferredcodec": "mp3",

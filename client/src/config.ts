@@ -7,6 +7,12 @@
 // CDN Base URL - barcha media fayllar shu yerda saqlanadi
 const CDN_BASE = "https://creative-design.uz";
 
+// Upload server URL - admin panel orqali yuklangan fayllar
+const isProduction = typeof window !== 'undefined' && window.location.hostname === 'creative-design.uz';
+export const UPLOAD_SERVER_URL = isProduction
+  ? 'https://creative-design.uz:3001'
+  : 'http://localhost:3001';
+
 // Helper function to build CDN URLs
 const cdn = (path: string): string => `${CDN_BASE}${path}`;
 

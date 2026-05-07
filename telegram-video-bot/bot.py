@@ -191,9 +191,7 @@ class VideoDownloaderBot:
         from downloader import check_ffmpeg
         check_ffmpeg()
 
-        # Configure bot session with Local API Server for 2GB uploads
-        # CRITICAL: Must use TelegramAPIServer.from_base() for proper local server integration
-        api_server = None
+        # Configure bot session
         if config.bot.TELEGRAM_API_SERVER:
             api_server = TelegramAPIServer.from_base(config.bot.TELEGRAM_API_SERVER)
             max_size_gb = config.downloader.MAX_FILE_SIZE / 1024 / 1024 / 1024
@@ -201,13 +199,10 @@ class VideoDownloaderBot:
                 f"Using Local Bot API Server: {config.bot.TELEGRAM_API_SERVER} "
                 f"(configured for up to {max_size_gb:.1f}GB uploads)"
             )
+            session = AiohttpSession(api=api_server, timeout=600)
         else:
             logger.warning("TELEGRAM_API_SERVER not configured - using standard Telegram API (50MB limit)")
-
-        session = AiohttpSession(
-            api=api_server,
-            timeout=600  # 10 minute timeout for large file uploads
-        )
+            session = AiohttpSession(timeout=600)
 
         self.bot = Bot(
             token=config.bot.TELEGRAM_BOT_TOKEN,
@@ -982,7 +977,10 @@ class VideoDownloaderBot:
         except VideoTooLargeError as e:
             # FIX: Delete animation before showing error
             await self._delete_downloading_animation(task.task_id, chat_id)
-            await self._handle_error(task, status_message, str(e))
+            await self._handle_error(
+                task, status_message,
+                f"{e}\n\n💡 Telegram limiti 50 MB. Qisqaroq video yoki pastroq sifat tanlang."
+            )
 
         except InvalidURLError as e:
             await self._delete_downloading_animation(task.task_id, chat_id)
@@ -1383,59 +1381,30 @@ class VideoDownloaderBot:
         await self.initialize()
 
         # ========================================================================
-        # HARD RESET: Force webhook deletion and cloud logout before local polling
-        # This prevents "silent death" when webhook conflicts with polling
+        # CLEANUP: Use temp standard-API bot to delete webhook and (if local
+        # server mode) log out from cloud so local server can take over.
         # ========================================================================
-        logger.info("=" * 60)
-        logger.info("PERFORMING HARD RESET: Cleaning up Telegram Cloud session...")
-        logger.info("=" * 60)
-
-        # Create a temporary bot instance with STANDARD Telegram API (not local)
-        # to perform webhook deletion and logout on the cloud server
         temp_bot = None
         try:
             from aiogram.client.session.aiohttp import AiohttpSession as StandardSession
-            
-            # Create temporary bot with standard session (no local API server)
             temp_session = StandardSession()
-            temp_bot = Bot(
-                token=config.bot.TELEGRAM_BOT_TOKEN,
-                session=temp_session,
-            )
-            
-            logger.info("Temporary bot instance created for cloud cleanup...")
-            
-            # STEP 1: Force delete webhook with pending updates drop
-            # This is CRITICAL - if webhook is set, polling will silently fail
-            try:
-                await temp_bot.delete_webhook(drop_pending_updates=True)
-                logger.info("✅ Webhook deleted successfully (drop_pending_updates=True)")
-            except Exception as e:
-                logger.warning(f"Webhook deletion returned: {e}")
-            
-            # STEP 2: Logout from Telegram Cloud to release any locked sessions
-            try:
+            temp_bot = Bot(token=config.bot.TELEGRAM_BOT_TOKEN, session=temp_session)
+
+            await temp_bot.delete_webhook(drop_pending_updates=True)
+            logger.info("Webhook deleted (drop_pending_updates=True)")
+
+            if config.bot.TELEGRAM_API_SERVER:
+                logger.info("Local API Server mode — performing cloud logout...")
                 await temp_bot.log_out()
-                logger.info("✅ Logged out from Telegram Cloud successfully")
-            except Exception as e:
-                logger.warning(f"Cloud logout returned: {e}")
-            
-            # STEP 3: Close temporary bot session
-            await temp_bot.session.close()
-            logger.info("✅ Temporary bot session closed")
-            
+                logger.info("Logged out from Telegram Cloud successfully")
         except Exception as e:
-            logger.warning(f"Hard reset encountered error (continuing anyway): {e}")
+            logger.warning(f"Cloud cleanup returned: {e}")
         finally:
             if temp_bot:
                 try:
                     await temp_bot.session.close()
-                except:
+                except Exception:
                     pass
-        
-        logger.info("=" * 60)
-        logger.info("HARD RESET COMPLETE - Now connecting to Local API Server...")
-        logger.info("=" * 60)
 
         # ========================================================================
         # PING LOCAL API SERVER (with retry mechanism)
@@ -1506,13 +1475,6 @@ class VideoDownloaderBot:
         logger.info("Shutting down bot...")
 
         if self.bot:
-            # FIX #2: Wrap log_out in broad try-except to prevent startup halts
-            try:
-                await self.bot.log_out()
-                logger.info("Bot logged out successfully")
-            except Exception as e:
-                logger.warning(f"Bot log_out failed (may already be logged out): {e}")
-            
             try:
                 await self.bot.session.close()
             except Exception as e:

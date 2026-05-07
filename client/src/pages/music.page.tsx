@@ -12,23 +12,54 @@ import {
   Link2,
   MoreHorizontal,
 } from "lucide-react";
-import { config } from "../config";
+import { config, UPLOAD_SERVER_URL } from "../config";
 import type { MusicItem } from "../types";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 export const MusicPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  
+
+  // Uploaded music from server
+  const [uploadedMusic, setUploadedMusic] = useState<MusicItem[]>([]);
+
+  const isProd = window.location.hostname === 'creative-design.uz';
+  const musicApiUrl = isProd ? `${UPLOAD_SERVER_URL}/api/music.php` : `${UPLOAD_SERVER_URL}/api/music`;
+
+  useEffect(() => {
+    fetch(musicApiUrl)
+      .then((res) => res.ok ? res.json() : [])
+      .then((data: any[]) => {
+        const base = isProd ? '' : UPLOAD_SERVER_URL;
+        const mapped: MusicItem[] = data.map((m) => ({
+          id: m.id,
+          title: m.title,
+          author: m.author || "",
+          duration: m.duration,
+          url: `${base}${m.url}`,
+          uploadedAt: m.uploadedAt,
+          size: m.size,
+          isUploaded: true,
+        }));
+        setUploadedMusic(mapped);
+      })
+      .catch(() => {});
+  }, []);
+
+  const configIds = new Set(config.music.map((m) => m.id));
+  const newUploaded = uploadedMusic.filter((m) => !configIds.has(m.id));
+  const allMusic = [...config.music, ...newUploaded];
+
   // Initialize currentTrack from URL parameter if exists
-  const [currentTrack, setCurrentTrack] = useState<MusicItem | null>(() => {
+  const [currentTrack, setCurrentTrack] = useState<MusicItem | null>(null);
+
+  useEffect(() => {
     const trackId = searchParams.get("trackId");
-    if (trackId) {
-      const track = config.music.find((t) => t.id === parseInt(trackId));
-      return track || null;
+    if (trackId && !currentTrack) {
+      const track = allMusic.find((t) => t.id === parseInt(trackId));
+      if (track) setCurrentTrack(track);
     }
-    return null;
-  });
+  }, [allMusic.length, searchParams]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
@@ -77,19 +108,19 @@ export const MusicPage = () => {
 
   const changeTrack = (direction: "next" | "prev") => {
     if (!currentTrack) return;
-    const currentIndex = config.music.findIndex(
+    const currentIndex = allMusic.findIndex(
       (t) => t.id === currentTrack.id
     );
     if (currentIndex === -1) return;
 
     let newIndex;
     if (direction === "next") {
-      newIndex = (currentIndex + 1) % config.music.length;
+      newIndex = (currentIndex + 1) % allMusic.length;
     } else {
-      newIndex = (currentIndex - 1 + config.music.length) % config.music.length;
+      newIndex = (currentIndex - 1 + allMusic.length) % allMusic.length;
     }
 
-    const newTrack = config.music[newIndex];
+    const newTrack = allMusic[newIndex];
     setCurrentTrack(newTrack);
     // Update URL with new track ID for deep linking
     setSearchParams({ trackId: newTrack.id.toString() }, { replace: true });
@@ -346,7 +377,7 @@ export const MusicPage = () => {
 
         {/* TRACK LIST - Refined */}
         <div className="flex flex-col gap-2 relative z-10">
-          {config.music.map((track) => {
+          {allMusic.map((track) => {
             const isActive = currentTrack?.id === track.id;
 
             return (
