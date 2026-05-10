@@ -9,6 +9,7 @@ const CustomPage = React.lazy(() => import("./pages/custom.page").then(m => ({ d
 const VideoDownloaderPage = React.lazy(() => import("./pages/downloader.page").then(m => ({ default: m.VideoDownloaderPage })));
 const AdminPage = React.lazy(() => import("./pages/admin.page").then(m => ({ default: m.AdminPage })));
 const WebsitesPage = React.lazy(() => import("./pages/websites.page").then(m => ({ default: m.WebsitesPage })));
+const OptomGulbozorPage = React.lazy(() => import("./pages/optom-gulbozor.page").then(m => ({ default: m.OptomGulbozorPage })));
 
 const LoadingSpinnerFallback = () => (
   <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: "white" }}>
@@ -90,6 +91,7 @@ export const Routes = () => {
           <Route path="/custom" element={<CustomPage />} />
           <Route path="/video-downloader" element={<VideoDownloaderPage />} />
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/optom_gulbozor" element={<OptomGulbozorPage />} />
         </Switch>
       </Suspense>
     </BrowserRouter>
