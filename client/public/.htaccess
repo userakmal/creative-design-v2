@@ -87,6 +87,9 @@
   # Skip rewrite for media directories and API directory
   RewriteRule ^(videos|image|music|data|assets|logo|api)/ - [L]
 
+  # SPA pages that are also physical directories — force React routing
+  RewriteRule ^optom_gulbozor/?$ /index.html [L]
+
   # SPA catch-all — only for non-file non-directory requests
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
