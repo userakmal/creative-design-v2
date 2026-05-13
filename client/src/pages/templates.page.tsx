@@ -238,9 +238,14 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
     }
   };
 
+  const getVideoShareUrl = () => {
+    if (!selectedVideo) return window.location.href;
+    return `${window.location.origin}${window.location.pathname}?videoId=${selectedVideo.id}`;
+  };
+
   const getTelegramLink = () => {
     if (!selectedVideo) return "#";
-    const message = `Assalomu Alaykum! Men sayt orqali ushbu taklifnoma dizaynini buyurtma qilmoqchiman.\n\n🎬 Dizayn: ${selectedVideo.title}, Havola: ${window.location.href}`;
+    const message = `Assalomu Alaykum! Men sayt orqali ushbu taklifnoma dizaynini buyurtma qilmoqchiman.\n\n🎬 Dizayn: ${selectedVideo.title}, Havola: ${getVideoShareUrl()}`;
     return `https://t.me/+998993955537?text=${encodeURIComponent(message)}`;
   };
 
@@ -252,7 +257,7 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
   const handleCopyLink = async () => {
     if (!selectedVideo) return;
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      await navigator.clipboard.writeText(getVideoShareUrl());
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
     } catch (err) {
@@ -263,7 +268,7 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
   const handleTelegramShare = () => {
     if (!selectedVideo) return;
     const text = `Ajoyib taklifnoma dizayni: ${selectedVideo.title}`;
-    const url = window.location.href;
+    const url = getVideoShareUrl();
     window.open(
       `https://t.me/share/url?url=${encodeURIComponent(
         url
@@ -277,7 +282,7 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
     const shareData = {
       title: selectedVideo.title,
       text: `Taklifnoma dizayni: ${selectedVideo.title} | Creative_designuz`,
-      url: window.location.href,
+      url: getVideoShareUrl(),
     };
     if (navigator.share) {
       try {
