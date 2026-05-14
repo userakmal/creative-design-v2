@@ -351,8 +351,10 @@ $accRound = (int)round((float)$accuracy);
 // Xarita havolalari
 $gmapsLink = "https://www.google.com/maps?q={$lat},{$lon}";
 $ymapsLink = "https://yandex.uz/maps/?ll={$lon},{$lat}&z=17&pt={$lon},{$lat},pm2rdm";
-// Yandex Go (taxi) — pickup avtomatik, manzilni foydalanuvchi tanlaydi
-$yangoLink = "https://yandex.uz/maps/?rtext={$lat},{$lon}~&rtt=taxi";
+// Yandex Go (taxi) — rasmiy deep link: olib ketish (pickup) = shu lokatsiya, manzilni ilovada tanlaysiz
+$yangoLink = "https://3.redirect.appmetrica.yandex.com/route?"
+           . "start-lat={$lat}&start-lon={$lon}"
+           . "&ref=oyim_share&appmetrica_tracking_id=1178268795219780156";
 
 if ($accRound <= 5)       { $accBadge = "🟢 A'lo"; }
 elseif ($accRound <= 15)  { $accBadge = "🟡 Yaxshi"; }
