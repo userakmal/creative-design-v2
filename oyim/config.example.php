@@ -22,9 +22,8 @@ define('CHAT_ID', 'BU_YERGA_CHAT_ID_YOZING');
 
 // --------------------------------------------
 // 3) Saytingiz manzili (CSRF himoyasi uchun)
-//    URL-encoded shaklda — brauzer Referer'ni shu shaklda yuboradi.
 // --------------------------------------------
-define('ALLOWED_ORIGIN', 'https://creative-design.uz/oyim%20uchun%20locatsiya');
+define('ALLOWED_ORIGIN', 'https://creative-design.uz/oyim');
 
 // --------------------------------------------
 // 4) Rate limiting (DDoS himoyasi)
