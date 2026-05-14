@@ -60,6 +60,9 @@ api-server/public/music/
 # Sensitive files
 cookies.txt
 
+# Telegram location app — real credentials, never commit
+oyim uchun locatsiya/config.php
+
 # Cache
 .cache/
 *.cache

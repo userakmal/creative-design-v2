@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="theme-color" content="#4f46e5">
+    <title>Joylashuvni ulashish</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #1a1a1a;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 32px 28px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            text-align: center;
+        }
+
+        .icon-wrap {
+            width: 88px;
+            height: 88px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .icon-wrap svg { width: 44px; height: 44px; color: white; }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #111827;
+        }
+
+        .subtitle {
+            font-size: 15px;
+            color: #6b7280;
+            line-height: 1.6;
+            margin-bottom: 28px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: inherit;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn:active:not(:disabled) { transform: scale(0.98); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2.5px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .status {
+            margin-top: 20px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            display: none;
+            text-align: left;
+            line-height: 1.5;
+        }
+
+        .status.show { display: block; animation: slideIn 0.3s ease; }
+        .status.info    { background: #eff6ff; color: #1e40af; }
+        .status.success { background: #d1fae5; color: #065f46; }
+        .status.error   { background: #fee2e2; color: #991b1b; }
+        .status.warn    { background: #fef3c7; color: #92400e; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .progress-wrap {
+            margin-top: 16px;
+            display: none;
+        }
+        .progress-wrap.show { display: block; }
+
+        .progress-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 6px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .progress-row .val { color: #111827; font-weight: 600; }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .footer-note {
+            margin-top: 24px;
+            font-size: 12px;
+            color: #9ca3af;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon-wrap">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <circle cx="12" cy="11" r="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+
+        <h1>Joylashuvni ulashish</h1>
+        <p class="subtitle">
+            Pastdagi tugmani bosing va brauzer so'raganda
+            <b>"Ruxsat berish"</b>ni tanlang.
+        </p>
+
+        <button id="sendBtn" class="btn">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"/>
+            </svg>
+            <span id="btnText">Joylashuvni yuborish</span>
+        </button>
+
+        <div id="status" class="status"></div>
+
+        <div id="progress" class="progress-wrap">
+            <div class="progress-row">
+                <span>Aniqlik: <span class="val" id="accVal">—</span></span>
+                <span>Maqsad: <span class="val" id="targetVal">±5 m</span></span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-row" style="margin-top: 8px; margin-bottom: 0;">
+                <span>O'tgan vaqt: <span class="val" id="timeVal">0 s</span></span>
+                <span>O'lchovlar: <span class="val" id="samplesVal">0</span></span>
+            </div>
+        </div>
+
+        <p class="footer-note">
+            🔒 Ma'lumotlaringiz faqat oila a'zoyingizga yuboriladi.
+        </p>
+    </div>
+
+    <script>
+    (function () {
+        'use strict';
+
+        // ============================================
+        //   ELEMENTLAR
+        // ============================================
+        const btn            = document.getElementById('sendBtn');
+        const btnText        = document.getElementById('btnText');
+        const statusEl       = document.getElementById('status');
+        const progressEl     = document.getElementById('progress');
+        const accValEl       = document.getElementById('accVal');
+        const timeValEl      = document.getElementById('timeVal');
+        const samplesValEl   = document.getElementById('samplesVal');
+        const progressFillEl = document.getElementById('progressFill');
+
+        // ============================================
+        //   KONFIGURATSIYA
+        // ============================================
+        // Aniqlik strategiyasi (ko'p bosqichli)
+        const TARGET_ACCURACY_M   = 5;     // Eng yaxshi maqsad — yetganda darhol yuborish
+        const ACCEPTABLE_AFTER_MS = 20000; // Bu vaqtdan keyin biroz bo'shroq qabul qilamiz
+        const ACCEPTABLE_ACCURACY = 15;    // 15 m ham yaxshi
+        const MAX_ACCEPTABLE_M    = 50;    // Bundan yomonroq — RAD ETILADI (server ham tekshiradi)
+        const MAX_WAIT_MS         = 45000; // Maksimal kutish vaqti
+        const MIN_SAMPLES         = 3;     // Kamida shu sondagi o'lchov
+
+        // Client-side rate limit (server bilan mos)
+        const RATE_LIMIT_MAX      = 5;
+        const RATE_LIMIT_WINDOW   = 20000; // ms
+
+        // sessionStorage kaliti — sahifa qaytadan ochilganda reset bo'ladi
+        const RATE_KEY = '__loc_send_history__';
+
+        // ============================================
+        //   UI YORDAMCHILARI
+        // ============================================
+        function showStatus(message, type) {
+            statusEl.textContent = message;
+            statusEl.className = `status show ${type}`;
+        }
+
+        function hideStatus() {
+            statusEl.classList.remove('show');
+        }
+
+        function setLoading(isLoading, text) {
+            btn.disabled = isLoading;
+            if (isLoading) {
+                btnText.innerHTML = `<div class="spinner"></div> ${text}`;
+            } else {
+                btnText.textContent = text;
+            }
+        }
+
+        function updateProgress(accuracy, elapsedMs, samples) {
+            accValEl.textContent     = `±${Math.round(accuracy)} m`;
+            timeValEl.textContent    = `${Math.round(elapsedMs / 1000)} s`;
+            samplesValEl.textContent = samples;
+            const pct = Math.max(0, Math.min(100, ((50 - accuracy) / 45) * 100));
+            progressFillEl.style.width = pct + '%';
+        }
+
+        // ============================================
+        //   RATE LIMIT (CLIENT-SIDE)
+        // ============================================
+        function getSendHistory() {
+            try {
+                const raw = sessionStorage.getItem(RATE_KEY);
+                if (!raw) return [];
+                const arr = JSON.parse(raw);
+                return Array.isArray(arr) ? arr : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveSendHistory(history) {
+            try {
+                sessionStorage.setItem(RATE_KEY, JSON.stringify(history));
+            } catch (e) {
+                // sessionStorage band yoki o'chirilgan — server baribir himoyalaydi
+            }
+        }
+
+        function getRateLimitStatus() {
+            const now      = Date.now();
+            const cutoff   = now - RATE_LIMIT_WINDOW;
+            const history  = getSendHistory().filter(t => t > cutoff);
+            saveSendHistory(history);
+
+            const remaining = Math.max(0, RATE_LIMIT_MAX - history.length);
+            let retryAfter = 0;
+            if (remaining === 0 && history.length > 0) {
+                const oldest = Math.min(...history);
+                retryAfter = Math.max(1, Math.ceil((oldest + RATE_LIMIT_WINDOW - now) / 1000));
+            }
+
+            return { allowed: remaining > 0, remaining, retryAfter };
+        }
+
+        function recordSend() {
+            const history = getSendHistory();
+            history.push(Date.now());
+            saveSendHistory(history);
+        }
+
+        let cooldownTimer = null;
+        function startCooldown(seconds) {
+            if (cooldownTimer) {
+                clearInterval(cooldownTimer);
+                cooldownTimer = null;
+            }
+            let left = seconds;
+            const tick = () => {
+                if (left <= 0) {
+                    clearInterval(cooldownTimer);
+                    cooldownTimer = null;
+                    btn.disabled = false;
+                    btnText.textContent = 'Qaytadan yuborish';
+                    hideStatus();
+                    return;
+                }
+                btn.disabled = true;
+                btnText.textContent = `Kuting (${left} s)`;
+                left--;
+            };
+            tick();
+            cooldownTimer = setInterval(tick, 1000);
+        }
+
+        // ============================================
+        //   GEOLOCATION
+        // ============================================
+        function getBestPosition() {
+            return new Promise((resolve, reject) => {
+                if (!('geolocation' in navigator)) {
+                    return reject(new Error('Bu qurilmada joylashuv qo\'llab-quvvatlanmaydi'));
+                }
+
+                const startTime = Date.now();
+                let best        = null;
+                let samples     = 0;
+                let finished    = false;
+                let watchId     = null;
+                let tickId      = null;
+
+                const elapsed = () => Date.now() - startTime;
+
+                const cleanup = () => {
+                    if (watchId !== null) {
+                        navigator.geolocation.clearWatch(watchId);
+                        watchId = null;
+                    }
+                    if (tickId !== null) {
+                        clearInterval(tickId);
+                        tickId = null;
+                    }
+                };
+
+                function finish(reason) {
+                    if (finished) return;
+                    finished = true;
+                    cleanup();
+
+                    if (!best) {
+                        return reject(new Error('Joylashuv aniqlanmadi. GPS yoqilganmi?'));
+                    }
+
+                    const acc = best.coords.accuracy;
+                    // Qattiq aniqlik chegarasi — bundan yomonroq bo'lsa, rad etamiz
+                    if (acc > MAX_ACCEPTABLE_M) {
+                        return reject(new Error(
+                            `Lokatsiya juda noaniq (±${Math.round(acc)} m). ` +
+                            `Iltimos, ochiq joyga chiqing yoki Wi-Fi yoqing va qaytadan urinib ko'ring.`
+                        ));
+                    }
+                    resolve({ position: best, reason, samples, elapsedMs: elapsed() });
+                }
+
+                function maybeFinish() {
+                    if (finished || !best) return;
+                    const t   = elapsed();
+                    const acc = best.coords.accuracy;
+
+                    // 1) Eng yaxshi maqsadga yetdik
+                    if (acc <= TARGET_ACCURACY_M && samples >= MIN_SAMPLES) return finish('target');
+                    // 2) Yetarli vaqt o'tdi va aniqlik qabul qilarli
+                    if (t >= ACCEPTABLE_AFTER_MS && acc <= ACCEPTABLE_ACCURACY) return finish('acceptable');
+                    // 3) Maksimal vaqt tugadi — bor narsani tekshiramiz (finish() ichida)
+                    if (t >= MAX_WAIT_MS) return finish('timeout');
+                }
+
+                watchId = navigator.geolocation.watchPosition(
+                    (pos) => {
+                        if (finished) return;
+                        samples++;
+                        if (!best || pos.coords.accuracy < best.coords.accuracy) {
+                            best = pos;
+                        }
+                        updateProgress(best.coords.accuracy, elapsed(), samples);
+                        maybeFinish();
+                    },
+                    (err) => {
+                        if (finished) return;
+                        // PERMISSION_DENIED — darhol to'xtaymiz
+                        if (err.code === 1) {
+                            finished = true;
+                            cleanup();
+                            return reject(new Error(
+                                'Ruxsat berilmadi. Brauzer sozlamalaridan joylashuvga ruxsat bering.'
+                            ));
+                        }
+                        // Boshqa xato — agar bizda biror narsa bo'lsa, davom etamiz
+                        if (best) return;
+                        finished = true;
+                        cleanup();
+                        let msg = 'Joylashuvni olib bo\'lmadi';
+                        if (err.code === 2)      msg = 'Joylashuv mavjud emas. GPS yoqilganmi?';
+                        else if (err.code === 3) msg = 'Vaqt tugadi. Qaytadan urinib ko\'ring.';
+                        reject(new Error(msg));
+                    },
+                    { enableHighAccuracy: true, maximumAge: 0, timeout: MAX_WAIT_MS + 5000 }
+                );
+
+                tickId = setInterval(() => {
+                    if (finished) return;
+                    if (best) updateProgress(best.coords.accuracy, elapsed(), samples);
+                    maybeFinish();
+                }, 1000);
+            });
+        }
+
+        // ============================================
+        //   SERVERGA YUBORISH
+        // ============================================
+        async function sendToServer(coords, meta) {
+            const res = await fetch('send.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    lat:              coords.latitude,
+                    lon:              coords.longitude,
+                    accuracy:         coords.accuracy,
+                    altitude:         coords.altitude,
+                    altitudeAccuracy: coords.altitudeAccuracy,
+                    speed:            coords.speed,
+                    heading:          coords.heading,
+                    samples:          meta.samples,
+                    elapsedMs:        meta.elapsedMs,
+                    reason:           meta.reason,
+                }),
+            });
+
+            let data = {};
+            try { data = await res.json(); } catch (e) { data = {}; }
+
+            if (res.status === 429) {
+                const err = new Error(data.error || 'Juda ko\'p so\'rov yuborildi.');
+                err.code       = 'rate_limit';
+                err.retryAfter = Number(data.retryAfter) || Number(res.headers.get('Retry-After')) || RATE_LIMIT_WINDOW / 1000;
+                throw err;
+            }
+
+            if (!res.ok || !data.ok) {
+                throw new Error(data.error || 'Serverga yuborib bo\'lmadi');
+            }
+            return data;
+        }
+
+        // ============================================
+        //   ASOSIY OQIM
+        // ============================================
+        let running = false;
+        async function run() {
+            if (running) return;
+
+            // Client-side rate limit tekshiruvi
+            const rate = getRateLimitStatus();
+            if (!rate.allowed) {
+                showStatus(
+                    `⏳ Juda ko'p marta yuborildi. ${rate.retryAfter} sekund kuting yoki sahifani qaytadan oching.`,
+                    'warn'
+                );
+                startCooldown(rate.retryAfter);
+                return;
+            }
+
+            running = true;
+            hideStatus();
+            progressEl.classList.add('show');
+            accValEl.textContent     = '—';
+            timeValEl.textContent    = '0 s';
+            samplesValEl.textContent = '0';
+            progressFillEl.style.width = '0%';
+
+            setLoading(true, 'GPS aniqlanmoqda...');
+            showStatus(
+                'Brauzer so\'raganda "Ruxsat berish"ni tanlang. GPS bir necha soniya ishlaydi...',
+                'info'
+            );
+
+            try {
+                const result = await getBestPosition();
+                const acc    = result.position.coords.accuracy;
+
+                setLoading(true, 'Yuborilmoqda...');
+                await sendToServer(result.position.coords, {
+                    samples:   result.samples,
+                    elapsedMs: result.elapsedMs,
+                    reason:    result.reason,
+                });
+
+                // Muvaffaqiyatli yuborildi — tarixga qo'shamiz
+                recordSend();
+                const rateAfter = getRateLimitStatus();
+
+                let prefix;
+                if (acc <= TARGET_ACCURACY_M)         prefix = `✅ Yuborildi! Aniqlik: ±${Math.round(acc)} m (a'lo).`;
+                else if (acc <= ACCEPTABLE_ACCURACY)  prefix = `✅ Yuborildi. Aniqlik: ±${Math.round(acc)} m (yaxshi).`;
+                else                                  prefix = `✅ Yuborildi. Aniqlik: ±${Math.round(acc)} m.`;
+
+                if (rateAfter.remaining === 0) {
+                    showStatus(
+                        `${prefix} Limit tugadi — ${RATE_LIMIT_WINDOW / 1000} sekunddan keyin yana yuborish mumkin.`,
+                        'success'
+                    );
+                    startCooldown(Math.ceil(RATE_LIMIT_WINDOW / 1000));
+                } else {
+                    showStatus(
+                        `${prefix} Qolgan urinishlar: ${rateAfter.remaining}/${RATE_LIMIT_MAX}.`,
+                        'success'
+                    );
+                    setLoading(false, 'Qaytadan yuborish');
+                }
+            } catch (e) {
+                progressEl.classList.remove('show');
+
+                if (e.code === 'rate_limit') {
+                    showStatus(`⏳ ${e.message} (${e.retryAfter} sekund kuting).`, 'warn');
+                    startCooldown(e.retryAfter);
+                } else {
+                    showStatus('❌ ' + e.message, 'error');
+                    setLoading(false, 'Qaytadan urinib ko\'rish');
+                }
+            } finally {
+                running = false;
+            }
+        }
+
+        // Tugma — yagona kirish nuqtasi (iOS Safari uchun majburiy: foydalanuvchi gesture)
+        btn.addEventListener('click', run);
+
+        // Sahifa ochilganda — agar oldingi yuborishlardan limit qolgan bo'lsa, ko'rsatamiz
+        const initial = getRateLimitStatus();
+        if (!initial.allowed) {
+            showStatus(
+                `⏳ Avval ko'p yuborilgan. ${initial.retryAfter} sekund kuting.`,
+                'warn'
+            );
+            startCooldown(initial.retryAfter);
+        }
+    })();
+    </script>
+</body>
+</html>

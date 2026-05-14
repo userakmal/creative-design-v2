@@ -1,0 +1,8 @@
+# Log papkasini internetdan to'liq yashirish
+Order allow,deny
+Deny from all
+
+# Apache 2.4+ uchun
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>

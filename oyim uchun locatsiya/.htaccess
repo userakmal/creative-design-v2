@@ -1,0 +1,60 @@
+# ============================================
+#   config.php — internetdan to'liq yashirish
+# ============================================
+<Files "config.php">
+    Order allow,deny
+    Deny from all
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</Files>
+
+# ============================================
+#   .htaccess fayllarini yashirish
+# ============================================
+<Files ".htaccess">
+    Order allow,deny
+    Deny from all
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</Files>
+
+# ============================================
+#   Maxfiy fayl turlari (log, json — fail-safe)
+# ============================================
+<FilesMatch "\.(log|sqlite|sqlite3|env|ini|bak|backup)$">
+    Order allow,deny
+    Deny from all
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</FilesMatch>
+
+# ============================================
+#   logs/ papkasiga kirishni bloklash (qo'shimcha himoya)
+# ============================================
+RewriteEngine On
+RewriteRule ^logs(/.*)?$ - [F,L]
+
+# ============================================
+#   HTTPS majburiy
+# ============================================
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# ============================================
+#   Xavfsizlik header'lari
+# ============================================
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "DENY"
+    Header set Referrer-Policy "no-referrer"
+    Header set Permissions-Policy "geolocation=(self)"
+    Header set Strict-Transport-Security "max-age=31536000; includeSubDomains" env=HTTPS
+</IfModule>
+
+# ============================================
+#   Asosiy sahifa
+# ============================================
+DirectoryIndex index.html
