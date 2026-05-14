@@ -28,8 +28,8 @@ jobs:
       - name: Assemble deploy directory
         run: |
           mkdir -p deploy
-          # React build (index.html, assets/, etc.)
-          cp -a client/dist/. deploy/
+          # React build lands in ./dist (vite.config: outDir = '../dist').
+          cp -a dist/. deploy/
           # PHP backend (api/, .htaccess) — but skip data/*.json and the
           # empty media dirs; those live on the server and must not be
           # clobbered. The data/.htaccess (block-direct-access) IS kept.
