@@ -1,28 +1,20 @@
 {
   "name": "creative-design-platform",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "private": true,
   "type": "module",
-  "description": "Creative Design Platform - Video Templates, Music & Universal Video Downloader",
+  "description": "Creative Design Platform - PHP backend + React frontend",
   "workspaces": [
-    "api-server",
     "client"
   ],
   "scripts": {
-    "install:all": "npm install && cd api-server && npm install",
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\" --names \"SERVER,CLIENT\" --prefix-colors \"green,blue\"",
-    "dev:server": "cd api-server && npm start",
-    "dev:client": "cd client && npm run dev",
+    "install:all": "cd client && npm install",
+    "dev": "cd client && npm run dev",
     "dev:video": "cd api-server/video-downloader && python api_enhanced.py",
     "build": "cd client && npm run build",
     "preview": "cd client && npm run preview",
-    "server": "cd api-server && npm start",
-    "client": "cd client && npm run dev",
     "lint": "cd client && npm run lint",
-    "clean": "rimraf node_modules api-server/node_modules client/node_modules client/dist dist"
-  },
-  "devDependencies": {
-    "concurrently": "^9.2.1"
+    "clean": "rimraf node_modules client/node_modules client/dist dist"
   },
   "engines": {
     "node": ">=18.0.0",

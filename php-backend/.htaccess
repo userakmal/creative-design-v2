@@ -1,0 +1,39 @@
+# ============================================================================
+# Site-root .htaccess
+# Serves the built React SPA + lets /api/*.php run normally.
+# ============================================================================
+
+# Don't expose Apache/PHP versions in headers.
+ServerSignature Off
+
+# UTF-8 by default.
+AddDefaultCharset UTF-8
+
+# Cache static media for 30 days.
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType video/mp4   "access plus 30 days"
+    ExpiresByType image/jpeg  "access plus 30 days"
+    ExpiresByType image/png   "access plus 30 days"
+    ExpiresByType image/webp  "access plus 30 days"
+    ExpiresByType audio/mpeg  "access plus 30 days"
+    ExpiresByType audio/mp4   "access plus 30 days"
+</IfModule>
+
+# Force correct mime types so the browser plays the files inline.
+<IfModule mod_mime.c>
+    AddType video/mp4   .mp4
+    AddType video/webm  .webm
+    AddType audio/mpeg  .mp3
+    AddType audio/mp4   .m4a
+</IfModule>
+
+# SPA fallback: every non-file/non-folder request returns index.html
+# so React Router can handle the path. /api/*.php is excluded because
+# those files exist on disk and won't match RewriteCond !-f.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.html [L]
+</IfModule>

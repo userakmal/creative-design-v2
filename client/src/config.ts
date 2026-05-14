@@ -8,9 +8,11 @@
 const CDN_BASE = "https://creative-design.uz";
 
 // Upload server URL - admin panel orqali yuklangan fayllar
+// PROD: PHP backend at creative-design.uz/api/*.php (same origin, port 443)
+// DEV : local Node.js Express server on :3001
 const isProduction = typeof window !== 'undefined' && window.location.hostname === 'creative-design.uz';
 export const UPLOAD_SERVER_URL = isProduction
-  ? 'https://creative-design.uz:3001'
+  ? 'https://creative-design.uz'
   : 'http://localhost:3001';
 
 // Helper function to build CDN URLs

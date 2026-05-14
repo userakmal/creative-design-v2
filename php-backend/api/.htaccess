@@ -1,0 +1,35 @@
+# ============================================================================
+# /api/.htaccess
+# Increase upload limits and lock down direct access to internal files.
+# Most shared hosts (sayt.uz, Beget, Hostinger, etc.) honor these.
+# If your host blocks php_value, set the same values in php.ini via cPanel.
+# ============================================================================
+
+<IfModule mod_php.c>
+    php_value upload_max_filesize 200M
+    php_value post_max_size       210M
+    php_value memory_limit        256M
+    php_value max_execution_time  300
+    php_value max_input_time      300
+</IfModule>
+
+<IfModule mod_php7.c>
+    php_value upload_max_filesize 200M
+    php_value post_max_size       210M
+    php_value memory_limit        256M
+    php_value max_execution_time  300
+    php_value max_input_time      300
+</IfModule>
+
+<IfModule mod_php8.c>
+    php_value upload_max_filesize 200M
+    php_value post_max_size       210M
+    php_value memory_limit        256M
+    php_value max_execution_time  300
+    php_value max_input_time      300
+</IfModule>
+
+# Files starting with "_" are internal — never serve them directly.
+<FilesMatch "^_">
+    Require all denied
+</FilesMatch>

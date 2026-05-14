@@ -1,69 +1,35 @@
 # Creative Design Platform
 
-Video templates platform with admin dashboard and universal video downloader.
+Video templates platform with admin dashboard.
+React frontend + PHP backend on shared hosting.
 
-## 🚀 Quick Start
+## Architecture
 
-### Start Everything
+- **Frontend** — React + Vite (`client/`). Build artifacts deploy to hosting `public_html/`.
+- **Backend** — Plain PHP 8 on shared hosting (`php-backend/`). No Node, no DB. JSON file storage.
+- **Video downloader** (optional) — Python FastAPI under `api-server/video-downloader/`.
+  Does NOT run on shared hosting; deploy to a VPS or skip.
+
+## Local development
 
 ```bash
-start-all.bat
+npm install --prefix client
+npm run dev          # React on http://localhost:5173
 ```
 
-That's it! This will:
-- ✅ Start Upload Server (Express) - Port 3001
-- ✅ Start Client (React + Vite) - Port 5173
-- ✅ Start Video Downloader (FastAPI) - Port 8000
-- ✅ Open browser automatically
+The admin panel and templates page detect the host and use the right backend:
+- On `localhost` → expects Node upload server on `:3001` (removed; restore from git
+  history if you need local upload testing).
+- On `creative-design.uz` → calls `/api/*.php`.
 
-## 🌐 Access Points
+## Deploy
 
-- **Main App**: http://localhost:5173
-- **Video Downloader**: http://localhost:5173/video-downloader
-- **Admin Panel**: http://localhost:5173/admin
-- **Video API Docs**: http://localhost:8000/api/docs
+See `php-backend/DEPLOY.md` for the full hosting setup.
 
-## 🏗️ Project Structure
-
-```
-creative-design-main/
-├── api-server/                 # BACKEND
-│   ├── upload-server.js        # Express API
-│   ├── public/                 # Uploaded files
-│   └── video-downloader/       # Python FastAPI
-│
-├── client/                     # FRONTEND
-│   ├── src/                    # UI code
-│   └── vite.config.ts
-│
-├── scripts/                    # Utility scripts
-│
-├── telegram-video-bot/         # Telegram bot (optional)
-├── start-all.bat               # ✅ Start everything
-├── package.json
-└── README.md
-```
-
-## 📋 Prerequisites
-
-- **Node.js 18+**
-- **Python 3.10+**
-- **FFmpeg** (for video processing)
-
-## 🎯 Supported Video Platforms
-
-✅ YouTube, Instagram, TikTok, Twitter/X, Facebook, Vimeo + 1000 more
-
-## 📝 Environment
-
-### api-server/.env
-```env
-PORT=3001
-ADMIN_PASSWORD=creative2026
-```
-
-### api-server/video-downloader/.env
-```env
-PORT=8000
-DOWNLOAD_DIR=downloads
-```
+Short version:
+1. `npm run build` → produces `client/dist/`
+2. Upload `client/dist/*` contents to hosting `public_html/`
+3. Upload `php-backend/*` contents to hosting `public_html/`
+4. Set CHMOD 0775 on `videos/`, `image/`, `music/`, `data/`
+5. Change `ADMIN_PASSWORD` in `api/_bootstrap.php`
+6. Visit `https://creative-design.uz/api/health.php` to verify

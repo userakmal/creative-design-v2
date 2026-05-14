@@ -1,0 +1,3 @@
+# Block direct browser access to JSON storage files.
+# Frontend reads them via /api/videos.php and /api/music.php only.
+Require all denied
