@@ -30,6 +30,18 @@ jobs:
       # into dist/ during the build, so the single dist/ directory contains
       # everything that needs to ship — React SPA + PHP backend.
 
+      # Hosting is nginx-fronted and doesn't honor .htaccess SPA fallback,
+      # so deep links like /admin would 404. Materialise an index.html for
+      # each React route so direct URL access serves the SPA shell and the
+      # router takes over client-side. /music isn't listed because that
+      # path is also the media folder for uploaded music files.
+      - name: Generate per-route index.html for SPA deep links
+        run: |
+          for route in admin templates popular websites custom video-downloader; do
+            mkdir -p "dist/$route"
+            cp dist/index.html "dist/$route/index.html"
+          done
+
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
