@@ -1,92 +1,40 @@
 <?php
-// Ushbu skript saytning online (jonli) serverida (FTP orqali) ishlashi uchun mo'ljallangan
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
+// ============================================================================
+// /api/upload.php  — Video + thumbnail upload (admin only).
+// Multipart form fields: video, image, title, password
+// ============================================================================
+require __DIR__ . '/_bootstrap.php';
+require_method('POST');
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode(["error" => "Ruxsat etilmagan metod. Faqat POST qabul qilinadi."]);
-    exit;
+check_password($_POST['password'] ?? null);
+
+if (empty($_FILES['video']['name']) || empty($_FILES['image']['name'])) {
+    send_error('Video va rasm fayllarini yuklang', 400);
 }
 
-// Ixtiyoriy parolni tekshirish (frontend-dan jo'natilganmi?)
-$password = isset($_POST['password']) ? $_POST['password'] : '';
-if ($password !== 'creative2026') {
-    echo json_encode(["error" => "Parol noto'g'ri yoki ruxsat yo'q"]);
-    exit;
-}
+$title = trim((string)($_POST['title'] ?? ''));
 
-$title = isset($_POST['title']) ? $_POST['title'] : 'Yangi video';
+$videoUrl = move_upload($_FILES['video'], 'video', VIDEO_DIR, VIDEO_URL_PREFIX);
+$imageUrl = move_upload($_FILES['image'], 'image', IMAGE_DIR, IMAGE_URL_PREFIX);
 
-// Papkalar (dist ichidagi public -> root hisobida)
-// Upload.php qayerda turadi? /api/upload.php da.
-// Videolar esa /videos/ va rasmlar /image/ da.
-$videoDir = '../videos/';
-$imageDir = '../image/';
-$dataDir = '../data/';
-$dataFile = $dataDir . 'videos.json';
+$videos = read_json(VIDEOS_JSON);
+$id     = next_id($videos);
 
-// Papkalar yo'q bo'lsa yaratamiz
-if (!file_exists($videoDir)) mkdir($videoDir, 0777, true);
-if (!file_exists($imageDir)) mkdir($imageDir, 0777, true);
-if (!file_exists($dataDir)) mkdir($dataDir, 0777, true);
+$newVideo = [
+    'id'         => $id,
+    'title'      => $title !== '' ? $title : "Dizayn $id",
+    'image'      => $imageUrl,
+    'videoUrl'   => $videoUrl,
+    'uploadedAt' => date('c'),
+    'size'       => format_size((int)$_FILES['video']['size'] + (int)$_FILES['image']['size']),
+];
 
-if (!isset($_FILES['video']) || !isset($_FILES['image'])) {
-    echo json_encode(["error" => "Iltimos, video va rasmni to'liq yuklang."]);
-    exit;
-}
+$videos[] = $newVideo;
+write_json(VIDEOS_JSON, $videos);
 
-$vidExt = strtolower(pathinfo($_FILES['video']['name'], PATHINFO_EXTENSION));
-$imgExt = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
-
-// Xavfsizlik: faqat ruxsat etilgan formatlar
-$allowedVids = ['mp4', 'mov', 'webm'];
-$allowedImgs = ['jpg', 'jpeg', 'png', 'webp'];
-
-if (!in_array($vidExt, $allowedVids) || !in_array($imgExt, $allowedImgs)) {
-    echo json_encode(["error" => "Fayl formati noto'g'ri. (Faqat mp4, mov, jpg, png)"]);
-    exit;
-}
-
-$unique = date("U") . rand(1000, 9999);
-$vidName = "v_" . $unique . "." . $vidExt;
-$imgName = "i_" . $unique . "." . $imgExt;
-
-if (move_uploaded_file($_FILES['video']['tmp_name'], $videoDir . $vidName) &&
-    move_uploaded_file($_FILES['image']['tmp_name'], $imageDir . $imgName)) {
-
-    $videoUrl = "/videos/" . $vidName;
-    $imageUrl = "/image/" . $imgName;
-
-    // JSON dan o'qish
-    $videos = [];
-    if (file_exists($dataFile)) {
-        $content = file_get_contents($dataFile);
-        $decoded = json_decode($content, true);
-        if (is_array($decoded)) {
-            $videos = $decoded;
-        }
-    }
-
-    $maxId = 48; // Asosiy configdagi oxirgi ID
-    foreach ($videos as $v) {
-        if (isset($v['id']) && $v['id'] > $maxId) {
-            $maxId = $v['id'];
-        }
-    }
-    $newId = $maxId + 1;
-
-    $newVideo = [
-        "id" => $newId,
-        "title" => $title,
-        "image" => $imageUrl,
-        "videoUrl" => $videoUrl
-    ];
-
-    $videos[] = $newVideo;
-    file_put_contents($dataFile, json_encode($videos, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-
-    echo json_encode(["success" => true, "message" => "Video muvaffaqiyatli saqlandi!", "data" => $newVideo]);
-} else {
-    echo json_encode(["error" => "Serverga faylni saqlashda xatolik yuz berdi. Papkani yozishga ruxsati bormi (chmod 777)?"]);
-}
-?>
+send_json([
+    'success'     => true,
+    'message'     => '"' . $newVideo['title'] . '" muvaffaqiyatli yuklandi!',
+    'data'        => $newVideo,
+    'totalVideos' => count($videos),
+]);

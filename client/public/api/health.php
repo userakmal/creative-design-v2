@@ -1,23 +1,16 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
+require __DIR__ . '/_bootstrap.php';
+require_method('GET');
 
-$dataDir = '../data/';
-$videosFile = $dataDir . 'videos.json';
-$musicFile = $dataDir . 'music.json';
+$videos = read_json(VIDEOS_JSON);
+$music  = read_json(MUSIC_JSON);
 
-$videos = file_exists($videosFile) ? json_decode(file_get_contents($videosFile), true) : [];
-$music = file_exists($musicFile) ? json_decode(file_get_contents($musicFile), true) : [];
-if (!is_array($videos)) $videos = [];
-if (!is_array($music)) $music = [];
-
-echo json_encode([
-    'status' => 'ok',
-    'message' => 'Server ishlamoqda',
-    'stats' => [
+send_json([
+    'status'  => 'ok',
+    'message' => 'PHP upload server ishlamoqda',
+    'stats'   => [
         'videos' => count($videos),
-        'music' => count($music),
+        'music'  => count($music),
     ],
+    'php'     => PHP_VERSION,
 ]);

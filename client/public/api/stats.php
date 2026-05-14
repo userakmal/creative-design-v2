@@ -1,36 +1,38 @@
 <?php
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
+require __DIR__ . '/_bootstrap.php';
+require_method('GET');
 
-$dataDir = '../data/';
-$videosFile = $dataDir . 'videos.json';
-$musicFile = $dataDir . 'music.json';
+$videos = read_json(VIDEOS_JSON);
+$music  = read_json(MUSIC_JSON);
 
-$videos = file_exists($videosFile) ? json_decode(file_get_contents($videosFile), true) : [];
-$music = file_exists($musicFile) ? json_decode(file_get_contents($musicFile), true) : [];
-if (!is_array($videos)) $videos = [];
-if (!is_array($music)) $music = [];
-
-// Calculate disk usage
 $totalSize = 0;
-$dirs = ['../videos', '../image', '../music'];
-foreach ($dirs as $dir) {
-    if (is_dir($dir)) {
-        foreach (scandir($dir) as $f) {
-            if ($f === '.' || $f === '..') continue;
-            $totalSize += filesize($dir . '/' . $f);
+$countDir = function (string $dir) use (&$totalSize): int {
+    if (!is_dir($dir)) return 0;
+    $count = 0;
+    foreach (scandir($dir) ?: [] as $f) {
+        if ($f === '.' || $f === '..') continue;
+        $full = $dir . '/' . $f;
+        if (is_file($full)) {
+            $totalSize += filesize($full) ?: 0;
+            $count++;
         }
     }
-}
+    return $count;
+};
 
-$diskUsage = $totalSize < 1024 * 1024
-    ? round($totalSize / 1024, 1) . ' KB'
-    : round($totalSize / (1024 * 1024), 1) . ' MB';
+$videoFiles = $countDir(VIDEO_DIR);
+$imageFiles = $countDir(IMAGE_DIR);
+$musicFiles = $countDir(MUSIC_DIR);
 
-echo json_encode([
+send_json([
     'videos' => count($videos),
-    'music' => count($music),
-    'diskUsage' => $diskUsage,
-    'lastVideoUpload' => count($videos) > 0 ? end($videos)['title'] : null,
-    'lastMusicUpload' => count($music) > 0 ? end($music)['title'] : null,
+    'music'  => count($music),
+    'files'  => [
+        'videos' => $videoFiles,
+        'images' => $imageFiles,
+        'music'  => $musicFiles,
+    ],
+    'diskUsage'       => format_size($totalSize),
+    'lastVideoUpload' => !empty($videos) ? end($videos)['title'] : null,
+    'lastMusicUpload' => !empty($music)  ? end($music)['title']  : null,
 ]);

@@ -25,21 +25,10 @@ jobs:
       - name: Build React app
         run: cd client && npm run build
 
-      - name: Assemble deploy directory
-        run: |
-          mkdir -p deploy
-          # React build lands in ./dist (vite.config: outDir = '../dist').
-          cp -a dist/. deploy/
-          # PHP backend (api/, .htaccess) — but skip data/*.json and the
-          # empty media dirs; those live on the server and must not be
-          # clobbered. The data/.htaccess (block-direct-access) IS kept.
-          cp -a php-backend/api      deploy/api
-          cp -a php-backend/.htaccess deploy/.htaccess
-          mkdir -p deploy/data
-          cp -a php-backend/data/.htaccess deploy/data/.htaccess
-          # Strip non-runtime artefacts that shouldn't ship.
-          rm -f deploy/DEPLOY.md
-          ls -la deploy/
+      # Vite outputs to ./dist (see client/vite.config.ts → build.outDir).
+      # client/public/* (including api/*.php, .htaccess, data/) is copied
+      # into dist/ during the build, so the single dist/ directory contains
+      # everything that needs to ship — React SPA + PHP backend.
 
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -47,9 +36,9 @@ jobs:
           server: 31.184.242.14
           username: gihub-deploy
           password: ${{ secrets.FTP_PASSWORD || 'gM9aH7jD3c' }}
-          local-dir: ./deploy/
+          local-dir: ./dist/
           server-dir: /
-          # Never touch uploaded media or live JSON data on the server.
+          # Preserve uploaded media + live JSON data on the server.
           exclude: |
             **/.git*
             **/.git*/**

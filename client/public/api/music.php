@@ -1,85 +1,57 @@
 <?php
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, DELETE, PUT, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+// ============================================================================
+// /api/music.php
+//   GET            → list all music
+//   DELETE ?id=NNN → delete a track
+//   PUT    ?id=NNN → rename (body: { title, author })
+// ============================================================================
+require __DIR__ . '/_bootstrap.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+
+if ($method === 'GET') {
+    send_json(read_json(MUSIC_JSON));
 }
 
-$dataDir = '../data/';
-$dataFile = $dataDir . 'music.json';
-
-if (!file_exists($dataDir)) mkdir($dataDir, 0777, true);
-if (!file_exists($dataFile)) file_put_contents($dataFile, '[]');
-
-$music = json_decode(file_get_contents($dataFile), true);
-if (!is_array($music)) $music = [];
-
-// GET
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    echo json_encode($music);
-    exit;
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+if ($id <= 0) {
+    send_error('id parametri talab qilinadi', 400);
 }
 
-// DELETE /api/music.php?id=123
-if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
-    $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-    if (!$id) {
-        http_response_code(400);
-        echo json_encode(['error' => 'ID kerak']);
-        exit;
-    }
+$list  = read_json(MUSIC_JSON);
+$index = null;
+foreach ($list as $i => $m) {
+    if ((int)($m['id'] ?? 0) === $id) { $index = $i; break; }
+}
+if ($index === null) {
+    send_error('Musiqa topilmadi', 404);
+}
 
-    $index = null;
-    foreach ($music as $i => $m) {
-        if (isset($m['id']) && $m['id'] === $id) {
-            $index = $i;
-            break;
-        }
-    }
-
-    if ($index === null) {
-        http_response_code(404);
-        echo json_encode(['error' => 'Musiqa topilmadi']);
-        exit;
-    }
-
-    $track = $music[$index];
-    if (!empty($track['url'])) {
-        $fPath = '..' . $track['url'];
-        if (file_exists($fPath)) unlink($fPath);
-    }
-
-    array_splice($music, $index, 1);
-    file_put_contents($dataFile, json_encode(array_values($music), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-
-    echo json_encode([
-        'success' => true,
-        'message' => '"' . ($track['title'] ?? '') . '" o\'chirildi',
-        'deletedId' => $id,
-        'totalMusic' => count($music),
+if ($method === 'DELETE') {
+    $music = $list[$index];
+    delete_public_file($music['url'] ?? null);
+    array_splice($list, $index, 1);
+    write_json(MUSIC_JSON, $list);
+    send_json([
+        'success'    => true,
+        'message'    => '"' . ($music['title'] ?? '') . '" ochirildi',
+        'deletedId'  => $id,
+        'totalMusic' => count($list),
     ]);
-    exit;
 }
 
-// PUT /api/music.php?id=123
-if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
-    $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-    $body = json_decode(file_get_contents('php://input'), true);
-
-    foreach ($music as &$m) {
-        if (isset($m['id']) && $m['id'] === $id) {
-            if (!empty($body['title'])) $m['title'] = trim($body['title']);
-            if (!empty($body['author'])) $m['author'] = trim($body['author']);
-            file_put_contents($dataFile, json_encode($music, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-            echo json_encode(['success' => true, 'message' => "Musiqa yangilandi", 'data' => $m]);
-            exit;
-        }
-    }
-
-    http_response_code(404);
-    echo json_encode(['error' => 'Musiqa topilmadi']);
+if ($method === 'PUT') {
+    $body   = read_json_body();
+    $title  = trim((string)($body['title']  ?? ''));
+    $author = trim((string)($body['author'] ?? ''));
+    if ($title !== '')  $list[$index]['title']  = $title;
+    if ($author !== '') $list[$index]['author'] = $author;
+    write_json(MUSIC_JSON, $list);
+    send_json([
+        'success' => true,
+        'message' => 'Musiqa yangilandi',
+        'data'    => $list[$index],
+    ]);
 }
+
+send_error('Method not allowed', 405);
