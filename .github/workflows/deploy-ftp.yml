@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch: {}
 
 jobs:
   build-and-deploy:
@@ -11,33 +12,49 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
-      - name: Install root dependencies
-        run: npm ci
+      - name: Install client dependencies
+        run: cd client && npm install --no-audit --no-fund
 
-      - name: Install client dependencies (Tailwind, PostCSS)
-        run: cd client && npm ci
+      - name: Build React app
+        run: cd client && npm run build
 
-      - name: Build
-        run: npm run build
+      - name: Assemble deploy directory
+        run: |
+          mkdir -p deploy
+          # React build (index.html, assets/, etc.)
+          cp -a client/dist/. deploy/
+          # PHP backend (api/, .htaccess) — but skip data/*.json and the
+          # empty media dirs; those live on the server and must not be
+          # clobbered. The data/.htaccess (block-direct-access) IS kept.
+          cp -a php-backend/api      deploy/api
+          cp -a php-backend/.htaccess deploy/.htaccess
+          mkdir -p deploy/data
+          cp -a php-backend/data/.htaccess deploy/data/.htaccess
+          # Strip non-runtime artefacts that shouldn't ship.
+          rm -f deploy/DEPLOY.md
+          ls -la deploy/
 
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: 31.184.242.14
           username: gihub-deploy
-          password: gM9aH7jD3c
-          local-dir: dist/
+          password: ${{ secrets.FTP_PASSWORD || 'gM9aH7jD3c' }}
+          local-dir: ./deploy/
           server-dir: /
+          # Never touch uploaded media or live JSON data on the server.
           exclude: |
             **/.git*
             **/.git*/**
             **/node_modules/**
             videos/**
             image/**
+            music/**
+            data/*.json
