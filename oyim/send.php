@@ -345,10 +345,14 @@ if (!defined('BOT_TOKEN') || BOT_TOKEN === '' || strpos(BOT_TOKEN, 'BU_YERGA') !
 }
 
 // ---- 8. Telegram xabarini tayyorlash ----
-$ua        = substr($_SERVER['HTTP_USER_AGENT'] ?? 'unknown', 0, 200);
-$time      = date('Y-m-d H:i:s');
-$mapsLink  = "https://www.google.com/maps?q={$lat},{$lon}";
-$accRound  = (int)round((float)$accuracy);
+$time     = date('Y-m-d H:i:s');
+$accRound = (int)round((float)$accuracy);
+
+// Xarita havolalari
+$gmapsLink = "https://www.google.com/maps?q={$lat},{$lon}";
+$ymapsLink = "https://yandex.uz/maps/?ll={$lon},{$lat}&z=17&pt={$lon},{$lat},pm2rdm";
+// Yandex Go (taxi) — pickup avtomatik, manzilni foydalanuvchi tanlaydi
+$yangoLink = "https://yandex.uz/maps/?rtext={$lat},{$lon}~&rtt=taxi";
 
 if ($accRound <= 5)       { $accBadge = "🟢 A'lo"; }
 elseif ($accRound <= 15)  { $accBadge = "🟡 Yaxshi"; }
@@ -374,9 +378,10 @@ if ($speed !== false && $speed !== null && $speed > 0) {
 if ($samples) {
     $caption .= "📊 O'lchovlar: {$samples} ta, " . round(((int)$elapsedMs) / 1000) . " s ({$reasonLabel})\n";
 }
-$caption .= "🌐 IP: `" . tgEscape($clientIp) . "`\n";
-$caption .= "📱 Qurilma: `" . tgEscape($ua) . "`\n\n";
-$caption .= "🗺 [Google Maps'da ochish]({$mapsLink})";
+$caption .= "\n";
+$caption .= "🗺 [Google Maps]({$gmapsLink})\n";
+$caption .= "🗺 [Yandex Maps]({$ymapsLink})\n";
+$caption .= "🚕 [Yandex Go — taxi chaqirish]({$yangoLink})";
 
 // ---- 9. Telegram ga yuborish ----
 $locResult = tgRequest('sendLocation', [
