@@ -19,7 +19,14 @@ const VIDEO_DOWNLOADER_API = isProduction
 // Production: PHP endpoints (.php), Local: Node.js endpoints
 const api = (path: string) => isProduction ? `${SERVER_URL}/api/${path}.php` : `${SERVER_URL}/api/${path}`;
 
-const ADMIN_PASSWORD = "creative2026";
+// Admin password lives in the browser's localStorage after a successful
+// login against /api/auth.php. The real source of truth is server-side
+// (api/_bootstrap.php → ADMIN_PASSWORD); the client only caches it so the
+// upload requests can re-send it without making the admin log in again.
+const AUTH_KEY = "creative_design_admin_password";
+const getAuthPassword = () => {
+  try { return localStorage.getItem(AUTH_KEY) || ""; } catch { return ""; }
+};
 
 // ============================================================================
 // Types
@@ -58,6 +65,13 @@ type MessageType = { type: "success" | "error" | ""; text: string };
 // ============================================================================
 export const AdminPage = () => {
   const navigate = useNavigate();
+
+  // Auth — gate the panel behind a server-verified login + password.
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => !!getAuthPassword());
+  const [loginUsername, setLoginUsername] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loginError, setLoginError] = useState("");
 
   // Server
   const [serverConnected, setServerConnected] = useState(false);
@@ -105,6 +119,38 @@ export const AdminPage = () => {
     setMessage({ type, text });
     setTimeout(() => setMessage({ type: "", text: "" }), 4000);
   }, []);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const username = loginUsername.trim();
+    const password = loginPassword.trim();
+    if (!username || !password) {
+      setLoginError("Login va parolni kiriting");
+      return;
+    }
+    setIsLoggingIn(true);
+    setLoginError("");
+    try {
+      const res = await fetch(api("auth"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      if (res.ok) {
+        localStorage.setItem(AUTH_KEY, password);
+        setIsAuthenticated(true);
+        setLoginUsername("");
+        setLoginPassword("");
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setLoginError(data.error || "Login yoki parol noto'g'ri");
+      }
+    } catch {
+      setLoginError("Server bilan aloqa yo'q. Internetni tekshiring.");
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
 
   const checkServer = useCallback(async () => {
     try {
@@ -158,8 +204,10 @@ export const AdminPage = () => {
     }
   }, []);
 
-  // Initial load + periodic health check
+  // Initial load + periodic health check — only after login, so the
+  // server isn't pinged for unauthenticated visitors who hit /admin.
   useEffect(() => {
+    if (!isAuthenticated) return;
     const init = async () => {
       const connected = await checkServer();
       if (connected) {
@@ -174,7 +222,7 @@ export const AdminPage = () => {
       if (connected) loadStats();
     }, 8000);
     return () => clearInterval(interval);
-  }, [checkServer, loadStats, loadVideos, loadMusic]);
+  }, [isAuthenticated, checkServer, loadStats, loadVideos, loadMusic]);
 
   // Image preview
   useEffect(() => {
@@ -210,7 +258,7 @@ export const AdminPage = () => {
     formData.append("title", videoTitle.trim());
     formData.append("video", videoFile);
     formData.append("image", imageFile);
-    formData.append("password", ADMIN_PASSWORD);
+    formData.append("password", getAuthPassword());
 
     try {
       const xhr = new XMLHttpRequest();
@@ -279,7 +327,7 @@ export const AdminPage = () => {
     formData.append("title", musicTitle.trim());
     formData.append("author", musicAuthor.trim());
     formData.append("music", musicFile);
-    formData.append("password", ADMIN_PASSWORD);
+    formData.append("password", getAuthPassword());
 
     try {
       const xhr = new XMLHttpRequest();
@@ -390,6 +438,75 @@ export const AdminPage = () => {
   // ========================================================================
   // RENDER
   // ========================================================================
+  if (!isAuthenticated) {
+    return (
+      <div className="admin-root">
+        <div className="admin-bg-pattern" />
+        <div className="admin-wrapper">
+          <header className="admin-header">
+            <div className="admin-header-inner">
+              <div className="admin-header-left">
+                <button onClick={() => navigate("/")} className="admin-back-btn">←</button>
+                <span className="admin-logo-text">Admin Panel</span>
+              </div>
+            </div>
+          </header>
+
+          <div className="admin-card" style={{ maxWidth: 420, margin: "40px auto" }}>
+            <div className="admin-card-header">
+              <div className="admin-card-icon video">🔒</div>
+              <div>
+                <div className="admin-card-title">Kirish</div>
+                <div className="admin-card-desc">Admin panelga kirish uchun parol kiriting</div>
+              </div>
+            </div>
+
+            <form onSubmit={handleLogin}>
+              <div className="admin-form-group">
+                <label className="admin-label">Login</label>
+                <input
+                  type="text"
+                  className="admin-input"
+                  autoComplete="username"
+                  value={loginUsername}
+                  onChange={(e) => { setLoginUsername(e.target.value); setLoginError(""); }}
+                  autoFocus
+                  disabled={isLoggingIn}
+                />
+              </div>
+
+              <div className="admin-form-group">
+                <label className="admin-label">Parol</label>
+                <input
+                  type="password"
+                  className="admin-input"
+                  autoComplete="current-password"
+                  value={loginPassword}
+                  onChange={(e) => { setLoginPassword(e.target.value); setLoginError(""); }}
+                  disabled={isLoggingIn}
+                />
+              </div>
+
+              {loginError && (
+                <div className="admin-toast error" style={{ position: "static", marginBottom: 12 }}>
+                  ❌ {loginError}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="admin-btn-primary video-btn"
+                disabled={isLoggingIn || !loginUsername.trim() || !loginPassword.trim()}
+              >
+                {isLoggingIn ? "⏳ Tekshirilmoqda..." : "🔓 Kirish"}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="admin-root">
       <div className="admin-bg-pattern" />

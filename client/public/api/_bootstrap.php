@@ -28,10 +28,11 @@ define('IMAGE_URL_PREFIX', '/image');
 define('MUSIC_URL_PREFIX', '/music');
 
 // ----------------------------------------------------------------------------
-// Admin password — change this once on the server, never commit secrets.
-// You can also set ADMIN_PASSWORD as an environment variable in cPanel.
+// Admin credentials — change once on the server, never commit secrets.
+// Can also be overridden via cPanel environment variables.
 // ----------------------------------------------------------------------------
-define('ADMIN_PASSWORD', getenv('ADMIN_PASSWORD') ?: 'creative2026');
+define('ADMIN_USERNAME', getenv('ADMIN_USERNAME') ?: 'creative2026');
+define('ADMIN_PASSWORD', getenv('ADMIN_PASSWORD') ?: 'admin2026');
 
 // ----------------------------------------------------------------------------
 // Upload limits (must also be set in php.ini / .htaccess to actually take effect).
