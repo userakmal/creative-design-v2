@@ -1,3 +1,25 @@
 # Block direct browser access to JSON storage files.
-# Frontend reads them via /api/videos.php and /api/music.php only.
-Require all denied
+# Frontend reads them only via /api/videos.php and /api/music.php.
+
+# Apache 2.4+ syntax
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+
+# Apache 2.2 fallback (some shared hosts still run 2.2)
+<IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+</IfModule>
+
+# Belt-and-braces: explicitly deny common data files even if the
+# directive above is ignored by the host config.
+<FilesMatch "\.(json|htaccess)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
