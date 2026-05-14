@@ -35,9 +35,11 @@ define('ADMIN_USERNAME', getenv('ADMIN_USERNAME') ?: 'creative2026');
 define('ADMIN_PASSWORD', getenv('ADMIN_PASSWORD') ?: 'admin2026');
 
 // ----------------------------------------------------------------------------
-// Upload limits (must also be set in php.ini / .htaccess to actually take effect).
+// No application-level upload cap — the PHP-FPM limits in /api/.user.ini
+// (upload_max_filesize / post_max_size) are the real ceiling. PHP_INT_MAX
+// here disables our own byte check so any file PHP accepts will be saved.
 // ----------------------------------------------------------------------------
-define('MAX_UPLOAD_BYTES', 200 * 1024 * 1024); // 200 MB
+define('MAX_UPLOAD_BYTES', PHP_INT_MAX);
 
 // Allowed file extensions per field name.
 const ALLOWED_EXT = [
@@ -158,8 +160,8 @@ function move_upload(array $file, string $field, string $destDir, string $urlPre
     if (!isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK) {
         send_error('Fayl yuklashda xatolik: ' . upload_error_message($file['error'] ?? -1), 400);
     }
-    if ($file['size'] <= 0 || $file['size'] > MAX_UPLOAD_BYTES) {
-        send_error('Fayl hajmi 0 dan katta va 200MB dan kichik bolishi kerak', 413);
+    if ($file['size'] <= 0) {
+        send_error('Bosh fayl yuklab bolmaydi', 400);
     }
 
     $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));

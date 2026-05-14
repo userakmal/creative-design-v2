@@ -596,10 +596,7 @@ export const AdminPage = () => {
 
                 <div className="admin-form-group">
                   <label className="admin-label">Video Fayl</label>
-                  <div
-                    className="admin-file-drop"
-                    onClick={() => videoInputRef.current?.click()}
-                  >
+                  <div className="admin-file-drop">
                     <span className="admin-file-drop-icon">🎬</span>
                     <div className="admin-file-drop-text">
                       {videoFile ? videoFile.name : "Video faylni tanlang"}
@@ -619,10 +616,7 @@ export const AdminPage = () => {
 
                 <div className="admin-form-group">
                   <label className="admin-label">Thumbnail Rasm</label>
-                  <div
-                    className="admin-file-drop"
-                    onClick={() => imageInputRef.current?.click()}
-                  >
+                  <div className="admin-file-drop">
                     <span className="admin-file-drop-icon">🖼️</span>
                     <div className="admin-file-drop-text">
                       {imageFile ? imageFile.name : "Rasm faylni tanlang"}
@@ -754,10 +748,7 @@ export const AdminPage = () => {
 
                 <div className="admin-form-group">
                   <label className="admin-label">Musiqa Fayl</label>
-                  <div
-                    className={`admin-file-drop music-drop ${musicFile ? 'music-selected' : ''}`}
-                    onClick={() => musicInputRef.current?.click()}
-                  >
+                  <div className={`admin-file-drop music-drop ${musicFile ? 'music-selected' : ''}`}>
                     <span className="admin-file-drop-icon">🎵</span>
                     <div className="admin-file-drop-text">
                       {musicFile ? musicFile.name : "Musiqa faylni tanlang"}
