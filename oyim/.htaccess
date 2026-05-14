@@ -21,7 +21,7 @@
 </Files>
 
 # ============================================
-#   Maxfiy fayl turlari (log, json — fail-safe)
+#   Maxfiy fayl turlari (log, env, bak — fail-safe)
 # ============================================
 <FilesMatch "\.(log|sqlite|sqlite3|env|ini|bak|backup)$">
     Order allow,deny
@@ -32,16 +32,14 @@
 </FilesMatch>
 
 # ============================================
-#   logs/ papkasiga kirishni bloklash (qo'shimcha himoya)
+#   logs/ papkasiga kirishni bloklash
 # ============================================
-RewriteEngine On
-RewriteRule ^logs(/.*)?$ - [F,L]
-
-# ============================================
-#   HTTPS majburiy
-# ============================================
-RewriteCond %{HTTPS} off
-RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # Bu papkadagi rewrite'lar uchun base — ota-saytning SPA routing'iga aralashmaydi
+    RewriteBase /oyim/
+    RewriteRule ^logs(/.*)?$ - [F,L]
+</IfModule>
 
 # ============================================
 #   Xavfsizlik header'lari
@@ -51,7 +49,6 @@ RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
     Header set X-Frame-Options "DENY"
     Header set Referrer-Policy "no-referrer"
     Header set Permissions-Policy "geolocation=(self)"
-    Header set Strict-Transport-Security "max-age=31536000; includeSubDomains" env=HTTPS
 </IfModule>
 
 # ============================================
