@@ -19,14 +19,14 @@ const VIDEO_DOWNLOADER_API = isProduction
 // Production: PHP endpoints (.php), Local: Node.js endpoints
 const api = (path: string) => isProduction ? `${SERVER_URL}/api/${path}.php` : `${SERVER_URL}/api/${path}`;
 
-// Admin password lives in the browser's localStorage after a successful
-// login against /api/auth.php. The real source of truth is server-side
-// (api/_bootstrap.php → ADMIN_PASSWORD); the client only caches it so the
-// upload requests can re-send it without making the admin log in again.
-const AUTH_KEY = "creative_design_admin_password";
-const getAuthPassword = () => {
-  try { return localStorage.getItem(AUTH_KEY) || ""; } catch { return ""; }
-};
+// Admin password lives only in memory for the lifetime of this module.
+// On refresh / new tab the variable is reset, so the admin must log in
+// again. The real source of truth is server-side (api/_bootstrap.php →
+// ADMIN_PASSWORD); the client only caches it in RAM so upload requests
+// can re-send it within the current session.
+let authPassword = "";
+const getAuthPassword = () => authPassword;
+const setAuthPassword = (p: string) => { authPassword = p; };
 
 // ============================================================================
 // Types
@@ -67,7 +67,8 @@ export const AdminPage = () => {
   const navigate = useNavigate();
 
   // Auth — gate the panel behind a server-verified login + password.
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => !!getAuthPassword());
+  // Always starts as false on mount, so a refresh forces a fresh login.
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [loginUsername, setLoginUsername] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -137,7 +138,7 @@ export const AdminPage = () => {
         body: JSON.stringify({ username, password }),
       });
       if (res.ok) {
-        localStorage.setItem(AUTH_KEY, password);
+        setAuthPassword(password);
         setIsAuthenticated(true);
         setLoginUsername("");
         setLoginPassword("");

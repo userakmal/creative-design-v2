@@ -71,6 +71,24 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [
         react(),
+        {
+          name: 'copy-index-html-for-routes',
+          closeBundle() {
+            const distDir = path.resolve(__dirname, '../dist');
+            const indexHtml = path.join(distDir, 'index.html');
+            if (fs.existsSync(indexHtml)) {
+              const routesWithDirs = ['optom_gulbozor', 'music'];
+              routesWithDirs.forEach(route => {
+                const routeDir = path.join(distDir, route);
+                if (!fs.existsSync(routeDir)) {
+                  fs.mkdirSync(routeDir, { recursive: true });
+                }
+                fs.copyFileSync(indexHtml, path.join(routeDir, 'index.html'));
+                console.log(`✅ Copied index.html to ${route}/index.html`);
+              });
+            }
+          }
+        }
       ],
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
