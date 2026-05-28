@@ -92,3 +92,6 @@ test_*.py
 *.bak
 *.backup
 *.old
+
+# Sardor_Gulnoza raw export (served copy lives in client/public/Sardor_Gulnoza)
+/Sardor_Gulnoza/
