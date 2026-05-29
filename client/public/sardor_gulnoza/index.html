@@ -67,6 +67,21 @@
     <script src="https://static.tildacdn.one/js/tilda-events-1.0.min.js" charset="utf-8" async
         onerror="this.loaderr='y';"></script> <!-- nominify begin -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script><!-- nominify end -->
+    <style>
+      /* Fix: 'Invite' font renders "0" as slashed-zero (Ø) on iOS Safari */
+      .tn-elem__9875713961744275878941 .tn-atom,
+      .tn-elem__9875713961744275910324 .tn-atom,
+      .tn-elem__9875713961744275912383 .tn-atom,
+      .tn-elem__9875713961744275914502 .tn-atom {
+        font-feature-settings: "zero" 0, "ss01" 0, "ss02" 0, "ss03" 0, "ss04" 0 !important;
+        font-variant-numeric: normal !important;
+        -webkit-font-feature-settings: "zero" 0, "ss01" 0, "ss02" 0, "ss03" 0, "ss04" 0 !important;
+      }
+      /* Hide decorative empty circle */
+      .tn-elem__9875713961744276327053 {
+        display: none !important;
+      }
+    </style>
     <script type="text/javascript">window.dataLayer = window.dataLayer || [];</script>
     <script type="text/javascript">(function () {
             if ((/bot|google|yandex|baidu|bing|msn|duckduckbot|teoma|slurp|crawler|spider|robot|crawling|facebook/i.test(navigator.userAgent)) === false && typeof (sessionStorage) != 'undefined' && sessionStorage.getItem('visited') !== 'y' && document.visibilityState) {
