@@ -1,0 +1,105 @@
+- generic [ref=e2]:
+  - generic [ref=e5]:
+    - generic [ref=e28]: Save the Date
+    - generic [ref=e31]: "\"Busmillahi Rahmani Rahim\""
+    - generic [ref=e34]: Sardor va Gulnoza
+    - generic [ref=e36]: Sardor va Gulnoza
+    - generic [ref=e38]: Manzil
+    - generic [ref=e41]: Dress-code
+    - generic [ref=e44]: Sardor va Gulnoza
+    - generic [ref=e47]: "\"Va biz sizni juftliklarga birlashtirdik\""
+    - generic [ref=e49]:
+      - text: Zamona Restorani
+      - text: Sizning qulayligingiz uchun
+      - text: joylashuv koordinatalarini
+      - text: xaritada qoldirdik.
+    - generic [ref=e52]:
+      - text: Bayram oqshomida o‘zingizni qulay
+      - text: libosda tashrif buyurishingizni xohlaymiz.
+      - text: Hech qanday qat'iy cheklovlar yo‘q -
+      - text: Muhimi tashrifingiz
+    - generic [ref=e54]: Sizni intiqlik bilan kutamiz!
+    - generic [ref=e57]:
+      - text: Sizni biz uchun juda muhim
+      - text: bo‘lgan ushbu quvonchli kunda biz
+      - text: bilan birga bo‘lishga va oilaviy
+      - text: tariximizning boshlanishiga guvoh
+      - text: bo‘lishga taklif qilamiz!
+    - generic [ref=e60]: Hurmat bilan
+    - generic [ref=e63]: Qadrli Mehmonlar
+    - generic [ref=e66]: 30.06.2026
+    - generic [ref=e69]: 18:00
+    - generic [ref=e71]: "32"
+    - generic [ref=e73]: "18"
+    - generic [ref=e75]: "45"
+    - generic [ref=e77]: "08"
+    - generic [ref=e79]: KUN SOAT DAQIQA SONIYA
+    - generic [ref=e92]:
+      - generic [ref=e93]: Iyun
+      - table [ref=e94]:
+        - rowgroup [ref=e95]:
+          - row "Du Se Ch Pa Ju Sh Ya" [ref=e96]:
+            - columnheader "Du" [ref=e97]
+            - columnheader "Se" [ref=e98]
+            - columnheader "Ch" [ref=e99]
+            - columnheader "Pa" [ref=e100]
+            - columnheader "Ju" [ref=e101]
+            - columnheader "Sh" [ref=e102]
+            - columnheader "Ya" [ref=e103]
+        - rowgroup [ref=e104]:
+          - row "1 2 3 4 5 6 7" [ref=e105]:
+            - cell "1" [ref=e106]
+            - cell "2" [ref=e107]
+            - cell "3" [ref=e108]
+            - cell "4" [ref=e109]
+            - cell "5" [ref=e110]
+            - cell "6" [ref=e111]
+            - cell "7" [ref=e112]
+          - row "8 9 10 11 12 13 14" [ref=e113]:
+            - cell "8" [ref=e114]
+            - cell "9" [ref=e115]
+            - cell "10" [ref=e116]
+            - cell "11" [ref=e117]
+            - cell "12" [ref=e118]
+            - cell "13" [ref=e119]
+            - cell "14" [ref=e120]
+          - row "15 16 17 18 19 20 21" [ref=e121]:
+            - cell "15" [ref=e122]
+            - cell "16" [ref=e123]
+            - cell "17" [ref=e124]
+            - cell "18" [ref=e125]
+            - cell "19" [ref=e126]
+            - cell "20" [ref=e127]
+            - cell "21" [ref=e128]
+          - row "22 23 24 25 26 27 28" [ref=e129]:
+            - cell "22" [ref=e130]
+            - cell "23" [ref=e131]
+            - cell "24" [ref=e132]
+            - cell "25" [ref=e133]
+            - cell "26" [ref=e134]
+            - cell "27" [ref=e135]
+            - cell "28" [ref=e136]
+          - row "29 30" [ref=e137]:
+            - cell "29" [ref=e138]
+            - cell "30" [ref=e139]:
+              - generic [ref=e140]: "30"
+            - cell [ref=e141]
+            - cell [ref=e142]
+            - cell [ref=e143]
+            - cell [ref=e144]
+            - cell [ref=e145]
+    - link "Xaritaga o‘tish" [ref=e154] [cursor=pointer]:
+      - /url: https://yandex.uz/maps/-/CPH5BT~s
+    - img [ref=e162]:
+      - generic "Ellipse 2" [ref=e163]
+    - img [ref=e169]
+  - list "Соц. сети" [ref=e175]:
+    - listitem [ref=e176]:
+      - link "telegram" [ref=e177] [cursor=pointer]:
+        - /url: https://t.me/+998993955537
+    - listitem [ref=e179]:
+      - link "Телефон" [ref=e180] [cursor=pointer]:
+        - /url: tel:+998888000480
+    - listitem [ref=e182]:
+      - link "instagram" [ref=e183] [cursor=pointer]:
+        - /url: https://www.instagram.com/creative_designuz/

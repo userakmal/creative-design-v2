@@ -1,0 +1,10 @@
+- list "Соц. сети" [ref=e8]:
+  - listitem [ref=e9]:
+    - link "telegram" [ref=e10] [cursor=pointer]:
+      - /url: https://t.me/+998993955537
+  - listitem [ref=e12]:
+    - link "Телефон" [ref=e13] [cursor=pointer]:
+      - /url: tel:+998888000480
+  - listitem [ref=e15]:
+    - link "instagram" [ref=e16] [cursor=pointer]:
+      - /url: https://www.instagram.com/creative_designuz/

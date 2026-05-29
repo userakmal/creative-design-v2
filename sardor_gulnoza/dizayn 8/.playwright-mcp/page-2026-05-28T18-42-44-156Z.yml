@@ -1,0 +1,51 @@
+- generic [ref=e2]:
+  - generic [ref=e5]:
+    - generic [ref=e28]: Save the Date
+    - generic [ref=e31]: "\"Busmillahi Rahmani Rahim\""
+    - generic [ref=e34]: Sardor va Gulnoza
+    - generic [ref=e36]: Sardor va Gulnoza
+    - generic [ref=e38]: Manzil
+    - generic [ref=e41]: Dress-code
+    - generic [ref=e44]: Sardor va Gulnoza
+    - generic [ref=e47]: "\"Va biz sizni juftliklarga birlashtirdik\""
+    - generic [ref=e49]:
+      - text: Zamona Restorani
+      - text: Sizning qulayligingiz uchun
+      - text: joylashuv koordinatalarini
+      - text: xaritada qoldirdik.
+    - generic [ref=e52]:
+      - text: Bayram oqshomida o‘zingizni qulay
+      - text: libosda tashrif buyurishingizni xohlaymiz.
+      - text: Hech qanday qat'iy cheklovlar yo‘q -
+      - text: Muhimi tashrifingiz
+    - generic [ref=e54]: Sizni intiqlik bilan kutamiz!
+    - generic [ref=e57]:
+      - text: Sizni biz uchun juda muhim
+      - text: bo‘lgan ushbu quvonchli kunda biz
+      - text: bilan birga bo‘lishga va oilaviy
+      - text: tariximizning boshlanishiga guvoh
+      - text: bo‘lishga taklif qilamiz!
+    - generic [ref=e60]: Hurmat bilan
+    - generic [ref=e63]: Qadrli Mehmonlar
+    - generic [ref=e66]: 30.06.2026
+    - generic [ref=e69]: 18:00
+    - generic [ref=e71]: "32"
+    - generic [ref=e73]: "18"
+    - generic [ref=e75]: "17"
+    - generic [ref=e77]: "16"
+    - generic [ref=e79]: KUN SOAT DAQIQA SONIYA
+    - link "Xaritaga o‘tish" [ref=e101] [cursor=pointer]:
+      - /url: https://yandex.uz/maps/-/CPH5BT~s
+    - img [ref=e109]:
+      - generic "Ellipse 2" [ref=e110]
+    - img [ref=e116]
+  - list "Соц. сети" [ref=e122]:
+    - listitem [ref=e123]:
+      - link "telegram" [ref=e124] [cursor=pointer]:
+        - /url: https://t.me/+998993955537
+    - listitem [ref=e126]:
+      - link "Телефон" [ref=e127] [cursor=pointer]:
+        - /url: tel:+998888000480
+    - listitem [ref=e129]:
+      - link "instagram" [ref=e130] [cursor=pointer]:
+        - /url: https://www.instagram.com/creative_designuz/
