@@ -81,6 +81,48 @@
       .tn-elem__9875713961744276327053 {
         display: none !important;
       }
+      /* Fix: S, G letters and calendar lost absolute positioning (no inline
+         CSS) and fell to page bottom. Restore Tilda artboard coordinates. */
+      #rec987571396 .tn-elem[data-elem-id="1744272780612"],
+      #rec987571396 .tn-elem[data-elem-id="1744272799317"],
+      #rec987571396 .tn-elem[data-elem-id="1744274188832"] {
+        position: absolute !important;
+        height: auto !important;
+      }
+      /* letter-s */
+      #rec987571396 .tn-elem[data-elem-id="1744272780612"] {
+        z-index: 5;
+        top: 338px;
+        left: calc(50% - 600px - 763px);
+        width: 200px;
+      }
+      /* letter-g */
+      #rec987571396 .tn-elem[data-elem-id="1744272799317"] {
+        z-index: 5;
+        top: 600px;
+        left: calc(50% - 600px - 759px);
+        width: 200px;
+      }
+      @media screen and (max-width: 479px) {
+        /* letter-s */
+        #rec987571396 .tn-elem[data-elem-id="1744272780612"] {
+          top: calc(50vh - 275px + 140px) !important;
+          left: calc(50% - 160px + 50px) !important;
+          width: 88px !important;
+        }
+        /* letter-g */
+        #rec987571396 .tn-elem[data-elem-id="1744272799317"] {
+          top: calc(50vh - 275px + 248px) !important;
+          left: calc(50% - 160px + 178px) !important;
+          width: 71px !important;
+        }
+        /* calendar */
+        #rec987571396 .tn-elem[data-elem-id="1744274188832"] {
+          top: calc(50vh - 275px + 1342px) !important;
+          left: calc(50% - 160px + 88px) !important;
+          width: 143px !important;
+        }
+      }
     </style>
     <script type="text/javascript">window.dataLayer = window.dataLayer || [];</script>
     <script type="text/javascript">(function () {
