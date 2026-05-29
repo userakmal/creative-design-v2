@@ -67,55 +67,6 @@
     <script src="https://static.tildacdn.one/js/tilda-events-1.0.min.js" charset="utf-8" async
         onerror="this.loaderr='y';"></script> <!-- nominify begin -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script><!-- nominify end -->
-    <style>
-      /* Fix: 'Invite' font renders "0" as slashed-zero (Ø) on iOS Safari.
-         Applies to countdown digits AND the static 18:00 wedding time text. */
-      .tn-elem__9875713961744275878941 .tn-atom,
-      .tn-elem__9875713961744275910324 .tn-atom,
-      .tn-elem__9875713961744275912383 .tn-atom,
-      .tn-elem__9875713961744275914502 .tn-atom,
-      .tn-elem__9875713961744274104205 .tn-atom {
-        font-feature-settings: "zero" 0, "ss01" 0, "ss02" 0, "ss03" 0, "ss04" 0 !important;
-        font-variant-numeric: normal !important;
-        -webkit-font-feature-settings: "zero" 0, "ss01" 0, "ss02" 0, "ss03" 0, "ss04" 0 !important;
-      }
-      /* Hide decorative empty circle */
-      .tn-elem__9875713961744276327053 {
-        display: none !important;
-      }
-      /* Force artboard animated elements visible: iOS Safari scroll animation
-         often never fires, leaving elements at opacity:0.
-         Scoped to #rec987571396 only — other blocks must NOT be affected. */
-      #rec987571396 .t396__elem--anim-hidden,
-      #rec987571396 [class*="anim-hidden"] {
-        opacity: 1 !important;
-        pointer-events: auto !important;
-        visibility: visible !important;
-      }
-      /* Force S/G/calendar mobile positions with !important so they beat any
-         desktop inline-style that Tilda's init JS may have written for them.
-         (Stylesheet !important > non-!important inline style in CSS cascade.) */
-      @media screen and (max-width: 479px) {
-        #rec987571396 .tn-elem[data-elem-id="1744272780612"] {
-          top: calc(50vh - 275px + 140px) !important;
-          left: calc(50% - 160px + 50px) !important;
-          width: 88px !important;
-          opacity: 1 !important;
-        }
-        #rec987571396 .tn-elem[data-elem-id="1744272799317"] {
-          top: calc(50vh - 275px + 248px) !important;
-          left: calc(50% - 160px + 178px) !important;
-          width: 71px !important;
-          opacity: 1 !important;
-        }
-        #rec987571396 .tn-elem[data-elem-id="1744274188832"] {
-          top: calc(50vh - 275px + 1342px) !important;
-          left: calc(50% - 160px + 88px) !important;
-          width: 143px !important;
-          opacity: 1 !important;
-        }
-      }
-    </style>
     <script type="text/javascript">window.dataLayer = window.dataLayer || [];</script>
     <script type="text/javascript">(function () {
             if ((/bot|google|yandex|baidu|bing|msn|duckduckbot|teoma|slurp|crawler|spider|robot|crawling|facebook/i.test(navigator.userAgent)) === false && typeof (sessionStorage) != 'undefined' && sessionStorage.getItem('visited') !== 'y' && document.visibilityState) {
@@ -2774,39 +2725,41 @@
                                 src='https://thb.tildacdn.one/tild3830-3236-4265-b736-376534623532/-/resize/20x/2.png'
                                 alt='' imgfield='tn_img_1744272738841' /> </div>
                     </div>
-                    <div class='t396__elem tn-elem tn-elem__9875713961744272780612'
+                    <div class='t396__elem tn-elem tn-elem__9875713961744272780612 t396__elem--anim-hidden'
                         data-elem-id='1744272780612' data-elem-type='image' data-field-top-value="338"
                         data-field-left-value="-763" data-field-height-value="191" data-field-width-value="200"
                         data-field-axisy-value="top" data-field-axisx-value="left" data-field-container-value="grid"
                         data-field-topunits-value="px" data-field-leftunits-value="px" data-field-heightunits-value="px"
-                        data-field-widthunits-value="px"
+                        data-field-widthunits-value="px" data-animate-mobile="y" data-animate-sbs-event="intoview"
+                        data-animate-sbs-trg="0.5" data-animate-sbs-trgofst="200"
+                        data-animate-sbs-opts="[{'mx':0,'my':0,'sx':1,'sy':1,'op':1,'ro':0,'ti':0,'ea':'0','dt':0},{'mx':-50,'my':-60,'sx':1,'sy':1,'op':0,'ro':0,'ti':0,'ea':'0','dt':0},{'mx':0,'my':0,'sx':1,'sy':1,'op':1,'ro':0,'ti':1000,'ea':'easeInOut','dt':0}]"
                         data-field-filewidth-value="199" data-field-fileheight-value="190"
                         data-field-heightmode-value="hug" data-field-top-res-320-value="140"
                         data-field-left-res-320-value="50" data-field-height-res-320-value="84"
-                        data-field-width-res-320-value="88" data-field-height-res-480-value="191"
-                        style="position:absolute;top:calc(50vh - 275px + 140px);left:calc(50% - 160px + 50px);width:88px;height:auto;opacity:1;z-index:5;">
+                        data-field-width-res-320-value="88" data-field-height-res-480-value="191">
                         <div class='tn-atom'> <img class='tn-atom__img t-img'
                                 data-original='images/letter-s.png'
                                 src='images/letter-s.png'
                                 alt='' imgfield='tn_img_1744272780612'
-                                style='width:100%;height:100%;object-fit:contain;transform:scale(1.2);transform-origin:center;' /> </div>
+                                style='width:100%;height:auto;object-fit:contain;transform:scale(1.2);transform-origin:center;' /> </div>
                     </div>
-                    <div class='t396__elem tn-elem tn-elem__9875713961744272799317'
+                    <div class='t396__elem tn-elem tn-elem__9875713961744272799317 t396__elem--anim-hidden'
                         data-elem-id='1744272799317' data-elem-type='image' data-field-top-value="600"
                         data-field-left-value="-759" data-field-height-value="243" data-field-width-value="200"
                         data-field-axisy-value="top" data-field-axisx-value="left" data-field-container-value="grid"
                         data-field-topunits-value="px" data-field-leftunits-value="px" data-field-heightunits-value="px"
-                        data-field-widthunits-value="px"
+                        data-field-widthunits-value="px" data-animate-mobile="y" data-animate-sbs-event="intoview"
+                        data-animate-sbs-trg="0.5" data-animate-sbs-trgofst="200"
+                        data-animate-sbs-opts="[{'mx':0,'my':0,'sx':1,'sy':1,'op':1,'ro':0,'ti':0,'ea':'0','dt':0},{'mx':50,'my':60,'sx':1,'sy':1,'op':0,'ro':0,'ti':0,'ea':'0','dt':0},{'mx':0,'my':0,'sx':1,'sy':1,'op':1,'ro':0,'ti':1000,'ea':'easeInOut','dt':0}]"
                         data-field-filewidth-value="154" data-field-fileheight-value="187"
                         data-field-heightmode-value="hug" data-field-top-res-320-value="248"
                         data-field-left-res-320-value="178" data-field-height-res-320-value="86"
-                        data-field-width-res-320-value="71" data-field-height-res-480-value="243"
-                        style="position:absolute;top:calc(50vh - 275px + 248px);left:calc(50% - 160px + 178px);width:71px;height:auto;opacity:1;z-index:5;">
+                        data-field-width-res-320-value="71" data-field-height-res-480-value="243">
                         <div class='tn-atom'> <img class='tn-atom__img t-img'
                                 data-original='images/letter-g.png'
                                 src='images/letter-g.png'
                                 alt='' imgfield='tn_img_1744272799317'
-                                style='width:100%;height:100%;object-fit:contain;transform:scale(1.49);transform-origin:center;' /> </div>
+                                style='width:100%;height:auto;object-fit:contain;transform:scale(1.49);transform-origin:center;' /> </div>
                     </div>
                     <div class='t396__elem tn-elem tn-elem__9875713961744272788298 t396__elem--anim-hidden'
                         data-elem-id='1744272788298' data-elem-type='image' data-field-top-value="545"
@@ -3237,13 +3190,12 @@
                         data-field-fileheight-value="428" data-field-heightmode-value="hug"
                         data-field-top-res-320-value="1342" data-field-left-res-320-value="88"
                         data-field-height-res-320-value="150" data-field-width-res-320-value="143"
-                        data-field-height-res-480-value="210"
-                        style="position:absolute;top:calc(50vh - 275px + 1342px);left:calc(50% - 160px + 88px);width:143px;height:auto;opacity:1;z-index:5;">
+                        data-field-height-res-480-value="210">
                         <div class='tn-atom'> <img class='tn-atom__img t-img'
                                 data-original='images/calendar-iyun.png'
                                 src='images/calendar-iyun.png'
                                 alt='' imgfield='tn_img_1744274188832'
-                                style='width:100%;height:100%;object-fit:contain;transform:scale(1.1);transform-origin:center;' /> </div>
+                                style='width:100%;height:auto;object-fit:contain;transform:scale(1.1);transform-origin:center;' /> </div>
                     </div>
                     <div class='t396__elem tn-elem tn-elem__9875713961744274214162' data-elem-id='1744274214162'
                         data-elem-type='image' data-field-top-value="572" data-field-left-value="693"
@@ -3636,48 +3588,6 @@
             z-index: -9999 !important;
         }
     </style>
-
-    <script>
-      /* iOS mobile layout init.
-         Problem: Tilda's init JS writes desktop coordinates as non-!important
-         inline styles (e.g. left:-1168px for S), overriding the correct mobile
-         media-query CSS. Tilda's animation JS also hides elements with
-         t396__elem--anim-hidden which never fires in iOS Safari.
-         Solution: re-read every element's data-field-*-res-320 attributes and
-         force correct mobile positions via style.setProperty(...,'important'),
-         which beats any inline style written without !important. */
-      (function () {
-        function layoutMobile() {
-          if (!window.matchMedia('(max-width: 479px)').matches) return;
-          var block = document.querySelector('#rec987571396');
-          if (!block) return;
-          var elems = block.querySelectorAll('.t396__elem');
-          [].forEach.call(elems, function (el) {
-            // Skip intentionally hidden desktop-only elements
-            var inlineStyle = el.getAttribute('style') || '';
-            if (/display\s*:\s*none/.test(inlineStyle)) return;
-            // Remove anim-hidden so opacity is not 0
-            el.classList.remove('t396__elem--anim-hidden');
-            var topM  = el.getAttribute('data-field-top-res-320-value');
-            var leftM = el.getAttribute('data-field-left-res-320-value');
-            var widthM = el.getAttribute('data-field-width-res-320-value');
-            if (topM === null || topM === '') return;
-            // Use CSS calc() string — matches Tilda's formula exactly and uses
-            // true CSS 50vh (not window.innerHeight which differs on iOS Safari)
-            el.style.setProperty('position', 'absolute', 'important');
-            el.style.setProperty('top', 'calc(50vh - 275px + ' + parseFloat(topM) + 'px)', 'important');
-            el.style.setProperty('left', 'calc(50% - 160px + ' + parseFloat(leftM || 0) + 'px)', 'important');
-            if (widthM) el.style.setProperty('width', parseFloat(widthM) + 'px', 'important');
-            el.style.setProperty('height', 'auto', 'important');
-            el.style.setProperty('opacity', '1', 'important');
-            el.style.setProperty('visibility', 'visible', 'important');
-          });
-        }
-        layoutMobile();
-        [200, 600, 1200].forEach(function (t) { setTimeout(layoutMobile, t); });
-        window.addEventListener('load', function () { layoutMobile(); setTimeout(layoutMobile, 400); });
-      })();
-    </script>
 
 </body>
 
