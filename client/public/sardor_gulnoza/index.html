@@ -3646,6 +3646,47 @@
         }
     </style>
 
+    <script>
+      /* Force-position S, G letters and calendar after Tilda's t396 init.
+         These local-image elements have no static positioning CSS, so they
+         fall to the page bottom. Re-apply Tilda artboard coordinates as inline
+         !important styles, which beat any runtime overrides, and reveal them. */
+      (function () {
+        var defs = {
+          '1744272780612': { d: { top: 338, left: -763, w: 200 }, m: { top: 140, left: 50, w: 88 } },  /* letter-s */
+          '1744272799317': { d: { top: 600, left: -759, w: 200 }, m: { top: 248, left: 178, w: 71 } }, /* letter-g */
+          '1744274188832': { d: { top: 722, left: 380, w: 200 }, m: { top: 1342, left: 88, w: 143 } }  /* calendar */
+        };
+        function place() {
+          var mobile = window.matchMedia('(max-width: 479px)').matches;
+          Object.keys(defs).forEach(function (id) {
+            var el = document.querySelector('#rec987571396 .tn-elem[data-elem-id="' + id + '"]');
+            if (!el) return;
+            var c = mobile ? defs[id].m : defs[id].d;
+            el.style.setProperty('position', 'absolute', 'important');
+            el.style.setProperty('height', 'auto', 'important');
+            el.style.setProperty('width', c.w + 'px', 'important');
+            if (mobile) {
+              el.style.setProperty('top', 'calc(50vh - 275px + ' + c.top + 'px)', 'important');
+              el.style.setProperty('left', 'calc(50% - 160px + ' + c.left + 'px)', 'important');
+            } else {
+              el.style.setProperty('top', c.top + 'px', 'important');
+              el.style.setProperty('left', 'calc(50% - 600px + ' + c.left + 'px)', 'important');
+            }
+            el.classList.remove('t396__elem--anim-hidden');
+            el.style.setProperty('opacity', '1', 'important');
+          });
+        }
+        function schedule() { [300, 800, 1500, 2500].forEach(function (t) { setTimeout(place, t); }); }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', schedule);
+        } else { schedule(); }
+        window.addEventListener('load', schedule);
+        window.addEventListener('resize', function () { setTimeout(place, 200); });
+        window.addEventListener('orientationchange', function () { setTimeout(place, 300); });
+      })();
+    </script>
+
 </body>
 
 </html>
