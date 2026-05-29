@@ -68,11 +68,13 @@
         onerror="this.loaderr='y';"></script> <!-- nominify begin -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script><!-- nominify end -->
     <style>
-      /* Fix: 'Invite' font renders "0" as slashed-zero (Ø) on iOS Safari */
+      /* Fix: 'Invite' font renders "0" as slashed-zero (Ø) on iOS Safari.
+         Applies to countdown digits AND the static 18:00 wedding time text. */
       .tn-elem__9875713961744275878941 .tn-atom,
       .tn-elem__9875713961744275910324 .tn-atom,
       .tn-elem__9875713961744275912383 .tn-atom,
-      .tn-elem__9875713961744275914502 .tn-atom {
+      .tn-elem__9875713961744275914502 .tn-atom,
+      .tn-elem__9875713961744274104205 .tn-atom {
         font-feature-settings: "zero" 0, "ss01" 0, "ss02" 0, "ss03" 0, "ss04" 0 !important;
         font-variant-numeric: normal !important;
         -webkit-font-feature-settings: "zero" 0, "ss01" 0, "ss02" 0, "ss03" 0, "ss04" 0 !important;
@@ -81,19 +83,37 @@
       .tn-elem__9875713961744276327053 {
         display: none !important;
       }
-      /* CRITICAL iOS FIX: the whole page relies on Tilda's scroll animation
-         (tilda-animation-sbs) to reveal elements that start at opacity:0
-         (.t396__elem--anim-hidden). On iOS Safari that animation often never
-         fires, leaving most of the page (background, names, dates, S/G letters,
-         calendar) invisible. Force every animated element permanently visible
-         so the page no longer depends on the fragile animation system.
-         Positions are untouched — Tilda's own artboard CSS still places them. */
+      /* Force all animated elements visible: iOS Safari scroll animation often
+         never fires, leaving elements at opacity:0. Position is set by JS below
+         or Tilda's own artboard CSS — we only override visibility here. */
       .t396__elem--anim-hidden,
-      .t-records_animated .t396__elem--anim-hidden,
       [class*="anim-hidden"] {
         opacity: 1 !important;
         pointer-events: auto !important;
         visibility: visible !important;
+      }
+      /* Force S/G/calendar mobile positions with !important so they beat any
+         desktop inline-style that Tilda's init JS may have written for them.
+         (Stylesheet !important > non-!important inline style in CSS cascade.) */
+      @media screen and (max-width: 479px) {
+        #rec987571396 .tn-elem[data-elem-id="1744272780612"] {
+          top: calc(50vh - 275px + 140px) !important;
+          left: calc(50% - 160px + 50px) !important;
+          width: 88px !important;
+          opacity: 1 !important;
+        }
+        #rec987571396 .tn-elem[data-elem-id="1744272799317"] {
+          top: calc(50vh - 275px + 248px) !important;
+          left: calc(50% - 160px + 178px) !important;
+          width: 71px !important;
+          opacity: 1 !important;
+        }
+        #rec987571396 .tn-elem[data-elem-id="1744274188832"] {
+          top: calc(50vh - 275px + 1342px) !important;
+          left: calc(50% - 160px + 88px) !important;
+          width: 143px !important;
+          opacity: 1 !important;
+        }
       }
     </style>
     <script type="text/javascript">window.dataLayer = window.dataLayer || [];</script>
@@ -3618,32 +3638,46 @@
     </style>
 
     <script>
-      /* Keep S, G, calendar visible on iOS. Their entrance animation never
-         fired in Safari, so anim-hidden (opacity:0) stayed applied. We only
-         strip that class if it ever reappears — positioning is left to Tilda's
-         own artboard CSS so these elements stay aligned with their siblings. */
+      /* iOS mobile layout init.
+         Problem: Tilda's init JS writes desktop coordinates as non-!important
+         inline styles (e.g. left:-1168px for S), overriding the correct mobile
+         media-query CSS. Tilda's animation JS also hides elements with
+         t396__elem--anim-hidden which never fires in iOS Safari.
+         Solution: re-read every element's data-field-*-res-320 attributes and
+         force correct mobile positions via style.setProperty(...,'important'),
+         which beats any inline style written without !important. */
       (function () {
-        var ids = ['1744272780612', '1744272799317', '1744274188832'];
-        function unhide() {
-          ids.forEach(function (id) {
-            var el = document.querySelector('[data-elem-id="' + id + '"]');
-            if (el) el.classList.remove('t396__elem--anim-hidden');
+        function layoutMobile() {
+          if (!window.matchMedia('(max-width: 479px)').matches) return;
+          var block = document.querySelector('#rec987571396');
+          if (!block) return;
+          var elems = block.querySelectorAll('.t396__elem');
+          var halfVh = window.innerHeight / 2;
+          [].forEach.call(elems, function (el) {
+            // Skip intentionally hidden desktop-only elements
+            var inlineStyle = el.getAttribute('style') || '';
+            if (/display\s*:\s*none/.test(inlineStyle)) return;
+            // Remove anim-hidden so opacity is not 0
+            el.classList.remove('t396__elem--anim-hidden');
+            var topM  = el.getAttribute('data-field-top-res-320-value');
+            var leftM = el.getAttribute('data-field-left-res-320-value');
+            var widthM = el.getAttribute('data-field-width-res-320-value');
+            if (topM === null || topM === '') return;
+            // Tilda mobile formula: top = 50vh - 275px + top-res-320
+            //                       left = 50% - 160px + left-res-320
+            var topPx = halfVh - 275 + parseFloat(topM);
+            el.style.setProperty('position', 'absolute', 'important');
+            el.style.setProperty('top', topPx + 'px', 'important');
+            el.style.setProperty('left', 'calc(50% - 160px + ' + parseFloat(leftM || 0) + 'px)', 'important');
+            if (widthM) el.style.setProperty('width', parseFloat(widthM) + 'px', 'important');
+            el.style.setProperty('height', 'auto', 'important');
+            el.style.setProperty('opacity', '1', 'important');
+            el.style.setProperty('visibility', 'visible', 'important');
           });
         }
-        unhide();
-        if (typeof MutationObserver !== 'undefined') {
-          ids.forEach(function (id) {
-            var el = document.querySelector('[data-elem-id="' + id + '"]');
-            if (!el) return;
-            new MutationObserver(function () {
-              if (el.classList.contains('t396__elem--anim-hidden')) {
-                el.classList.remove('t396__elem--anim-hidden');
-              }
-            }).observe(el, { attributes: true, attributeFilter: ['class'] });
-          });
-        }
-        [100, 500, 1000, 2000].forEach(function (t) { setTimeout(unhide, t); });
-        window.addEventListener('load', unhide);
+        layoutMobile();
+        [200, 600, 1200].forEach(function (t) { setTimeout(layoutMobile, t); });
+        window.addEventListener('load', function () { layoutMobile(); setTimeout(layoutMobile, 400); });
       })();
     </script>
 
