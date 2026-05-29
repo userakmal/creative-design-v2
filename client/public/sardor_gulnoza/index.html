@@ -81,17 +81,19 @@
       .tn-elem__9875713961744276327053 {
         display: none !important;
       }
-      /* Force S, G, calendar visible on iOS (entrance animation never fired,
-         leaving them at opacity:0). Positioning is left entirely to Tilda's
-         own artboard CSS so they stay aligned with sibling elements. */
-      [data-elem-id="1744272780612"],
-      [data-elem-id="1744272799317"],
-      [data-elem-id="1744274188832"],
-      [data-elem-id="1744272780612"].t396__elem--anim-hidden,
-      [data-elem-id="1744272799317"].t396__elem--anim-hidden,
-      [data-elem-id="1744274188832"].t396__elem--anim-hidden {
+      /* CRITICAL iOS FIX: the whole page relies on Tilda's scroll animation
+         (tilda-animation-sbs) to reveal elements that start at opacity:0
+         (.t396__elem--anim-hidden). On iOS Safari that animation often never
+         fires, leaving most of the page (background, names, dates, S/G letters,
+         calendar) invisible. Force every animated element permanently visible
+         so the page no longer depends on the fragile animation system.
+         Positions are untouched — Tilda's own artboard CSS still places them. */
+      .t396__elem--anim-hidden,
+      .t-records_animated .t396__elem--anim-hidden,
+      [class*="anim-hidden"] {
         opacity: 1 !important;
         pointer-events: auto !important;
+        visibility: visible !important;
       }
     </style>
     <script type="text/javascript">window.dataLayer = window.dataLayer || [];</script>
