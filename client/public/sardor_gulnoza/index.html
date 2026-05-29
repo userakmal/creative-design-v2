@@ -81,47 +81,21 @@
       .tn-elem__9875713961744276327053 {
         display: none !important;
       }
-      /* Fix: S, G letters and calendar lost absolute positioning (no inline
-         CSS) and fell to page bottom. Restore Tilda artboard coordinates. */
-      #rec987571396 .tn-elem[data-elem-id="1744272780612"],
-      #rec987571396 .tn-elem[data-elem-id="1744272799317"],
-      #rec987571396 .tn-elem[data-elem-id="1744274188832"] {
+      /* Force S, G, calendar always visible — override Tilda anim-hidden */
+      [data-elem-id="1744272780612"],
+      [data-elem-id="1744272799317"],
+      [data-elem-id="1744274188832"] {
         position: absolute !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
         height: auto !important;
+        z-index: 5 !important;
       }
-      /* letter-s */
-      #rec987571396 .tn-elem[data-elem-id="1744272780612"] {
-        z-index: 5;
-        top: 338px;
-        left: calc(50% - 600px - 763px);
-        width: 200px;
-      }
-      /* letter-g */
-      #rec987571396 .tn-elem[data-elem-id="1744272799317"] {
-        z-index: 5;
-        top: 600px;
-        left: calc(50% - 600px - 759px);
-        width: 200px;
-      }
-      @media screen and (max-width: 479px) {
-        /* letter-s */
-        #rec987571396 .tn-elem[data-elem-id="1744272780612"] {
-          top: calc(50vh - 275px + 140px) !important;
-          left: calc(50% - 160px + 50px) !important;
-          width: 88px !important;
-        }
-        /* letter-g */
-        #rec987571396 .tn-elem[data-elem-id="1744272799317"] {
-          top: calc(50vh - 275px + 248px) !important;
-          left: calc(50% - 160px + 178px) !important;
-          width: 71px !important;
-        }
-        /* calendar */
-        #rec987571396 .tn-elem[data-elem-id="1744274188832"] {
-          top: calc(50vh - 275px + 1342px) !important;
-          left: calc(50% - 160px + 88px) !important;
-          width: 143px !important;
-        }
+      [data-elem-id="1744272780612"].t396__elem--anim-hidden,
+      [data-elem-id="1744272799317"].t396__elem--anim-hidden,
+      [data-elem-id="1744274188832"].t396__elem--anim-hidden {
+        opacity: 1 !important;
+        pointer-events: auto !important;
       }
     </style>
     <script type="text/javascript">window.dataLayer = window.dataLayer || [];</script>
@@ -2782,36 +2756,34 @@
                                 src='https://thb.tildacdn.one/tild3830-3236-4265-b736-376534623532/-/resize/20x/2.png'
                                 alt='' imgfield='tn_img_1744272738841' /> </div>
                     </div>
-                    <div class='t396__elem tn-elem tn-elem__9875713961744272780612 t396__elem--anim-hidden'
+                    <div class='t396__elem tn-elem tn-elem__9875713961744272780612'
                         data-elem-id='1744272780612' data-elem-type='image' data-field-top-value="338"
                         data-field-left-value="-763" data-field-height-value="191" data-field-width-value="200"
                         data-field-axisy-value="top" data-field-axisx-value="left" data-field-container-value="grid"
                         data-field-topunits-value="px" data-field-leftunits-value="px" data-field-heightunits-value="px"
-                        data-field-widthunits-value="px" data-animate-mobile="y" data-animate-sbs-event="intoview"
-                        data-animate-sbs-trg="0.5" data-animate-sbs-trgofst="200"
-                        data-animate-sbs-opts="[{'mx':0,'my':0,'sx':1,'sy':1,'op':1,'ro':0,'ti':0,'ea':'0','dt':0},{'mx':-50,'my':-60,'sx':1,'sy':1,'op':0,'ro':0,'ti':0,'ea':'0','dt':0},{'mx':0,'my':0,'sx':1,'sy':1,'op':1,'ro':0,'ti':1000,'ea':'easeInOut','dt':0}]"
+                        data-field-widthunits-value="px"
                         data-field-filewidth-value="199" data-field-fileheight-value="190"
                         data-field-heightmode-value="hug" data-field-top-res-320-value="140"
                         data-field-left-res-320-value="50" data-field-height-res-320-value="84"
-                        data-field-width-res-320-value="88" data-field-height-res-480-value="191">
+                        data-field-width-res-320-value="88" data-field-height-res-480-value="191"
+                        style="position:absolute;top:calc(50vh - 275px + 140px);left:calc(50% - 160px + 50px);width:88px;height:auto;opacity:1;z-index:5;">
                         <div class='tn-atom'> <img class='tn-atom__img t-img'
                                 data-original='images/letter-s.png'
                                 src='images/letter-s.png'
                                 alt='' imgfield='tn_img_1744272780612'
                                 style='width:100%;height:100%;object-fit:contain;transform:scale(1.2);transform-origin:center;' /> </div>
                     </div>
-                    <div class='t396__elem tn-elem tn-elem__9875713961744272799317 t396__elem--anim-hidden'
+                    <div class='t396__elem tn-elem tn-elem__9875713961744272799317'
                         data-elem-id='1744272799317' data-elem-type='image' data-field-top-value="600"
                         data-field-left-value="-759" data-field-height-value="243" data-field-width-value="200"
                         data-field-axisy-value="top" data-field-axisx-value="left" data-field-container-value="grid"
                         data-field-topunits-value="px" data-field-leftunits-value="px" data-field-heightunits-value="px"
-                        data-field-widthunits-value="px" data-animate-mobile="y" data-animate-sbs-event="intoview"
-                        data-animate-sbs-trg="0.5" data-animate-sbs-trgofst="200"
-                        data-animate-sbs-opts="[{'mx':0,'my':0,'sx':1,'sy':1,'op':1,'ro':0,'ti':0,'ea':'0','dt':0},{'mx':50,'my':60,'sx':1,'sy':1,'op':0,'ro':0,'ti':0,'ea':'0','dt':0},{'mx':0,'my':0,'sx':1,'sy':1,'op':1,'ro':0,'ti':1000,'ea':'easeInOut','dt':0}]"
+                        data-field-widthunits-value="px"
                         data-field-filewidth-value="154" data-field-fileheight-value="187"
                         data-field-heightmode-value="hug" data-field-top-res-320-value="248"
                         data-field-left-res-320-value="178" data-field-height-res-320-value="86"
-                        data-field-width-res-320-value="71" data-field-height-res-480-value="243">
+                        data-field-width-res-320-value="71" data-field-height-res-480-value="243"
+                        style="position:absolute;top:calc(50vh - 275px + 248px);left:calc(50% - 160px + 178px);width:71px;height:auto;opacity:1;z-index:5;">
                         <div class='tn-atom'> <img class='tn-atom__img t-img'
                                 data-original='images/letter-g.png'
                                 src='images/letter-g.png'
@@ -3247,7 +3219,8 @@
                         data-field-fileheight-value="428" data-field-heightmode-value="hug"
                         data-field-top-res-320-value="1342" data-field-left-res-320-value="88"
                         data-field-height-res-320-value="150" data-field-width-res-320-value="143"
-                        data-field-height-res-480-value="210">
+                        data-field-height-res-480-value="210"
+                        style="position:absolute;top:calc(50vh - 275px + 1342px);left:calc(50% - 160px + 88px);width:143px;height:auto;opacity:1;z-index:5;">
                         <div class='tn-atom'> <img class='tn-atom__img t-img'
                                 data-original='images/calendar-iyun.png'
                                 src='images/calendar-iyun.png'
@@ -3647,43 +3620,49 @@
     </style>
 
     <script>
-      /* Force-position S, G letters and calendar after Tilda's t396 init.
-         These local-image elements have no static positioning CSS, so they
-         fall to the page bottom. Re-apply Tilda artboard coordinates as inline
-         !important styles, which beat any runtime overrides, and reveal them. */
+      /* Permanently keep S, G, calendar visible — Tilda animation removed from
+         HTML but MutationObserver guards against any runtime re-application. */
       (function () {
-        var defs = {
-          '1744272780612': { d: { top: 338, left: -763, w: 200 }, m: { top: 140, left: 50, w: 88 } },  /* letter-s */
-          '1744272799317': { d: { top: 600, left: -759, w: 200 }, m: { top: 248, left: 178, w: 71 } }, /* letter-g */
-          '1744274188832': { d: { top: 722, left: 380, w: 200 }, m: { top: 1342, left: 88, w: 143 } }  /* calendar */
+        var styles = {
+          '1744272780612': 'position:absolute;top:calc(50vh - 275px + 140px);left:calc(50% - 160px + 50px);width:88px;height:auto;opacity:1;z-index:5;',
+          '1744272799317': 'position:absolute;top:calc(50vh - 275px + 248px);left:calc(50% - 160px + 178px);width:71px;height:auto;opacity:1;z-index:5;',
+          '1744274188832': 'position:absolute;top:calc(50vh - 275px + 1342px);left:calc(50% - 160px + 88px);width:143px;height:auto;opacity:1;z-index:5;'
         };
-        function place() {
-          var mobile = window.matchMedia('(max-width: 479px)').matches;
-          Object.keys(defs).forEach(function (id) {
-            var el = document.querySelector('#rec987571396 .tn-elem[data-elem-id="' + id + '"]');
+        var observers = {};
+
+        function fixElem(id) {
+          var el = document.querySelector('[data-elem-id="' + id + '"]');
+          if (!el) return;
+          if (observers[id]) observers[id].disconnect();
+          el.classList.remove('t396__elem--anim-hidden');
+          el.setAttribute('style', styles[id]);
+          if (observers[id]) observers[id].observe(el, { attributes: true, attributeFilter: ['class', 'style'] });
+        }
+
+        function fixAll() {
+          Object.keys(styles).forEach(fixElem);
+        }
+
+        function attachObservers() {
+          if (typeof MutationObserver === 'undefined') return;
+          Object.keys(styles).forEach(function (id) {
+            var el = document.querySelector('[data-elem-id="' + id + '"]');
             if (!el) return;
-            var c = mobile ? defs[id].m : defs[id].d;
-            el.style.setProperty('position', 'absolute', 'important');
-            el.style.setProperty('height', 'auto', 'important');
-            el.style.setProperty('width', c.w + 'px', 'important');
-            if (mobile) {
-              el.style.setProperty('top', 'calc(50vh - 275px + ' + c.top + 'px)', 'important');
-              el.style.setProperty('left', 'calc(50% - 160px + ' + c.left + 'px)', 'important');
-            } else {
-              el.style.setProperty('top', c.top + 'px', 'important');
-              el.style.setProperty('left', 'calc(50% - 600px + ' + c.left + 'px)', 'important');
-            }
-            el.classList.remove('t396__elem--anim-hidden');
-            el.style.setProperty('opacity', '1', 'important');
+            observers[id] = new MutationObserver(function () { fixElem(id); });
+            observers[id].observe(el, { attributes: true, attributeFilter: ['class', 'style'] });
           });
         }
-        function schedule() { [300, 800, 1500, 2500].forEach(function (t) { setTimeout(place, t); }); }
+
+        fixAll();
+        [100, 500, 1000, 2000].forEach(function (t) { setTimeout(fixAll, t); });
+
         if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', schedule);
-        } else { schedule(); }
-        window.addEventListener('load', schedule);
-        window.addEventListener('resize', function () { setTimeout(place, 200); });
-        window.addEventListener('orientationchange', function () { setTimeout(place, 300); });
+          document.addEventListener('DOMContentLoaded', function () { fixAll(); attachObservers(); });
+        } else {
+          fixAll();
+          attachObservers();
+        }
+        window.addEventListener('load', function () { fixAll(); attachObservers(); });
       })();
     </script>
 
