@@ -81,16 +81,12 @@
       .tn-elem__9875713961744276327053 {
         display: none !important;
       }
-      /* Force S, G, calendar always visible — override Tilda anim-hidden */
+      /* Force S, G, calendar visible on iOS (entrance animation never fired,
+         leaving them at opacity:0). Positioning is left entirely to Tilda's
+         own artboard CSS so they stay aligned with sibling elements. */
       [data-elem-id="1744272780612"],
       [data-elem-id="1744272799317"],
-      [data-elem-id="1744274188832"] {
-        position: absolute !important;
-        opacity: 1 !important;
-        pointer-events: auto !important;
-        height: auto !important;
-        z-index: 5 !important;
-      }
+      [data-elem-id="1744274188832"],
       [data-elem-id="1744272780612"].t396__elem--anim-hidden,
       [data-elem-id="1744272799317"].t396__elem--anim-hidden,
       [data-elem-id="1744274188832"].t396__elem--anim-hidden {
@@ -3620,49 +3616,32 @@
     </style>
 
     <script>
-      /* Permanently keep S, G, calendar visible — Tilda animation removed from
-         HTML but MutationObserver guards against any runtime re-application. */
+      /* Keep S, G, calendar visible on iOS. Their entrance animation never
+         fired in Safari, so anim-hidden (opacity:0) stayed applied. We only
+         strip that class if it ever reappears — positioning is left to Tilda's
+         own artboard CSS so these elements stay aligned with their siblings. */
       (function () {
-        var styles = {
-          '1744272780612': 'position:absolute;top:calc(50vh - 275px + 140px);left:calc(50% - 160px + 50px);width:88px;height:auto;opacity:1;z-index:5;',
-          '1744272799317': 'position:absolute;top:calc(50vh - 275px + 248px);left:calc(50% - 160px + 178px);width:71px;height:auto;opacity:1;z-index:5;',
-          '1744274188832': 'position:absolute;top:calc(50vh - 275px + 1342px);left:calc(50% - 160px + 88px);width:143px;height:auto;opacity:1;z-index:5;'
-        };
-        var observers = {};
-
-        function fixElem(id) {
-          var el = document.querySelector('[data-elem-id="' + id + '"]');
-          if (!el) return;
-          if (observers[id]) observers[id].disconnect();
-          el.classList.remove('t396__elem--anim-hidden');
-          el.setAttribute('style', styles[id]);
-          if (observers[id]) observers[id].observe(el, { attributes: true, attributeFilter: ['class', 'style'] });
-        }
-
-        function fixAll() {
-          Object.keys(styles).forEach(fixElem);
-        }
-
-        function attachObservers() {
-          if (typeof MutationObserver === 'undefined') return;
-          Object.keys(styles).forEach(function (id) {
+        var ids = ['1744272780612', '1744272799317', '1744274188832'];
+        function unhide() {
+          ids.forEach(function (id) {
             var el = document.querySelector('[data-elem-id="' + id + '"]');
-            if (!el) return;
-            observers[id] = new MutationObserver(function () { fixElem(id); });
-            observers[id].observe(el, { attributes: true, attributeFilter: ['class', 'style'] });
+            if (el) el.classList.remove('t396__elem--anim-hidden');
           });
         }
-
-        fixAll();
-        [100, 500, 1000, 2000].forEach(function (t) { setTimeout(fixAll, t); });
-
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', function () { fixAll(); attachObservers(); });
-        } else {
-          fixAll();
-          attachObservers();
+        unhide();
+        if (typeof MutationObserver !== 'undefined') {
+          ids.forEach(function (id) {
+            var el = document.querySelector('[data-elem-id="' + id + '"]');
+            if (!el) return;
+            new MutationObserver(function () {
+              if (el.classList.contains('t396__elem--anim-hidden')) {
+                el.classList.remove('t396__elem--anim-hidden');
+              }
+            }).observe(el, { attributes: true, attributeFilter: ['class'] });
+          });
         }
-        window.addEventListener('load', function () { fixAll(); attachObservers(); });
+        [100, 500, 1000, 2000].forEach(function (t) { setTimeout(unhide, t); });
+        window.addEventListener('load', unhide);
       })();
     </script>
 
