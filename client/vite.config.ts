@@ -86,6 +86,24 @@ export default defineConfig(({ mode }) => {
                 fs.copyFileSync(indexHtml, path.join(routeDir, 'index.html'));
                 console.log(`✅ Copied index.html to ${route}/index.html`);
               });
+
+              // /websites — Telegram/ijtimoiy tarmoqlarda rasmsiz (faqat matn) preview chiqsin.
+              // Asosiy index.html ga tegmaymiz: faqat shu sahifa uchun og:image/twitter:image olib tashlanadi.
+              let websitesHtml = fs.readFileSync(indexHtml, 'utf-8');
+              websitesHtml = websitesHtml
+                // og:image va twitter:image meta teglarini butunlay olib tashlash
+                .replace(/\s*<meta property="og:image"[^>]*\/?>/g, '')
+                .replace(/\s*<meta property="twitter:image"[^>]*\/?>/g, '')
+                // JSON-LD ichidagi "image": "..." qatorini olib tashlash
+                .replace(/\s*"image":\s*"[^"]*",?\n/g, '\n')
+                // URL/canonical larni /websites ga moslash
+                .replace(/https:\/\/creative-design\.uz\/"/g, 'https://creative-design.uz/websites"');
+              const websitesDir = path.join(distDir, 'websites');
+              if (!fs.existsSync(websitesDir)) {
+                fs.mkdirSync(websitesDir, { recursive: true });
+              }
+              fs.writeFileSync(path.join(websitesDir, 'index.html'), websitesHtml);
+              console.log('✅ Generated websites/index.html (og:image olib tashlandi)');
             }
           }
         }
