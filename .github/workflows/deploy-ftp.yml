@@ -35,14 +35,9 @@ jobs:
       # each React route so direct URL access serves the SPA shell and the
       # router takes over client-side. /music isn't listed because that
       # path is also the media folder for uploaded music files.
-      # NOTE: 'websites' is intentionally excluded here. The Vite build
-      # (client/vite.config.ts → copy-index-html-for-routes plugin) already
-      # materialises dist/websites/index.html WITHOUT og:image/twitter:image
-      # so the /websites link shows a text-only social preview (no photo).
-      # A plain `cp` here would overwrite it and bring the image back.
       - name: Generate per-route index.html for SPA deep links
         run: |
-          for route in admin templates popular custom video-downloader; do
+          for route in admin templates popular websites custom video-downloader; do
             mkdir -p "dist/$route"
             cp dist/index.html "dist/$route/index.html"
           done

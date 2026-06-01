@@ -86,29 +86,6 @@ export default defineConfig(({ mode }) => {
                 fs.copyFileSync(indexHtml, path.join(routeDir, 'index.html'));
                 console.log(`✅ Copied index.html to ${route}/index.html`);
               });
-
-              // /websites — Telegram'da link UMUMAN preview qilmasin (na rasm, na sarlavha, na tavsif).
-              // Telegram faqat statik HTML'ni o'qiydi: og/twitter teglar, <title> va meta description
-              // bo'lmasa, preview kartochkasi qurilmaydi. Sahifa nomi brauzerda React orqali qo'yiladi
-              // (websites.page.tsx → document.title). Asosiy index.html ga tegmaymiz.
-              let websitesHtml = fs.readFileSync(indexHtml, 'utf-8');
-              websitesHtml = websitesHtml
-                // Barcha Open Graph / Twitter meta teglarini olib tashlash
-                .replace(/\s*<meta property="og:[^"]*"[^>]*\/?>/g, '')
-                .replace(/\s*<meta property="twitter:[^"]*"[^>]*\/?>/g, '')
-                // <title> va meta description — Telegram bularni preview sarlavhasi sifatida ishlatadi
-                .replace(/\s*<title>[\s\S]*?<\/title>/i, '')
-                .replace(/\s*<meta name="description"[^>]*\/?>/g, '')
-                // JSON-LD (Telegram o'qimaydi, lekin keraksiz) — butunlay olib tashlash
-                .replace(/\s*<script type="application\/ld\+json">[\s\S]*?<\/script>/i, '')
-                // canonical'ni /websites ga moslash (SEO uchun)
-                .replace(/https:\/\/creative-design\.uz\/"/g, 'https://creative-design.uz/websites"');
-              const websitesDir = path.join(distDir, 'websites');
-              if (!fs.existsSync(websitesDir)) {
-                fs.mkdirSync(websitesDir, { recursive: true });
-              }
-              fs.writeFileSync(path.join(websitesDir, 'index.html'), websitesHtml);
-              console.log('✅ Generated websites/index.html (preview meta butunlay olib tashlandi)');
             }
           }
         }
