@@ -212,12 +212,6 @@ export const WebsitesPage: React.FC = () => {
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
 
-  // Statik HTML'da <title> yo'q (Telegram preview chiqarmasligi uchun),
-  // shuning uchun brauzer tab nomini shu yerda qo'yamiz.
-  useEffect(() => {
-    document.title = "Web taklifnomalar | Creative Design";
-  }, []);
-
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 100);
     return () => clearTimeout(timer);
