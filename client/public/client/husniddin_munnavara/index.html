@@ -131,4 +131,26 @@ window.tildastatcookie='no';setTimeout(function(){(function(d,w,k,o,g) {var n=d.
  }
 }
 </style>
+
+<!-- Hero videoni darrov avtoplay qilish (widget kechikishini chetlab o'tish) -->
+<script>
+(function(){
+  var SEL='.tn-elem__9538666911744377009988';
+  function force(){
+    var v=document.querySelector(SEL+' video');
+    if(!v) return;
+    try{
+      v.muted=true; v.defaultMuted=true;
+      v.setAttribute('muted',''); v.setAttribute('autoplay','');
+      v.setAttribute('playsinline',''); v.setAttribute('webkit-playsinline','');
+      if(v.preload!=='auto'){ v.preload='auto'; }
+      if(v.paused){ var p=v.play(); if(p&&p.catch){ p.catch(function(){}); } }
+    }catch(e){}
+  }
+  var iv=setInterval(force,120);
+  setTimeout(function(){ clearInterval(iv); },12000);
+  document.addEventListener('DOMContentLoaded',force);
+  window.addEventListener('load',force);
+})();
+</script>
 </body> </html>
