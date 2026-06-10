@@ -370,4 +370,16 @@ window.tildastatcookie='no';setTimeout(function(){(function(d,w,k,o,g) {var n=d.
 #rec1082595976 .tn-elem[data-elem-id="1749059260635"] .tn-atom__img{width:100% !important;height:100% !important;object-fit:cover !important;}
 #rec1082595976 .tn-elem[data-elem-id="1749059260635"] .tn-atom::after{content:'' !important;position:absolute !important;left:0 !important;right:0 !important;top:0 !important;bottom:0 !important;z-index:10 !important;pointer-events:none !important;background:linear-gradient(to bottom,#ffffff 0%,rgba(255,255,255,0) 22%,rgba(255,255,255,0) 78%,#ffffff 100%) !important;}
 </style>
+<script id="mu-music-toggle">
+document.addEventListener("DOMContentLoaded",function(){
+  var a=document.getElementById("bg-sound");
+  var btn=document.querySelector('[data-elem-id="1749117380488"]');
+  if(!a||!btn)return;
+  btn.style.cursor="pointer";
+  btn.addEventListener("click",function(e){
+    e.stopPropagation(); e.preventDefault();
+    if(a.paused){ a.play().catch(function(){}); } else { a.pause(); }
+  },true);
+},{once:true});
+</script>
 </body> </html>
