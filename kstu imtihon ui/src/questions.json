@@ -2,8 +2,8 @@
   {
     "text": "Logistik regressiya modelining asosiy kuchli tomoni nimada?",
     "options": [
-      "Klasterlashda",
       "Ehtimollik asosida sinflashtirishda",
+      "Klasterlashda",
       "Grafik tahlilda",
       "Faqat regressiya qilishda"
     ],
@@ -12,10 +12,10 @@
   {
     "text": "Agar model trening ma’lumotda juda yaxshi ishlasa, lekin yangi ma’lumotda yomon ishlasa, bu nimani bildiradi?",
     "options": [
+      "Overfitting",
       "Gradient muammosi",
       "Normal holat",
-      "Underfitting",
-      "Overfitting"
+      "Underfitting"
     ],
     "correct": 0
   },
@@ -62,9 +62,9 @@
   {
     "text": "Hierarchical clustering nimasi bilan farq qiladi?",
     "options": [
+      "Oldindan klaster soni shart emas",
       "Regressionga asoslangan",
       "Faqat 2 klaster yaratadi",
-      "Oldindan klaster soni shart emas",
       "GPU talab qiladi"
     ],
     "correct": 0
@@ -82,9 +82,9 @@
   {
     "text": "“Recall” nimani bildiradi?",
     "options": [
+      "Haqiqiy ijobiylarni topish darajasi",
       "Model tezligi",
       "Dataset sifati",
-      "Haqiqiy ijobiylarni topish darajasi",
       "Regressiya aniqligi"
     ],
     "correct": 0
@@ -92,9 +92,9 @@
   {
     "text": "F1-score qachon muhim bo‘ladi?",
     "options": [
+      "Muvozanatsiz sinflarda",
       "Regressiyada",
       "Klasterlashda",
-      "Muvozanatsiz sinflarda",
       "Dataset katta bo‘lsa"
     ],
     "correct": 0
@@ -102,8 +102,8 @@
   {
     "text": "Unsupervised learning asosiy vazifasi:",
     "options": [
-      "Regressiya qilish",
       "Ma’lumot ichidagi yashirin tuzilmani toppish",
+      "Regressiya qilish",
       "Grafik chizish",
       "Belgilangan sinflar bilan ishlash"
     ],
@@ -112,9 +112,9 @@
   {
     "text": "Activation function nima uchun kerak?",
     "options": [
+      "Nolinearlik kiritish",
       "Grafikni soddalashtirish",
       "Datasetni kamaytirish",
-      "Nolinearlik kiritish",
       "Modelni tezlashtirish"
     ],
     "correct": 0
@@ -122,8 +122,8 @@
   {
     "text": "ReLU funksiyasining asosiy muammosi:",
     "options": [
-      "Klasterlash qila olmaydi",
       "Ba’zi neyronlar butunlay o‘chib qolishi",
+      "Klasterlash qila olmaydi",
       "Model sekin ishlaydi",
       "Dataset kichik"
     ],
@@ -132,9 +132,9 @@
   {
     "text": "Backpropagation jarayoni nimani bajaradi?",
     "options": [
+      "Xatoni orqaga uzatib og‘irliklarni yangilaydi",
       "Klasterlash qiladi",
       "Datasetni kengaytiradi",
-      "Xatoni orqaga uzatib og‘irliklarni yangilaydi",
       "Ma’lumotni tozalaydi"
     ],
     "correct": 0
@@ -142,8 +142,8 @@
   {
     "text": "Deep learning modeli nimasi bilan ajraladi?",
     "options": [
-      "Dataset kichik",
       "Ko‘p qatlamli tuzilma",
+      "Dataset kichik",
       "Grafik ishlaydi",
       "Faqat regressiya qiladi"
     ],
@@ -152,10 +152,10 @@
   {
     "text": "Dropout texnikasi nimaga xizmat qiladi?",
     "options": [
+      "Overfittingni kamaytirish",
       "Batch normalization nimani yaxshilaydi?",
       "Datasetni oshirish",
-      "C) Modelni murakkablashtirish\nD) Regressiya qilish",
-      "Overfittingni kamaytirish"
+      "C) Modelni murakkablashtirish\nD) Regressiya qilish"
     ],
     "correct": 0
   },
@@ -182,9 +182,9 @@
   {
     "text": "Modelning haddan tashqari murakkabligi qaysi muammoga olib keladi?",
     "options": [
+      "Overfitting",
       "Klasterlash",
       "Normalizatsiya",
-      "Overfitting",
       "Underfitting"
     ],
     "correct": 0
@@ -192,8 +192,8 @@
   {
     "text": "Feature engineering nima uchun muhim?",
     "options": [
-      "Modelni sekinlashtirish uchun",
       "Modelga foydali belgilar yaratish uchun",
+      "Modelni sekinlashtirish uchun",
       "Datasetni kamaytirish uchun",
       "GPU ishlatish uchun"
     ],
@@ -202,20 +202,20 @@
   {
     "text": "Datasetni normalizatsiya qilishning asosiy maqsadi:",
     "options": [
+      "Belgilarni bir xil diapazonga keltirish",
       "Ma’lumotni o‘chirish",
       "Modelni kattalashtirish",
-      "Grafik chizish",
-      "Belgilarni bir xil diapazonga keltirish"
+      "Grafik chizish"
     ],
     "correct": 0
   },
   {
     "text": "Supervised learning uchun kerak bo‘lgan asosiy element:",
     "options": [
+      "Belgilangan natija",
       "Belgisiz ma’lumot",
       "Grafik",
-      "GPU",
-      "Belgilangan natija"
+      "GPU"
     ],
     "correct": 0
   },
@@ -232,19 +232,19 @@
   {
     "text": "Learning rate juda kichik bo‘lsa:",
     "options": [
+      "O‘qitish sekinlashadi",
       "Model buziladi",
       "Dataset yo‘qoladi",
-      "O‘qitish tezlashadi",
-      "O‘qitish sekinlashadi"
+      "O‘qitish tezlashadi"
     ],
     "correct": 0
   },
   {
     "text": "Learning rate juda katta bo‘lsa:",
     "options": [
+      "O‘qitish beqaror bo‘ladi",
       "Dataset oshadi",
       "Model barqaror bo‘ladi",
-      "O‘qitish beqaror bo‘ladi",
       "Overfitting kamayadi"
     ],
     "correct": 0
@@ -262,9 +262,9 @@
   {
     "text": "Klassifikatsiyada muvozanatsiz dataset nimani anglatadi?",
     "options": [
+      "Sinflar soni keskin farqli",
       "Regressiya mavjud",
       "Dataset kichik",
-      "Sinflar soni keskin farqli",
       "Belgilar teng"
     ],
     "correct": 0
@@ -282,9 +282,9 @@
   {
     "text": "Clusteringda masofa o‘lchovi nimani bildiradi?",
     "options": [
+      "Belgilar o‘xshashligi",
       "Grafik",
       "Model tezligi",
-      "Belgilar o‘xshashligi",
       "Dataset hajmi"
     ],
     "correct": 0
@@ -292,8 +292,8 @@
   {
     "text": "K-means boshlang‘ich markazlarga sezgir bo‘lishi nimani bildiradi?",
     "options": [
-      "Har doim bir xil natija",
       "Natija tasodifiy bo‘lishi mumkin",
+      "Har doim bir xil natija",
       "Model buziladi",
       "Klaster yo‘q"
     ],
@@ -302,8 +302,8 @@
   {
     "text": "Modelni qayta o‘qitish qachon kerak?",
     "options": [
-      "Grafik buzilsa",
       "Dataset o‘zgarganda",
+      "Grafik buzilsa",
       "Iteratsiya kamaysa",
       "GPU o‘chsa"
     ],
@@ -312,10 +312,10 @@
   {
     "text": "Feature selection maqsadi:",
     "options": [
+      "Keraksiz belgilarni olib tashlash",
       "Belgilarni ko‘paytirish",
       "Grafik chizish",
-      "Datasetni saqlash",
-      "Keraksiz belgilarni olib tashlash"
+      "Datasetni saqlash"
     ],
     "correct": 0
   },
@@ -332,9 +332,9 @@
   {
     "text": "Neural networkda og‘irliklar nimani ifodalaydi?",
     "options": [
+      "Belgilar ahamiyati",
       "Dataset hajmi",
       "Iteratsiya soni",
-      "Belgilar ahamiyati",
       "Grafik qiymat"
     ],
     "correct": 0
@@ -342,9 +342,9 @@
   {
     "text": "Epoch nimani bildiradi?",
     "options": [
+      "Datasetni bir marta to‘liq ko‘rish",
       "Klasterlash bosqichi",
       "Grafik",
-      "Datasetni bir marta to‘liq ko‘rish",
       "Gradient yo‘qolishi"
     ],
     "correct": 0
@@ -352,18 +352,18 @@
   {
     "text": "Batch training nimani anglatadi?",
     "options": [
+      "Butun dataset bilan o‘qitish",
       "Bitta element bilan o‘qitish",
       "Klasterlash",
-      "Grafik",
-      "Butun dataset bilan o‘qitish"
+      "Grafik"
     ],
     "correct": 0
   },
   {
     "text": "Mini-batch training afzalligi:",
     "options": [
-      "Datasetni o‘chirish",
       "Tezlik va barqarorlik muvozanati",
+      "Datasetni o‘chirish",
       "Modelni soddalashtirish",
       "Grafik chizish"
     ],
@@ -372,9 +372,9 @@
   {
     "text": "Activation funksiyasiz neyron tarmoq:",
     "options": [
+      "Chiziqli modelga aylanadi",
       "Nolinear model",
       "Overfitting bo‘ladi",
-      "Chiziqli modelga aylanadi",
       "Klasterlash qiladi"
     ],
     "correct": 0
@@ -392,18 +392,18 @@
   {
     "text": "Deep network muammosi:",
     "options": [
+      "O‘qitish qiyinlashadi",
       "Klasterlash yo‘q",
       "Dataset o‘sadi",
-      "Grafik buziladi",
-      "O‘qitish qiyinlashadi"
+      "Grafik buziladi"
     ],
     "correct": 0
   },
   {
     "text": "Early stopping texnikasi nimani kamaytiradi?",
     "options": [
-      "Klasterlash",
       "Overfitting",
+      "Klasterlash",
       "Underfitting",
       "Dataset"
     ],
@@ -412,9 +412,9 @@
   {
     "text": "Data augmentation nimani bildiradi?",
     "options": [
+      "Sun’iy ma’lumot qo‘shish",
       "Grafikni kamaytirish",
       "Datasetni o‘chirish",
-      "Sun’iy ma’lumot qo‘shish",
       "Regressiya"
     ],
     "correct": 0
@@ -422,28 +422,28 @@
   {
     "text": "Transfer learning qachon foydali?",
     "options": [
+      "Dataset kichik bo‘lsa",
       "Grafikda",
       "Dataset katta bo‘lsa",
-      "Klasterlashda",
-      "Dataset kichik bo‘lsa"
+      "Klasterlashda"
     ],
     "correct": 0
   },
   {
     "text": "Hyperparameter nimani bildiradi?",
     "options": [
+      "Oldindan belgilangan sozlama",
       "Grafik",
       "Model o‘rganadigan qiymat",
-      "Dataset",
-      "Oldindan belgilangan sozlama"
+      "Dataset"
     ],
     "correct": 0
   },
   {
     "text": "Model deployment nimani anglatadi?",
     "options": [
-      "Datasetni o‘chirish",
       "Modelni ishlab chiqarishga chiqarish",
+      "Datasetni o‘chirish",
       "Klasterlash",
       "Grafik chizish"
     ],
@@ -452,8 +452,8 @@
   {
     "text": "Monitoring bosqichi nima uchun kerak?",
     "options": [
-      "Grafik",
       "Modelni kuzatish va yangilash",
+      "Grafik",
       "Regressiya",
       "Datasetni saqlash"
     ],
@@ -462,8 +462,8 @@
   {
     "text": "Mashinali o‘qitishda modelning real sharoitda barqaror ishlashi nimaga ko‘proq bog‘liq?",
     "options": [
-      "Dataset hajmining kattaligiga",
       "Modelning umumlashtirish qobiliyatiga",
+      "Dataset hajmining kattaligiga",
       "GPU tezligiga",
       "Faqat trening aniqligiga"
     ],
@@ -482,9 +482,9 @@
   {
     "text": "Feature scaling bajarilmasa qanday muammo kelib chiqadi?",
     "options": [
+      "Ba’zi belgilar ustun bo‘lib ketadi",
       "Klaster yo‘qoladi",
       "Model tezlashadi",
-      "Ba’zi belgilar ustun bo‘lib ketadi",
       "Dataset o‘chadi"
     ],
     "correct": 0
@@ -502,20 +502,20 @@
   {
     "text": "K-means algoritmi noto‘g‘ri ishlashi mumkin bo‘lgan holat:",
     "options": [
+      "Klasterlar notekis shaklda bo‘lsa",
       "Grafik yo‘q bo‘lsa",
       "Dataset kichik bo‘lsa",
-      "GPU ishlatilsa",
-      "Klasterlar notekis shaklda bo‘lsa"
+      "GPU ishlatilsa"
     ],
     "correct": 0
   },
   {
     "text": "Hierarchical clustering qachon afzal?",
     "options": [
+      "Klaster soni oldindan noma’lum bo‘lsa",
       "Dataset juda kichik bo‘lsa",
       "GPU ishlatilganda",
-      "Faqat regressiyada",
-      "Klaster soni oldindan noma’lum bo‘lsa"
+      "Faqat regressiyada"
     ],
     "correct": 0
   },
@@ -532,20 +532,20 @@
   {
     "text": "Imbalanced datasetda faqat accuracy ga tayanish:",
     "options": [
+      "Yolg‘on yaxshi natija ko‘rsatishi mumkin",
       "To‘g‘ri baho beradi",
       "Modelni tezlashtiradi",
-      "Gradientni yaxshilaydi",
-      "Yolg‘on yaxshi natija ko‘rsatishi mumkin"
+      "Gradientni yaxshilaydi"
     ],
     "correct": 0
   },
   {
     "text": "Model murakkablashgani sari odatda:",
     "options": [
+      "Variance oshadi",
       "Gradient yo‘qoladi",
       "Bias oshadi",
-      "Dataset kamayadi",
-      "Variance oshadi"
+      "Dataset kamayadi"
     ],
     "correct": 0
   },
@@ -562,8 +562,8 @@
   {
     "text": "Neural networkda qatlamlar ko‘payishi:",
     "options": [
-      "Har doim aniqlikni oshiradi",
       "O‘qitishni murakkablashtiradi",
+      "Har doim aniqlikni oshiradi",
       "Datasetni o‘chiradi",
       "Grafikni buzadi"
     ],
@@ -582,18 +582,18 @@
   {
     "text": "Deep learningning asosiy afzalligi:",
     "options": [
+      "Avtomatik xususiyat o‘rganish",
       "GPUni o‘chirish",
       "Grafikni soddalashtirish",
-      "Datasetni kamaytirish",
-      "Avtomatik xususiyat o‘rganish"
+      "Datasetni kamaytirish"
     ],
     "correct": 0
   },
   {
     "text": "Dropout ishlatilmasa:",
     "options": [
-      "Gradient yo‘qoladi",
       "Overfitting xavfi oshadi",
+      "Gradient yo‘qoladi",
       "Model tezlashadi",
       "Dataset o‘chadi"
     ],
@@ -602,19 +602,19 @@
   {
     "text": "Batch normalization qaysi muammoni kamaytiradi?",
     "options": [
+      "O‘qitish beqarorligini",
       "Dataset hajmini",
       "Grafikni",
-      "Klasterlashni",
-      "O‘qitish beqarorligini"
+      "Klasterlashni"
     ],
     "correct": 0
   },
   {
     "text": "Early stopping nimani bildiradi?",
     "options": [
+      "Modelni vaqtida to‘xtatish",
       "Klasterlashni bekor qilish",
       "GPUni o‘chirish",
-      "Modelni vaqtida to‘xtatish",
       "Datasetni o‘chirish"
     ],
     "correct": 0
@@ -622,9 +622,9 @@
   {
     "text": "Transfer learningning kuchli tomoni:",
     "options": [
+      "Kichik datasetda ham ishlaydi",
       "Har doim tezroq",
       "Grafik uchun",
-      "Kichik datasetda ham ishlaydi",
       "Klasterlash uchun"
     ],
     "correct": 0
@@ -642,8 +642,8 @@
   {
     "text": "Hyperparameter noto‘g‘ri tanlansa:",
     "options": [
-      "Grafik buziladi",
       "Model optimal bo‘lmaydi",
+      "Grafik buziladi",
       "Klasterlash to‘xtaydi",
       "Dataset yo‘qoladi"
     ],
@@ -652,9 +652,9 @@
   {
     "text": "Mini-batch trainingning ustunligi:",
     "options": [
+      "Tezlik va aniqlik muvozanati",
       "Modelni soddalashtiradi",
       "Datasetni kamaytiradi",
-      "Tezlik va aniqlik muvozanati",
       "Grafikni yaxshilaydi"
     ],
     "correct": 0
@@ -662,9 +662,9 @@
   {
     "text": "Curse of dimensionality natijasi:",
     "options": [
+      "Ma’lumot siyraklashadi",
       "Model tezlashadi",
       "Dataset yo‘qoladi",
-      "Ma’lumot siyraklashadi",
       "Gradient kuchayadi"
     ],
     "correct": 0
@@ -672,10 +672,10 @@
   {
     "text": "Model monitoring nima uchun zarur?",
     "options": [
+      "Driftni aniqlash uchun",
       "Grafik chizish",
       "Datasetni o‘chirish",
-      "GPUni tekshirish",
-      "Driftni aniqlash uchun"
+      "GPUni tekshirish"
     ],
     "correct": 0
   },
@@ -692,8 +692,8 @@
   {
     "text": "Training dataset noto‘g‘ri bo‘lsa:",
     "options": [
-      "Model tezlashadi",
       "Model noto‘g‘ri o‘rganadi",
+      "Model tezlashadi",
       "Dataset kattalashadi",
       "Gradient yo‘qoladi"
     ],
@@ -702,19 +702,19 @@
   {
     "text": "Noise ko‘p bo‘lsa model:",
     "options": [
+      "Chalg‘ishi mumkin",
       "Mukammal bo‘ladi",
       "Tezlashadi",
-      "Klasterlash qiladi",
-      "Chalg‘ishi mumkin"
+      "Klasterlash qiladi"
     ],
     "correct": 0
   },
   {
     "text": "Regularization ishlatilmasa:",
     "options": [
+      "Overfitting ehtimoli oshadi",
       "Dataset kamayadi",
       "Regressiya bo‘lmaydi",
-      "Overfitting ehtimoli oshadi",
       "Grafik yo‘qoladi"
     ],
     "correct": 0
@@ -722,9 +722,9 @@
   {
     "text": "Model interpretability nimani bildiradi?",
     "options": [
+      "Modelni tushuntirish imkoniyati",
       "GPU tezligi",
       "Grafik sifati",
-      "Modelni tushuntirish imkoniyati",
       "Dataset hajmi"
     ],
     "correct": 0
@@ -732,8 +732,8 @@
   {
     "text": "Explainable AI maqsadi:",
     "options": [
-      "Modelni sekinlashtirish",
       "Qarorlarni tushuntirish",
+      "Modelni sekinlashtirish",
       "Klasterlash",
       "Datasetni oshirish"
     ],
@@ -742,8 +742,8 @@
   {
     "text": "Feature importance nimani ko‘rsatadi?",
     "options": [
-      "Grafikni",
       "Belgilar ahamiyatini",
+      "Grafikni",
       "Dataset hajmini",
       "Gradient tezligini"
     ],
@@ -752,10 +752,10 @@
   {
     "text": "Model drift nimani bildiradi?",
     "options": [
+      "Ma’lumot taqsimoti o‘zgarishi",
       "Dataset yo‘qolishi",
       "Gradient o‘sishi",
-      "GPU buzilishi",
-      "Ma’lumot taqsimoti o‘zgarishi"
+      "GPU buzilishi"
     ],
     "correct": 0
   },
@@ -782,9 +782,9 @@
   {
     "text": "Trening ma’lumotlari real sharoitni to‘liq aks ettirmasa, model qanday muammoga duch keladi?",
     "options": [
+      "Real sharoitda noto‘g‘ri qaror chiqaradi",
       "Juda tez ishlaydi",
       "Dataset kengayadi",
-      "Real sharoitda noto‘g‘ri qaror chiqaradi",
       "Gradient kuchayadi"
     ],
     "correct": 0
@@ -792,29 +792,29 @@
   {
     "text": "Klassifikatsiya modelida noto‘g‘ri belgilangan (xato label) ma’lumotlar ko‘p bo‘lsa, eng ehtimoliy natija:",
     "options": [
+      "Model noto‘g‘ri o‘rganadi va barqarorlik yo‘qoladi",
       "Dataset tezlashadi",
       "Model yanada mustahkam bo‘ladi",
-      "Klasterlash yaxshilanadi",
-      "Model noto‘g‘ri o‘rganadi va barqarorlik yo‘qoladi"
+      "Klasterlash yaxshilanadi"
     ],
     "correct": 0
   },
   {
     "text": "Modelni o‘qitishda juda katta datasetdan foydalanish har doim yaxshi natija bermasligi sababi:",
     "options": [
+      "Sifatsiz yoki shovqinli ma’lumot modelni chalg‘itadi",
       "GPU ortiqcha yuklanadi",
       "Dataset hajmi modelni sekinlashtirishi mumkin",
-      "Grafik ishlamaydi",
-      "Sifatsiz yoki shovqinli ma’lumot modelni chalg‘itadi"
+      "Grafik ishlamaydi"
     ],
     "correct": 0
   },
   {
     "text": "Feature engineering jarayonida keraksiz belgilarni modelga qo‘shish nimaga olib keladi?",
     "options": [
+      "Model chalg‘ishi va ortiqcha moslashish xavfi oshadi",
       "Model umumlashtirish qobiliyati oshadi",
       "Dataset kichrayadi",
-      "Model chalg‘ishi va ortiqcha moslashish xavfi oshadi",
       "Klasterlash tezlashadi"
     ],
     "correct": 0
@@ -822,9 +822,9 @@
   {
     "text": "Neural networkda juda ko‘p qatlam qo‘shishning salbiy tomoni:",
     "options": [
+      "O‘qitish murakkablashadi va barqarorlik kamayadi",
       "Model har doim aniq bo‘ladi",
       "Grafik yaxshilanadi",
-      "O‘qitish murakkablashadi va barqarorlik kamayadi",
       "Dataset avtomatik tozalanadi"
     ],
     "correct": 0
@@ -832,20 +832,20 @@
   {
     "text": "Model interpretability yuqori bo‘lishi nima uchun muhim?",
     "options": [
+      "Qarorlarni tushuntirish va ishonch hosil qilish uchun",
       "Datasetni oshirish uchun",
       "GPU tezligini oshirish uchun",
-      "Faqat grafik uchun",
-      "Qarorlarni tushuntirish va ishonch hosil qilish uchun"
+      "Faqat grafik uchun"
     ],
     "correct": 0
   },
   {
     "text": "Explainable AI usullarining asosiy maqsadi:",
     "options": [
+      "Model qarorlarini inson tushunadigan qilish",
       "Klasterlashni tezlashtirish",
       "Datasetni kamaytirish",
-      "Modelni murakkablashtirish",
-      "Model qarorlarini inson tushunadigan qilish"
+      "Modelni murakkablashtirish"
     ],
     "correct": 0
   },
@@ -862,8 +862,8 @@
   {
     "text": "Modelni qayta o‘qitish qachon zarur bo‘ladi?",
     "options": [
-      "Grafik eskirsa",
       "Ma’lumotlar muhitida o‘zgarish bo‘lsa",
+      "Grafik eskirsa",
       "GPU yangilansa",
       "Klasterlash tugasa"
     ],
@@ -872,19 +872,19 @@
   {
     "text": "Imbalanced datasetda noto‘g‘ri model qanday xatoga olib kelishi mumkin?",
     "options": [
+      "Kichik sinflarni e’tiborsiz qoldiradi",
       "Datasetni o‘chiradi",
       "Gradientni oshiradi",
-      "GPUni buzadi",
-      "Kichik sinflarni e’tiborsiz qoldiradi"
+      "GPUni buzadi"
     ],
     "correct": 0
   },
   {
     "text": "Transfer learning ishlatilganda eng katta foyda:",
     "options": [
+      "Oldindan o‘rganilgan bilimdan foydalanish",
       "Klasterlashni tezlashtirish",
       "Grafikni yaxshilash",
-      "Oldindan o‘rganilgan bilimdan foydalanish",
       "Datasetni o‘chirish"
     ],
     "correct": 0
@@ -892,8 +892,8 @@
   {
     "text": "Training va validation natijalari juda farq qilsa, bu nimani bildiradi?",
     "options": [
-      "Dataset ideal",
       "Model umumlashtira olmayapti",
+      "Dataset ideal",
       "GPU sust",
       "Model mukammal"
     ],
@@ -902,29 +902,29 @@
   {
     "text": "Dropout ishlatiladigan asosiy sabab:",
     "options": [
+      "Ortiqcha moslashishni kamaytirish",
       "Grafikni soddalashtirish",
       "Modelni murakkablashtirish",
-      "Datasetni oshirish",
-      "Ortiqcha moslashishni kamaytirish"
+      "Datasetni oshirish"
     ],
     "correct": 0
   },
   {
     "text": "Monitoring bosqichi e’tibordan chetda qolsa:",
     "options": [
+      "Model real muhitda buzilishi mumkin",
       "Klasterlash yaxshilanadi",
       "GPU tezlashadi",
-      "Dataset kattalashadi",
-      "Model real muhitda buzilishi mumkin"
+      "Dataset kattalashadi"
     ],
     "correct": 0
   },
   {
     "text": "Hyperparameter tuning noto‘g‘ri bajarilsa:",
     "options": [
+      "Model optimal ishlamaydi",
       "Gradient kuchayadi",
       "Dataset yo‘qoladi",
-      "Model optimal ishlamaydi",
       "Grafik buziladi"
     ],
     "correct": 0
@@ -932,10 +932,10 @@
   {
     "text": "Ma’lumot sifati past bo‘lsa, eng yaxshi model ham:",
     "options": [
+      "Noto‘g‘ri natija beradi",
       "Mukammal ishlaydi",
       "GPUni kuchaytiradi",
-      "Klasterlashni yaxshilaydi",
-      "Noto‘g‘ri natija beradi"
+      "Klasterlashni yaxshilaydi"
     ],
     "correct": 0
   },
@@ -952,9 +952,9 @@
   {
     "text": "Mashinali o‘qitish tizimining muvaffaqiyati ko‘proq nimaga bog‘liq?",
     "options": [
-      "GPU kuchiga",
-      "GPU kuchiga",
       "Ma’lumot sifati va model tanlashga",
+      "GPU kuchiga",
+      "GPU kuchiga",
       "Grafik interfeysga"
     ],
     "correct": 0
@@ -962,9 +962,9 @@
   {
     "text": "Mashinali o‘qitishning asosiy g‘oyasi nimadan iborat bo‘lib, u an’anaviy dasturlashdan qaysi jihati bilan farq qiladi?",
     "options": [
+      "Mashinali o‘qitish ma’lumotlardan qonuniyatlarni o‘zi o‘rganadi, an’anaviy dasturlashda esa qoidalar oldindan yoziladi",
       "Ikkalasi ham bir xil ishlaydi",
       "Mashinali o‘qitish faqat grafik uchun ishlatiladi",
-      "Mashinali o‘qitish ma’lumotlardan qonuniyatlarni o‘zi o‘rganadi, an’anaviy dasturlashda esa qoidalar oldindan yoziladi",
       "Mashinali o‘qitish aniq qoidalar asosida ishlaydi, an’anaviy dasturlash esa ehtimollikka asoslanadi"
     ],
     "correct": 0
@@ -982,8 +982,8 @@
   {
     "text": "Datasetni shakllantirishda Pandasning ustunligi nimada?",
     "options": [
-      "Klasterlash qiladi",
       "Jadval ko‘rinishidagi ma’lumotlarni qulay boshqaradi",
+      "Klasterlash qiladi",
       "Faqat grafik chizadi",
       "Model o‘qitadi"
     ],
@@ -1002,8 +1002,8 @@
   {
     "text": "Supervised learningda model nimani o‘rganadi?",
     "options": [
-      "GPU tezligini",
       "Belgilangan kirish–chiqish bog‘lanishini",
+      "GPU tezligini",
       "Belgisiz tuzilmani",
       "Klaster masofasini"
     ],
@@ -1032,10 +1032,10 @@
   {
     "text": "Ochiq manbali datasetlar nimasi bilan muhim?",
     "options": [
+      "Tajriba va solishtirish imkonini beradi",
       "GPUni tezlashtiradi",
       "Faqat akademik uchun",
-      "Grafik uchun kerak",
-      "Tajriba va solishtirish imkonini beradi"
+      "Grafik uchun kerak"
     ],
     "correct": 0
   },
@@ -1052,8 +1052,8 @@
   {
     "text": "Overfitting nimaga olib keladi?",
     "options": [
-      "Grafik buziladi",
       "Real ma’lumotda yomon natija",
+      "Grafik buziladi",
       "Har doim yuqori aniqlik",
       "Dataset kengayadi"
     ],
@@ -1062,8 +1062,8 @@
   {
     "text": "Regularization ishlatilishining asosiy sababi:",
     "options": [
-      "Grafik chizish",
       "Overfittingni kamaytirish",
+      "Grafik chizish",
       "Datasetni kamaytirish",
       "GPUni tezlashtirish"
     ],
@@ -1072,8 +1072,8 @@
   {
     "text": "Bias–variance muvozanati nimani anglatadi?",
     "options": [
-      "Grafikni optimallashtirish",
       "Xato turlarini balanslash",
+      "Grafikni optimallashtirish",
       "Dataset hajmini oshirish",
       "Klasterlashni tezlashtirish"
     ],
@@ -1082,8 +1082,8 @@
   {
     "text": "MNIST dataset nimani ifodalaydi?",
     "options": [
-      "Video signal",
       "Qo‘lda yozilgan raqamlar tasviri",
+      "Video signal",
       "Audio ma’lumot",
       "Matnlar to‘plami"
     ],
@@ -1102,8 +1102,8 @@
   {
     "text": "Klassifikatsiya modelini baholashda eng muhim jihat:",
     "options": [
-      "GPU tezligi",
       "Umumlashtirish qobiliyati",
+      "GPU tezligi",
       "Grafik sifati",
       "Dataset rangi"
     ],
@@ -1112,10 +1112,10 @@
   {
     "text": "Zamonaviy sinflashtirish algoritmlarining ustunligi:",
     "options": [
+      "Murakkab naqshlarni o‘rganadi",
       "Har doim tez",
       "Grafikni soddalashtiradi",
-      "Datasetni kamaytiradi",
-      "Murakkab naqshlarni o‘rganadi"
+      "Datasetni kamaytiradi"
     ],
     "correct": 0
   },
@@ -1142,9 +1142,9 @@
   {
     "text": "Yuqori samarali klasterlash nimani anglatadi?",
     "options": [
+      "Aniqlik va barqarorlik",
       "Dataset kichik",
       "Grafik chiroyli",
-      "Aniqlik va barqarorlik",
       "Tez ishlash"
     ],
     "correct": 0
@@ -1162,9 +1162,9 @@
   {
     "text": "CNN arxitekturasi qayerda ishlatiladi?",
     "options": [
+      "Tasvir tahlili",
       "Klasterlash",
       "Matn",
-      "Tasvir tahlili",
       "Audio"
     ],
     "correct": 0
@@ -1172,19 +1172,19 @@
   {
     "text": "RNN nimaga mos?",
     "options": [
+      "Vaqtli qatorlar",
       "Klasterlash\nGrafik",
-      "Tasvir",
-      "Vaqtli qatorlar"
+      "Tasvir"
     ],
     "correct": 0
   },
   {
     "text": "Vaqtli qatorlarni tahlil qilishda asosiy muammo:",
     "options": [
+      "Ketma-ket bog‘liqlik",
       "Grafik sifati",
       "Tasodifiylik",
-      "Dataset rangi",
-      "Ketma-ket bog‘liqlik"
+      "Dataset rangi"
     ],
     "correct": 0
   },
@@ -1201,9 +1201,9 @@
   {
     "text": "Mashinali o‘qitishda ma’lumotlarni oldindan qayta ishlash bosqichi nega muhim hisoblanadi?",
     "options": [
+      "Chunki model faqat toza va strukturalangan ma’lumotda barqaror ishlaydi",
       "Chunki dataset avtomatik kichrayadi",
       "Chunki GPU tezlashadi",
-      "Chunki model faqat toza va strukturalangan ma’lumotda barqaror ishlaydi",
       "Chunki grafik chizish osonlashadi"
     ],
     "correct": 0
@@ -1211,10 +1211,10 @@
   {
     "text": "Pandas yordamida yo‘qolgan qiymatlarni qayta ishlamaslik qanday muammoga olib kelishi mumkin?",
     "options": [
+      "Model noto‘g‘ri xulosa chiqarishi mumkin",
       "Dataset kengayadi",
       "Model tezlashadi",
-      "Klasterlash osonlashadi",
-      "Model noto‘g‘ri xulosa chiqarishi mumkin"
+      "Klasterlash osonlashadi"
     ],
     "correct": 0
   },
@@ -1241,9 +1241,9 @@
   {
     "text": "Agent noto‘g‘ri qaror qabul qilganda reinforcement learningda nima sodir bo‘ladi?",
     "options": [
+      "Mukofot kamayadi yoki jazolanadi",
       "Dataset o‘chadi",
       "Klasterlash boshlanadi",
-      "Mukofot kamayadi yoki jazolanadi",
       "Grafik o‘zgaradi"
     ],
     "correct": 0
@@ -1251,9 +1251,9 @@
   {
     "text": "Ochiq manbali datasetlar bilan ishlashning ilmiy ahamiyati nimada?",
     "options": [
+      "Natijalarni boshqa tadqiqotchilar bilan solishtirish mumkin",
       "Dataset o‘chadi",
       "GPU kuchayadi",
-      "Natijalarni boshqa tadqiqotchilar bilan solishtirish mumkin",
       "Grafik tezlashadi"
     ],
     "correct": 0
@@ -1261,9 +1261,9 @@
   {
     "text": "Regression masalasida underfitting qachon yuz beradi?",
     "options": [
+      "Model juda oddiy bo‘lsa va naqshni o‘rganolmasa",
       "GPU sust bo‘lsa",
       "Grafik yo‘q bo‘lsa",
-      "Model juda oddiy bo‘lsa va naqshni o‘rganolmasa",
       "Dataset juda katta bo‘lsa"
     ],
     "correct": 0
@@ -1271,9 +1271,9 @@
   {
     "text": "Overfitting bo‘lgan modelning asosiy belgisi:",
     "options": [
+      "Test natijasi keskin yomon",
       "Grafik buziladi",
       "Trening natijasi yomon",
-      "Test natijasi keskin yomon",
       "Dataset yo‘q"
     ],
     "correct": 0
@@ -1281,10 +1281,10 @@
   {
     "text": "Bias yuqori bo‘lgan model nimani anglatadi?",
     "options": [
+      "Model soddalashtirilgan",
       "Klasterlash noto‘g‘ri",
       "Dataset ortiqcha katta",
-      "Model juda murakkab",
-      "Model soddalashtirilgan"
+      "Model juda murakkab"
     ],
     "correct": 0
   },
@@ -1301,18 +1301,18 @@
   {
     "text": "MNIST bilan ishlashda modelni baholash nima uchun muhim?",
     "options": [
+      "Model umumlashtirish qobiliyatini aniqlash uchun",
       "Klasterlash uchun",
       "Grafik chizish uchun",
-      "Datasetni kamaytirish uchun",
-      "Model umumlashtirish qobiliyatini aniqlash uchun"
+      "Datasetni kamaytirish uchun"
     ],
     "correct": 0
   },
   {
     "text": "Klassifikatsiya algoritmlarini qiyoslashdan maqsad:",
     "options": [
-      "Eng tez algoritmni toppish",
       "Eng mos modelni aniqlash",
+      "Eng tez algoritmni toppish",
       "Datasetni o‘chirish",
       "Grafikni yaxshilash"
     ],
@@ -1321,10 +1321,10 @@
   {
     "text": "Zamonaviy algoritmlar ko‘pincha nimani yaxshiroq bajaradi?",
     "options": [
+      "Murakkab naqshlarni o‘rganadi",
       "GPUni o‘chiradi",
       "Datasetni kamaytiradi",
-      "Grafikni soddalashtiradi",
-      "Murakkab naqshlarni o‘rganadi"
+      "Grafikni soddalashtiradi"
     ],
     "correct": 0
   },
@@ -1341,8 +1341,8 @@
   {
     "text": "Chuqur o‘qitish modeli nimani avtomatik o‘rganadi?",
     "options": [
-      "Datasetni o‘chirishni",
       "Belgilarni",
+      "Datasetni o‘chirishni",
       "Klasterlashni",
       "Grafikni"
     ],
@@ -1371,8 +1371,8 @@
   {
     "text": "Vaqtli qatorlarda modelning asosiy vazifasi:",
     "options": [
-      "Datasetni kamaytirish",
       "Kelajakni bashorat qilish",
+      "Datasetni kamaytirish",
       "Grafik chizish",
       "Klasterlash"
     ],
@@ -1381,9 +1381,9 @@
   {
     "text": "Tasvir tahlilida chuqur o‘qitishning ustunligi:",
     "options": [
+      "Belgilarni qo‘lda tanlash shart emas",
       "Grafikni soddalashtiradi",
       "Datasetni o‘chirish",
-      "Belgilarni qo‘lda tanlash shart emas",
       "GPUni o‘chiradi"
     ],
     "correct": 0
@@ -1391,18 +1391,18 @@
   {
     "text": "Training jarayonida modelni doimiy kuzatish nimaga yordam beradi?",
     "options": [
+      "Overfittingni aniqlash",
       "Datasetni o‘chirish",
       "Klasterlashni tezlashtirish",
-      "Grafikni o‘zgartirish",
-      "Overfittingni aniqlash"
+      "Grafikni o‘zgartirish"
     ],
     "correct": 0
   },
   {
     "text": "Validation datasetning vazifasi:",
     "options": [
-      "GPU",
       "Giparametrlarni sozlash",
+      "GPU",
       "Datasetni kamaytirish",
       "Grafik"
     ],
@@ -1421,10 +1421,10 @@
   {
     "text": "Modelni ishlab chiqarishga chiqarishdan oldin nima zarur?",
     "options": [
+      "Real sharoitga yaqin test",
       "GPUni o‘chirish",
       "Grafik chizish",
-      "Datasetni o‘chirish",
-      "Real sharoitga yaqin test"
+      "Datasetni o‘chirish"
     ],
     "correct": 0
   },
@@ -1451,9 +1451,9 @@
   {
     "text": "Datasetdagi shovqin (noise) ko‘payganda model qanday xavfga duch keladi?",
     "options": [
+      "Ortiqcha moslashish ehtimoli oshadi",
       "Dataset kengayadi",
       "Grafik yaxshilanadi\nJavob: A\n\n53.\nModelning umumlashtirish qobiliyati nimani anglatadi?",
-      "Ortiqcha moslashish ehtimoli oshadi",
       "Model tezlashadi"
     ],
     "correct": 0
@@ -1471,8 +1471,8 @@
   {
     "text": "Feature engineering jarayonining asosiy maqsadi:",
     "options": [
-      "GPUni o‘chirish",
       "Belgilarni foydaliroq ko‘rinishga keltirish",
+      "GPUni o‘chirish",
       "Datasetni o‘chirish",
       "Grafik chizish"
     ],
@@ -1481,9 +1481,9 @@
   {
     "text": "Keraksiz belgilarni modelga qo‘shish nimaga olib keladi?",
     "options": [
+      "Model chalg‘ishi mumkin",
       "Grafik tezlashadi",
       "Model aniqligi har doim oshadi",
-      "Model chalg‘ishi mumkin",
       "Dataset kichrayadi"
     ],
     "correct": 0
@@ -1521,8 +1521,8 @@
   {
     "text": "Epoch tushunchasi nimani bildiradi?",
     "options": [
-      "GPU bosqichi",
       "Datasetni bir marta to‘liq o‘rganish",
+      "GPU bosqichi",
       "Klasterlash",
       "Grafik chizish"
     ],
@@ -1541,8 +1541,8 @@
   {
     "text": "Activation funksiyasiz neyron tarmoq qanday modelga aylanadi?",
     "options": [
-      "Klasterlash modeli",
       "Chiziqli model",
+      "Klasterlash modeli",
       "Grafik modeli",
       "Nolinear model"
     ],
@@ -1551,9 +1551,9 @@
   {
     "text": "Hidden layerlarning vazifasi nimada?",
     "options": [
+      "Murakkab xususiyatlarni o‘rganish",
       "Grafik chizish",
       "GPUni boshqarish",
-      "Murakkab xususiyatlarni o‘rganish",
       "Datasetni kamaytirish"
     ],
     "correct": 0
@@ -1561,18 +1561,18 @@
   {
     "text": "Deep network o‘qitish qiyinlashishining sababi:",
     "options": [
+      "Gradient muammolari yuzaga kelishi",
       "Dataset kichikligi",
       "Grafik sifati",
-      "GPU tezligi",
-      "Gradient muammolari yuzaga kelishi"
+      "GPU tezligi"
     ],
     "correct": 0
   },
   {
     "text": "Batch normalization nimani yaxshilaydi?",
     "options": [
-      "Dataset hajmini",
       "O‘qitish barqarorligini",
+      "Dataset hajmini",
       "Grafik rangini",
       "Klasterlashni"
     ],
@@ -1581,8 +1581,8 @@
   {
     "text": "Transfer learning qachon eng foydali?",
     "options": [
-      "Grafikda",
       "Dataset kichik bo‘lganda",
+      "Grafikda",
       "Dataset juda katta bo‘lganda",
       "Klasterlashda"
     ],
@@ -1601,9 +1601,9 @@
   {
     "text": "Model deployment nimani bildiradi?",
     "options": [
+      "Modelni real tizimga qo‘shish",
       "Klasterlashni bekor qilish",
       "Grafikni o‘chirish",
-      "Modelni real tizimga qo‘shish",
       "Datasetni o‘chirish"
     ],
     "correct": 0
@@ -1611,10 +1611,10 @@
   {
     "text": "Monitoring bosqichining vazifasi:",
     "options": [
+      "Model ishlashini kuzatish",
       "GPUni o‘chirish",
       "Grafik chizish",
-      "Datasetni kamaytirish",
-      "Model ishlashini kuzatish"
+      "Datasetni kamaytirish"
     ],
     "correct": 0
   },
@@ -1631,20 +1631,20 @@
   {
     "text": "Explainable AI nimaga xizmat qiladi?",
     "options": [
+      "Model qarorlarini tushuntirish",
       "Datasetni oshirish",
       "Klasterlash",
-      "Grafikni yaxshilash",
-      "Model qarorlarini tushuntirish"
+      "Grafikni yaxshilash"
     ],
     "correct": 0
   },
   {
     "text": "Model interpretability nima uchun muhim?",
     "options": [
+      "Qarorlarni tushunish uchun",
       "GPU tezligi uchun",
       "Grafik uchun",
-      "Datasetni o‘chirish uchun",
-      "Qarorlarni tushunish uchun"
+      "Datasetni o‘chirish uchun"
     ],
     "correct": 0
   },
@@ -1671,8 +1671,8 @@
   {
     "text": "Mashinali o‘qitish modelini real ishlab chiqarish muhitida uzoq vaqt davomida ishlatishda eng katta xavflardan biri ma’lumotlar muhitining asta-sekin o‘zgarib borishidir. Agar model o‘qitilgan ma’lumotlar taqsimoti bilan real kelayotgan ma’lumotlar o‘rtasida sezilarli farq paydo bo‘lsa, bu holat modelning qaysi muammosiga olib keladi?",
     "options": [
-      "Model avtomatik qayta o‘rganadi",
       "Model noto‘g‘ri bashoratlar bera boshlaydi, chunki umumlashtirish buziladi",
+      "Model avtomatik qayta o‘rganadi",
       "Model faqat tezligini yo‘qotadi, lekin aniqlik saqlanadi",
       "GPU ishlashi yomonlashadi"
     ],
@@ -1691,8 +1691,8 @@
   {
     "text": "Katta hajmdagi dataset bilan ishlashda faqat miqdorga e’tibor berib, ma’lumot sifati nazorat qilinmasa, eng ehtimoliy natija qanday bo‘ladi?",
     "options": [
-      "Model tezroq o‘rganadi va mukammal ishlaydi",
       "Model shovqin va noto‘g‘ri naqshlarni ham o‘rganib oladi",
+      "Model tezroq o‘rganadi va mukammal ishlaydi",
       "Klasterlash yaxshilanadi",
       "Dataset avtomatik tozalanadi"
     ],
@@ -1701,18 +1701,18 @@
   {
     "text": "Feature engineering jarayonida noto‘g‘ri tanlangan yoki bir-biriga kuchli bog‘liq belgilar modelga qo‘shilsa, bu qanday oqibatga olib kelishi mumkin?",
     "options": [
+      "Model barqarorligi kamayadi va ortiqcha moslashish ehtimoli oshadi",
       "Model tezlashadi",
       "Dataset kamayadi",
-      "Grafik yaxshilanadi",
-      "Model barqarorligi kamayadi va ortiqcha moslashish ehtimoli oshadi"
+      "Grafik yaxshilanadi"
     ],
     "correct": 0
   },
   {
     "text": "Agar model juda murakkab arxitekturaga ega bo‘lsa va kichik datasetda o‘qitilsa, bu kombinatsiya odatda qaysi muammoni yuzaga keltiradi?",
     "options": [
-      "Grafik yo‘qoladi",
       "Model treningni yodlab oladi",
+      "Grafik yo‘qoladi",
       "Dataset kengayadi",
       "Model yetarli o‘rganmaydi"
     ],
@@ -1721,10 +1721,10 @@
   {
     "text": "Neural networklarda qatlamlar sonini cheksiz oshirish har doim yaxshi natija bermaydi. Buning asosiy sababi nimada?",
     "options": [
+      "O‘qitish barqarorligi pasayadi va gradient muammolari yuzaga keladi",
       "Model har doim sekinlashadi",
       "Dataset yo‘qoladi",
-      "GPU ishlamaydi",
-      "O‘qitish barqarorligi pasayadi va gradient muammolari yuzaga keladi"
+      "GPU ishlamaydi"
     ],
     "correct": 0
   },
@@ -1741,9 +1741,9 @@
   {
     "text": "Agar reinforcement learning agenti faqat eng katta darhol mukofotni tanlasa, lekin uzoq muddatli foydani hisobga olmasa, bu qanday muammo hisoblanadi?",
     "options": [
+      "Ekspluatatsiya ortiqcha, eksploratsiya yetishmaydi",
       "Grafik buzildi",
       "GPU sust",
-      "Ekspluatatsiya ortiqcha, eksploratsiya yetishmaydi",
       "Dataset noto‘g‘ri"
     ],
     "correct": 0
@@ -1761,10 +1761,10 @@
   {
     "text": "Imbalanced dataset bilan ishlashda precision va recall muhim bo‘lishining sababi:",
     "options": [
+      "Dataset kichik",
       "Model tezlashadi",
       "Grafik chiroyli",
-      "Accuracy hamma narsani ko‘rsatmaydi",
-      "Dataset kichik"
+      "Accuracy hamma narsani ko‘rsatmaydi"
     ],
     "correct": 0
   },
@@ -1781,9 +1781,9 @@
   {
     "text": "CNN arxitekturasining kuchli tomoni nimada?",
     "options": [
+      "Fazoviy naqshlarni aniqlash qobiliyatida",
       "Datasetni kamaytirishda",
       "GPUni o‘chirishda",
-      "Fazoviy naqshlarni aniqlash qobiliyatida",
       "Grafik chizishda"
     ],
     "correct": 0
@@ -1791,9 +1791,9 @@
   {
     "text": "RNN arxitekturasi vaqtli qatorlar bilan ishlashda nimani saqlaydi?",
     "options": [
+      "Oldingi holatlarning ta’sirini",
       "Dataset hajmini",
       "Tasodifiylikni",
-      "Oldingi holatlarning ta’sirini",
       "Grafikni"
     ],
     "correct": 0
@@ -1801,9 +1801,9 @@
   {
     "text": "Modelni baholashda validation natijalarini e’tiborsiz qoldirish nimaga olib keladi?",
     "options": [
+      "Overfittingni sezmay qolish mumkin",
       "Dataset oshadi",
       "Model barqaror bo‘ladi",
-      "Overfittingni sezmay qolish mumkin",
       "GPU kuchayadi"
     ],
     "correct": 0
@@ -1820,8 +1820,8 @@
   {
     "text": "Hyperparameter tuning jarayonini e’tiborsiz qoldirish qanday natija beradi?",
     "options": [
-      "Grafik yaxshilanadi",
       "Model optimal bo‘lmaydi",
+      "Grafik yaxshilanadi",
       "Dataset kengayadi",
       "Klasterlash yo‘qoladi"
     ],
@@ -1830,9 +1830,9 @@
   {
     "text": "Model deploymentdan keyingi monitoring nima uchun zarur?",
     "options": [
+      "Ma’lumot driftni aniqlash uchun",
       "Grafik chizish uchun",
       "Datasetni kamaytirish uchun",
-      "Ma’lumot driftni aniqlash uchun",
       "GPUni o‘chirish uchun"
     ],
     "correct": 0
@@ -1840,8 +1840,8 @@
   {
     "text": "Explainable AI’ning ahamiyati nimada?",
     "options": [
-      "Grafikni chiroyli qilish",
       "Qarorlarni tushuntirish orqali ishonchni oshiradi",
+      "Grafikni chiroyli qilish",
       "Datasetni o‘chirish",
       "GPUni tezlashtirish"
     ],
@@ -1860,19 +1860,19 @@
   {
     "text": "Noise ko‘p bo‘lgan ma’lumot bilan o‘qitilgan model:",
     "options": [
+      "Noto‘g‘ri naqshlarni o‘rganishi mumkin",
       "Datasetni tozalaydi",
       "Barqaror bo‘ladi",
-      "GPUni kuchaytiradi",
-      "Noto‘g‘ri naqshlarni o‘rganishi mumkin"
+      "GPUni kuchaytiradi"
     ],
     "correct": 0
   },
   {
     "text": "Mashinali o‘qitishda eng kuchli model nimaga bog‘liq?",
     "options": [
+      "Ma’lumot sifati va to‘g‘ri arxitekturaga",
       "Grafik interfeysga",
       "Dataset rangiga",
-      "Ma’lumot sifati va to‘g‘ri arxitekturaga",
       "GPU kuchiga"
     ],
     "correct": 0
@@ -1880,18 +1880,18 @@
   {
     "text": "Mashinali o‘qitish tizimining muvaffaqiyati uzoq muddatda nimaga bog‘liq?",
     "options": [
+      "Doimiy monitoring va yangilashga",
       "Dataset nomiga",
       "Grafik dizaynga",
-      "GPU rangiga",
-      "Doimiy monitoring va yangilashga"
+      "GPU rangiga"
     ],
     "correct": 0
   },
   {
     "text": "Quyida keltirilgan kompyuter tarmoqlarining qaysi biri avval paydo bo’lgan",
     "options": [
-      "kampuslar tarmog’i",
       "global kompyuter tarmoqlari",
+      "kampuslar tarmog’i",
       "korporativ tarmoqlar",
       "lokal kompyuter tarmoqlari"
     ],
@@ -1900,19 +1900,19 @@
   {
     "text": "To’rtta bir-biri bilan bog’langan bog’lamlar strukturasi (kvadrat shaklida) qaysi topologiya turiga mansub",
     "options": [
+      "Xalqa",
       "Yacheykali",
       "To’liq bog’lanishli",
-      "Yulduz",
-      "Xalqa"
+      "Yulduz"
     ],
     "correct": 0
   },
   {
     "text": "Ketma-ket bir-biri bilan bog’langan 3 ta bog’lamlar (oxiri boshi bilan bog’lanmagan) strukturasi qaysi topologiya turiga tegishli",
     "options": [
+      "Umumiy shina",
       "Yulduz",
       "Xalqa",
-      "Umumiy shina",
       "To’liq bog’lanishli"
     ],
     "correct": 0
@@ -1940,59 +1940,59 @@
   {
     "text": "Topologiyalardan qaysi biri ishonchliligi yuqori hisoblanadi",
     "options": [
+      "Yulduz",
       "Umumiy shina",
       "To’liq bog’lanishli",
-      "Xalqa",
-      "Yulduz"
+      "Xalqa"
     ],
     "correct": 0
   },
   {
     "text": "MAC satxi qanday vazifani bajaradi",
     "options": [
+      "uzatish muhitiga murojaat qilishni boshqarish",
       "bitlar sathida axborot uzatishni boshqarish",
       "bloklar sathida axbo-rot uzatishni boshqarish",
-      "stantsiyalar o’rtasida axborotni har-xil ishonchlilik darajasi bilan uzatish",
-      "uzatish muhitiga murojaat qilishni boshqarish"
+      "stantsiyalar o’rtasida axborotni har-xil ishonchlilik darajasi bilan uzatish"
     ],
     "correct": 0
   },
   {
     "text": "LLC satxi qanday vazifani bajaradi",
     "options": [
+      "stantsiyalar o’rtasida axborotni har-xil ishonchlilik darajasi bilan uzatish",
       "bitlar sathida axborot uzatishni boshqarish",
       "uzatish muhitiga murojaat qilishni boshqarish",
-      "bloklar sathida axborot uzatishni boshqarish",
-      "stantsiyalar o’rtasida axborotni har-xil ishonchlilik darajasi bilan uzatish"
+      "bloklar sathida axborot uzatishni boshqarish"
     ],
     "correct": 0
   },
   {
     "text": "10Base-2 segmentining uzunligi ko’pi bilan qancha bo’lishi mumkin",
     "options": [
+      "185 metr",
       "100 metr",
       "200 metr",
-      "500 metr",
-      "185 metr"
+      "500 metr"
     ],
     "correct": 0
   },
   {
     "text": "O’ralma juftlik kabeli simlarini, uning konnektorlariga ulashning necha xil variantlari mavjud",
     "options": [
+      "2",
       "3",
       "1",
-      "4",
-      "2"
+      "4"
     ],
     "correct": 0
   },
   {
     "text": "Ethernet tarmoqlarida uzatish muhitiga murojaat qilishning qaysi usuli qo’llaniladi",
     "options": [
+      "CSMA/CD",
       "CSQE/NQ",
       "CSTK/QL",
-      "CSMA/CD",
       "CSTK/CE"
     ],
     "correct": 0
@@ -2000,10 +2000,10 @@
   {
     "text": "Ethernet da kommutatsiyalashning qaysi xilidan foydalaniladi",
     "options": [
+      "paketlarni deytagrammali kommutatsiyalash",
       "paketlarni virtual kanal orqali uzatish",
       "chastotali multi-plekslash asosida kanallarni kommu-tatsiyalash",
-      "vaqtni taqsimlash aso-sida kanallarni kommu-tatsiyalash",
-      "paketlarni deytagrammali kommutatsiyalash"
+      "vaqtni taqsimlash aso-sida kanallarni kommu-tatsiyalash"
     ],
     "correct": 0
   },
@@ -2020,9 +2020,9 @@
   {
     "text": "100Base-TX spetsifikatsiyasi qaysi texnologiyaga tegishli",
     "options": [
+      "Fast Ethernet",
       "Ethernet",
       "FDDI",
-      "Fast Ethernet",
       "Gigabit Ethernet"
     ],
     "correct": 0
@@ -2030,8 +2030,8 @@
   {
     "text": "Fast Ethernet texnologiyasi spetsifikatsiyalari qaysi komitet tarkibida ishlab chiqilgan",
     "options": [
-      "802.2",
       "802.3",
+      "802.2",
       "802.5",
       "802.1"
     ],
@@ -2040,18 +2040,18 @@
   {
     "text": "Ethernet texnologiyasida koaksial kabelining ma’lumotlarni uzatish tezligi qanday",
     "options": [
+      "10 Mbit/s",
       "1000 Mbit/s",
       "100 Mbit/s",
-      "1 Mbit/s",
-      "10 Mbit/s"
+      "1 Mbit/s"
     ],
     "correct": 0
   },
   {
     "text": "Fast Ethernet texnologiyasida o’ralma juftlik kabelining ma’lumotlarni uzatish tezligi qanday",
     "options": [
-      "1 Mbit/s",
       "100 Mbit/s",
+      "1 Mbit/s",
       "10 Mbit/s",
       "1000 Mbit/s"
     ],
@@ -2060,30 +2060,30 @@
   {
     "text": "Lokal tarmoqlarda keng tarqalgan topologiya turi qaysi",
     "options": [
+      "Yulduz",
       "Xalqa",
       "To’liq bog’lanishli",
-      "Umumiy shina",
-      "Yulduz"
+      "Umumiy shina"
     ],
     "correct": 0
   },
   {
     "text": "100Base-TX spetsifikatsiya qaysi texnologiyaga tegishli",
     "options": [
+      "Fast Ethernet",
       "10G Ethernet",
       "Ethernet",
-      "Gigabit Ethernet",
-      "Fast Ethernet"
+      "Gigabit Ethernet"
     ],
     "correct": 0
   },
   {
     "text": "1000Base-SX spetsifikatsiya qaysi texnologiyaga tegishli",
     "options": [
+      "Gigabit Ethernet",
       "Ethernet",
       "10G Ethernet",
-      "Fast Ethernet",
-      "Gigabit Ethernet"
+      "Fast Ethernet"
     ],
     "correct": 0
   },
@@ -2100,9 +2100,9 @@
   {
     "text": "MАC sath osti satxi OSI modelining qaysi sathiga tegishli",
     "options": [
+      "kanal sathiga",
       "transport sathiga",
       "tarmoq sathiga",
-      "kanal sathiga",
       "fizik sathiga"
     ],
     "correct": 0
@@ -2110,28 +2110,28 @@
   {
     "text": "Ethernet texnologiyasi nechta standartga ega",
     "options": [
+      "4",
       "6",
       "2",
-      "3",
-      "4"
+      "3"
     ],
     "correct": 0
   },
   {
     "text": "Fast Ethernet texnologiyasi nechta spetsifikatsiyaga ega",
     "options": [
+      "3",
       "6",
       "2",
-      "4",
-      "3"
+      "4"
     ],
     "correct": 0
   },
   {
     "text": "Umumiy shina topologiyali lokal tarmoqlarda kontsentratorlar qanday funktsiyani bajaradi",
     "options": [
-      "Kompyuter tomonidan uzatilgan ma’lumotni boshqa bir kompyuterga yo’naltiradi",
       "Kompyuter tomonidan uzatilayotgan ma’lumotni barcha kompyuterga yo’naltiradi",
+      "Kompyuter tomonidan uzatilgan ma’lumotni boshqa bir kompyuterga yo’naltiradi",
       "Kompyuter tomonidan uzatilgan ma’lumotni xalqa orqali keyingi kompyuterga yo’naltiradi",
       "Tarmoqning ikki segmentini o’zaro bog’laydi"
     ],
@@ -2140,9 +2140,9 @@
   {
     "text": "Simsiz tarmoqlar standartlari qaysi komitet tarkibida ishlab chiqilmoqda",
     "options": [
+      "802.11",
       "802.6",
       "802.7",
-      "802.11",
       "802.12"
     ],
     "correct": 0
@@ -2160,8 +2160,8 @@
   {
     "text": "802.11 spetsifikatsiyasi simsiz lokal tarmog’i diametrining chegaralari qanday",
     "options": [
-      "100 -200 m",
       "100 - 300 m",
+      "100 -200 m",
       "50 - 100 m",
       "300 – 400 m"
     ],
@@ -2170,10 +2170,10 @@
   {
     "text": "Tarmoqni fizik strukturalashda qaysi qurilma ishlatiladi",
     "options": [
+      "takrorlovchi (kontsentrator)",
       "Shlyuz",
       "ko’prik",
-      "Kommutator",
-      "takrorlovchi (kontsentrator)"
+      "Kommutator"
     ],
     "correct": 0
   },
@@ -2190,9 +2190,9 @@
   {
     "text": "Kompyuter tarmog’ining fizik strukturalash nima maqsadda amalga oshiriladi",
     "options": [
+      "Tarmoq diametrini oshirish uchun",
       "Tarmoqosti tarmoqlarini bog’lashni amalga oshirish uchun",
       "Unumdorlikni oshirish uchun",
-      "Tarmoq diametrini oshirish uchun",
       "Internetga ulanish uchun"
     ],
     "correct": 0
@@ -2200,9 +2200,9 @@
   {
     "text": "Kompyuter tarmog’ining mantiqiy strukturalash nima maqsadda amalga oshiriladi",
     "options": [
+      "Trafikni lokallashtirish uchun",
       "Tarmoqosti tarmoqlarini bog’lashni amalga oshirish uchun",
       "Internetga ulanish uchun",
-      "Trafikni lokallashtirish uchun",
       "Tarmoq diametrini oshirish uchun"
     ],
     "correct": 0
@@ -2230,10 +2230,10 @@
   {
     "text": "OSI modelining to’rtinchi satxi qanday nomlanadi",
     "options": [
+      "Transport sathi",
       "Аmaliy sath",
       "Taqdimlash sathi",
-      "Seanslar sathi",
-      "Transport sathi"
+      "Seanslar sathi"
     ],
     "correct": 0
   },
@@ -2250,8 +2250,8 @@
   {
     "text": "OSI modelining birinchi satxi qanday nomlanadi",
     "options": [
-      "Transport sathi",
       "Fizik sath",
+      "Transport sathi",
       "Seanslar sathi",
       "Taqdimlash sathi"
     ],
@@ -2270,9 +2270,9 @@
   {
     "text": "OSI modelining uchinchi satxi qanday nomlanadi",
     "options": [
+      "Tarmoq sathi",
       "Аmaliy sathi",
       "Seanslar sathi",
-      "Tarmoq sathi",
       "Taqdimlash sathi"
     ],
     "correct": 0
@@ -2280,9 +2280,9 @@
   {
     "text": "OSI modelining oltinchi satxi qanday nomlanadi",
     "options": [
+      "Taqdimlash sathi",
       "Kanal sathi",
       "Аmaliy sathi",
-      "Taqdimlash sathi",
       "Seanslar sathi"
     ],
     "correct": 0
@@ -2340,9 +2340,9 @@
   {
     "text": "Еlektr signallarini qabul qilish va uzatish vazifalarini OSI modelining qaysi sathi bajaradi",
     "options": [
+      "Fizik sath",
       "Kanal sathi",
       "Transport sathi",
-      "Fizik sath",
       "Seanslar sathi"
     ],
     "correct": 0
@@ -2350,9 +2350,9 @@
   {
     "text": "Ma’lumotlarni uzatishning optimal marshrutlarini aniqlash vazifalarini OSI modelining qaysi sathi bajaradi",
     "options": [
+      "Tarmoq sathi",
       "Аmaliy sathi",
       "Taqdimlash sathi",
-      "Tarmoq sathi",
       "Seanslar sathi"
     ],
     "correct": 0
@@ -2360,9 +2360,9 @@
   {
     "text": "Mijozlar dasturlari bilan o’zaro muloqot vazifalarini OSI modelining qaysi sathi bajaradi",
     "options": [
+      "Аmaliy sath",
       "Transport sathi",
       "Kanal sathi",
-      "Аmaliy sath",
       "Seanslar sathi"
     ],
     "correct": 0
@@ -2380,18 +2380,18 @@
   {
     "text": "Keltirilgan protokollarning qaysilari transport sathi protokollariga mansub",
     "options": [
+      "TCP,UDP",
       "Ethernet, FDDI",
       "NFS, FTP",
-      "IP, IPX",
-      "TCP,UDP"
+      "IP, IPX"
     ],
     "correct": 0
   },
   {
     "text": "Keltirilgan protokollarning qaysilari amaliy sathi protokollariga mansub",
     "options": [
-      "10Base-T, 100Base-T",
       "NFS, FTP",
+      "10Base-T, 100Base-T",
       "IP, IPX",
       "TCP,UDP"
     ],
@@ -2400,9 +2400,9 @@
   {
     "text": "OSI modelining fizik sathi qanday funktsiyalarni bajaradi",
     "options": [
+      "Elektr signallarini uzatish va qabul qilish",
       "Аloqa kanalini va ma’lumotlarni uzatish muxitiga murojat qilishni boshqarish",
       "Klient dasturlari bilan o’zaro muloqotda bo’lish",
-      "Elektr signallarini uzatish va qabul qilish",
       "Bog’lanish seansini yaratish, kuzatish, oxirigacha ta’minlash"
     ],
     "correct": 0
@@ -2410,9 +2410,9 @@
   {
     "text": "OSI modelining kanal sathi qaysi funktsiyalarni bajaradi",
     "options": [
+      "Аloqa kanalini va ma’lumotlarni uzatish muxitiga murojat qilishni boshqarish",
       "Klient dasturlari bilan o’zaro muloqotda bo’lish",
       "Ma’lumotlarni kodlash va shifrlash",
-      "Аloqa kanalini va ma’lumotlarni uzatish muxitiga murojat qilishni boshqarish",
       "Bog’lanish seansini yaratish, kuzatish, oxirigacha ta’minlash"
     ],
     "correct": 0
@@ -2420,8 +2420,8 @@
   {
     "text": "OSI modelining tarmoq sathi qanday funktsiyalarni bajaradi",
     "options": [
-      "Аloqa kanalini va ma’lumotlarni uzatish muxitiga murojat qilishni boshqarish",
       "Ma’lumotlarni uzatish marshrutlarini optimalini aniqlash",
+      "Аloqa kanalini va ma’lumotlarni uzatish muxitiga murojat qilishni boshqarish",
       "Elektr signallarini uzatish va qabul qilish",
       "Ma’lumotlarni qabul qilish va uzatish jarayonida, ma’lumotlarni to’liq va to’g’ri uzatilishini nazorat qilish"
     ],
@@ -2430,9 +2430,9 @@
   {
     "text": "MАС-adres qanday uzunlikka ega",
     "options": [
+      "48 bit",
       "32 bit",
       "16 bit",
-      "48 bit",
       "64 bit"
     ],
     "correct": 0
@@ -2450,8 +2450,8 @@
   {
     "text": "192.190.21.254 adresi IP-adreslarningqaysi sinfiga tegishli",
     "options": [
-      "A",
       "C",
+      "A",
       "V",
       "D"
     ],
@@ -2460,29 +2460,29 @@
   {
     "text": "B sinfidagi tarmoq tarkibiga nechta bog’lam bo’lishi mumkin",
     "options": [
+      "65536",
       "1024",
       "512",
-      "256",
-      "65536"
+      "256"
     ],
     "correct": 0
   },
   {
     "text": "А sinfidagi tarmoq tarkibiga nechta bog’lam bo’lishi mumkin",
     "options": [
+      "16777216",
       "65536",
       "256",
-      "1024",
-      "16777216"
+      "1024"
     ],
     "correct": 0
   },
   {
     "text": "B sinfidagi tarmoq maskasi qanday qiymatga ega",
     "options": [
+      "255.255.0.0",
       "255.0.0.0",
       "255.255.255.0",
-      "255.255.0.0",
       "255.255.254.0"
     ],
     "correct": 0
@@ -2490,9 +2490,9 @@
   {
     "text": "Internet tarmog’i, kompyuter tarmoqlarining qaysi sinfiga mansub",
     "options": [
+      "global tarmoq",
       "shahar tarmog’i",
       "korporativ tarmog’i",
-      "global tarmoq",
       "lokal tarmoq"
     ],
     "correct": 0
@@ -2500,18 +2500,18 @@
   {
     "text": "Keltirilgan texnologiyalarning qaysi birlari global tarmoq texnologiyalariga mansub",
     "options": [
+      "ATM, TCP/IP",
       "Frame Relay, Token Ring",
       "Ethernet, Internet",
-      "X.25, FDDI",
-      "ATM, TCP/IP"
+      "X.25, FDDI"
     ],
     "correct": 0
   },
   {
     "text": "MAN tarmoqlari nima uchun mo’ljallangan",
     "options": [
-      "Internetga korxonalar tarmoqlarini ulash uchun",
       "Yirik shaxar axolisiga xizmat ko’rsatish uchun",
+      "Internetga korxonalar tarmoqlarini ulash uchun",
       "Faqat bir nechta lokal tarmoqlarni bog’lash uchun",
       "Faqat korporativ tarmoqning filiallarini ulash uchun"
     ],
@@ -2540,8 +2540,8 @@
   {
     "text": "Tarmoq ilovalari nima uchun xizmat qiladi",
     "options": [
-      "Global va lokal tarmoq ilovalari",
       "Foydalanuvchilarga, kompyuter tarmog'i tomonidan ko'rsatilishi mumkin bo'lgan turli xil xizmatlarni amalga oshiruvchi dasturlar tushuniladi.",
+      "Global va lokal tarmoq ilovalari",
       "Kompyuter tarmog'ini qurish va ishlatish uchun etarli bo'lgan bir-biriga moslashtirilgan apparat va dasturiy vositalar to'plami, hamda aloqa chiziqlari orqali ma'lumotlarni uzatish imkonini beradigan uskunalar tushuniladi.",
       "Xizmatlarni amalga oshiruvchi dasturlar."
     ],
@@ -2550,18 +2550,18 @@
   {
     "text": "Kompyuter tarmog'i texnologiyalari deganda nimani tushunasiz",
     "options": [
+      "Kompyuter tarmog'ini qurish va ishlatish uchun etarli bo'lgan bir-biriga moslashtirilgan apparat va dasturiy vositalar to'plami, hamda aloqa chiziqlari orqali ma'lumotlarni uzatish imkonini beradigan uskunalar tushuniladi",
       "Foydalanuvchilarga, kompyuter tarmog'i tomonidan ko'rsatilishi mumkin bo'lgan turli xil xizmatlarni amalga oshiruvchi dasturlar tushuniladi.",
       "Global va lokal tarmoq ilovalari",
-      "Xizmatlarni amalga oshiruvchi dasturlar.",
-      "Kompyuter tarmog'ini qurish va ishlatish uchun etarli bo'lgan bir-biriga moslashtirilgan apparat va dasturiy vositalar to'plami, hamda aloqa chiziqlari orqali ma'lumotlarni uzatish imkonini beradigan uskunalar tushuniladi"
+      "Xizmatlarni amalga oshiruvchi dasturlar."
     ],
     "correct": 0
   },
   {
     "text": "TCP/IP steki nechta sathga ajratilgan",
     "options": [
-      "Beshta sathga",
       "To’rtta sathga",
+      "Beshta sathga",
       "Oltita sathga",
       "Ikkta sathga"
     ],
@@ -2570,9 +2570,9 @@
   {
     "text": "FTP (File Transfer Protokol) qanday protokol",
     "options": [
+      "Fayllarni uzatish protokoli",
       "Gipermatnni uzatish protokoli",
       "Elektron pochtani uzatishning oddiy protokoli",
-      "Fayllarni uzatish protokoli",
       "Terminalni emulasiya qilish protokoli"
     ],
     "correct": 0
@@ -2580,10 +2580,10 @@
   {
     "text": "Telnet qanday protokol",
     "options": [
+      "Terminalni emulasiya qilish protokoli",
       "Fayllarni uzatish protokoli",
       "Elektron pochtani uzatishning oddiy protokoli",
-      "Gipermatnni uzatish protokoli",
-      "Terminalni emulasiya qilish protokoli"
+      "Gipermatnni uzatish protokoli"
     ],
     "correct": 0
   },
@@ -2600,9 +2600,9 @@
   {
     "text": "HTTP (Hyper Text Transfer Protocol) qanday vazifani bajarish uchun mo'ljallangan protokol",
     "options": [
+      "Gipermatnni uzatish protokoli",
       "Fayllarni uzatish protokoli",
       "Elektron pochtani uzatishning oddiy protokoli",
-      "Gipermatnni uzatish protokoli",
       "Terminalni emulasiya qilish protokoli"
     ],
     "correct": 0
@@ -2620,9 +2620,9 @@
   {
     "text": "IP-paket qanday qismlardan iborat bo'ladi",
     "options": [
+      "Sarlavxa va ma'lumotlar yoziladigan qismlardan iborat",
       "Ma’lumotlar saqlash va qayta ishlash qismlardan iborat",
       "Yuborish va saralash qismlardan iborat",
-      "Sarlavxa va ma'lumotlar yoziladigan qismlardan iborat",
       "Ma’lumotlar yozish va yuborish qismlaridan iborat"
     ],
     "correct": 0
@@ -2630,8 +2630,8 @@
   {
     "text": "IP-protokolining funktsional jihatdan sodda yoki murakkabligi nimalarga bog’liq",
     "options": [
-      "IPlrning soddajoylashganligiga bog’liq",
       "IP-paketning sarlavxasi qay darajada sodda yoki murakkab ekanligiga bog'liq",
+      "IPlrning soddajoylashganligiga bog’liq",
       "IP-paketning sarlavxasi sodda ekanligiga bog'liqdir",
       "IP-paketning sarlavxasi murakkab ekanligiga bog'liqdir"
     ],
@@ -2640,9 +2640,9 @@
   {
     "text": "IPv4-paket sarlavhasining uzunligi necha bitdan iborat",
     "options": [
+      "4 bitdan",
       "8 bitdan",
       "16 bitdan",
-      "4 bitdan",
       "32 baytdan"
     ],
     "correct": 0
@@ -2650,8 +2650,8 @@
   {
     "text": "Simsiz MAN tarmog’lari qanday texnologiyalarda quriladi",
     "options": [
-      "LTE, MAN, LAN, WiMAX",
       "WiMAX, LTE, sputnik",
+      "LTE, MAN, LAN, WiMAX",
       "WiMax, MAN",
       "MAN, LAN"
     ],
@@ -2660,10 +2660,10 @@
   {
     "text": "IMS kommutator qanday vazifani baradi",
     "options": [
+      "Shahar tarmoqlari turli tarmoqlar bir-biri bilan bog’lanish jarayonini nazorat qiladi.",
       "An’anaviy kommutatsiya jarayonida OSI modelida ishlaydi.",
       "Katta o’lchamli tarmoqlar orasida ko’prik vazifasini o’tashda.",
-      "Shahar tashqarisi tarmoqlari turli tarmoqlar bir-biri bilan bog’lanish jarayonini nazorat qiladi",
-      "Shahar tarmoqlari turli tarmoqlar bir-biri bilan bog’lanish jarayonini nazorat qiladi."
+      "Shahar tashqarisi tarmoqlari turli tarmoqlar bir-biri bilan bog’lanish jarayonini nazorat qiladi"
     ],
     "correct": 0
   },
@@ -2680,9 +2680,9 @@
   {
     "text": "Markaziy lokal tarmoqlarni uzoqdan turib ulaish serveri",
     "options": [
+      "RAS",
       "TCP",
       "IP",
-      "RAS",
       "TCP/IP"
     ],
     "correct": 0
@@ -2710,9 +2710,9 @@
   {
     "text": "Marshrutlash protakollari nechta sinfga bo’linadi",
     "options": [
+      "2 ta",
       "3 ta",
       "4 ta",
-      "2 ta",
       "6 ta"
     ],
     "correct": 0
@@ -2730,9 +2730,9 @@
   {
     "text": "Qanday protakol yo’llari ko’rsatilgan ma’lumotlarni tashqi tarmoqqa uzatadi",
     "options": [
+      "BBP (bateway to bateway Protocol)",
       "IBP (Interot bateway Protocol)",
       "TCP/IP Ptotocol",
-      "BBP (bateway to bateway Protocol)",
       "FTP (File Transfer Protocol)"
     ],
     "correct": 0
@@ -2740,8 +2740,8 @@
   {
     "text": "OSI modelining amaliy sathi qanday funktsiyalarni bajaradi",
     "options": [
-      "Elektr signallarini uzatish va qabul qilish",
       "Klient dasturlari bilan o’zaro muloqotda bo’lish",
+      "Elektr signallarini uzatish va qabul qilish",
       "Bog’lanish seansini yaratish, kuzatish, oxirigacha ta’minlash",
       "Аloqa kanalini va ma’lumotlarni uzatish muxitiga murojat qilishni boshqarish"
     ],
@@ -2750,8 +2750,8 @@
   {
     "text": "Ulanish tarmoqlarini bog’lashni va yuqori tezlikdagi kanallar orqali trafik tranzitini ta’minlashni, qaysi tarmoq amalga oshiradi",
     "options": [
-      "Аloqa operatorlari tarmog’i",
       "Magistral tarmoq",
+      "Аloqa operatorlari tarmog’i",
       "Bino tarmog’i",
       "Korporativ tarmoq"
     ],
@@ -2770,9 +2770,9 @@
   {
     "text": "А sinfidagi tarmoq maskasi qanday qiymatga ega",
     "options": [
+      "255.0.0.0",
       "255.0.0",
       "255.255.0.0",
-      "255.0.0.0",
       "255.255.255.0"
     ],
     "correct": 0
@@ -2780,9 +2780,9 @@
   {
     "text": "C sinfidagi tarmoq maskasi qanday qiymatga ega",
     "options": [
+      "255.255.255.0",
       "255.255.0.0",
       "255.0.0.0",
-      "255.255.255.0",
       "255.255.240.0"
     ],
     "correct": 0
@@ -2800,8 +2800,8 @@
   {
     "text": "Internet tarmog’ida kommutatsiyalashning qaysi xili ishlatiladi",
     "options": [
-      "kanallarni kommutatsiyalash",
       "paketlarni kommutatsiyalash",
+      "kanallarni kommutatsiyalash",
       "alohida ajratilgan kanallarni kommutatsiyalash",
       "xabarlarni kommutatsiyalash"
     ],
@@ -2830,10 +2830,10 @@
   {
     "text": "Keltirilgan qurilmalarning qaysi biri DCE bo’ladi",
     "options": [
+      "modem",
       "Kompyuter",
       "Klaviatura",
-      "Marshrutizator",
-      "modem"
+      "Marshrutizator"
     ],
     "correct": 0
   },
@@ -2850,18 +2850,18 @@
   {
     "text": "Keltirilgan protokollarning qaysilari fizik sath protokollariga mansub",
     "options": [
+      "10Base-T, 100Base-T",
       "IP, IPX",
       "NFS, FTP",
-      "TCP,UDP",
-      "10Base-T, 100Base-T"
+      "TCP,UDP"
     ],
     "correct": 0
   },
   {
     "text": "Keltirilgan protokollarning qaysilari taqdimlash sathi protokollariga mansub",
     "options": [
-      "Ethernet, FDDI",
       "SNMP, Telnet",
+      "Ethernet, FDDI",
       "IP, IPX",
       "TCP,UDP"
     ],
@@ -2890,10 +2890,10 @@
   {
     "text": "OSI modelining seanslar sathi qanday funktsiyalarni bajaradi",
     "options": [
+      "Bog’lanish seansini yaratish, kuzatish, oxirigacha ta’minlash",
       "Аloqa kanalini va ma’lumotlarni uzatish muxitiga murojat qilishni boshqarish",
       "Klient dasturlari bilan o’zaro muloqotda bo’lish",
-      "Elektr signallarini uzatish va qabul qilish",
-      "Bog’lanish seansini yaratish, kuzatish, oxirigacha ta’minlash"
+      "Elektr signallarini uzatish va qabul qilish"
     ],
     "correct": 0
   },
@@ -2910,9 +2910,9 @@
   {
     "text": "Аloqa kanaliga va uzatish muhitiga ulanishni boshqarish vazifalarini OSI modelining qaysi sathi bajaradi",
     "options": [
+      "Kanal sathi",
       "Fizik sath",
       "Tarmoq sathi",
-      "Kanal sathi",
       "Transport sathi"
     ],
     "correct": 0
@@ -2920,8 +2920,8 @@
   {
     "text": "Ma’lumotlarni uzatish jarayonida ularni to’liq va to’g’ri uzatilishini nazorat qilish vazifalarini OSI modelining qaysi sathi bajaradi",
     "options": [
-      "Kanal sathi",
       "Transport sathi",
+      "Kanal sathi",
       "Tarmoq sathi",
       "Fizik sath"
     ],
@@ -2930,8 +2930,8 @@
   {
     "text": "Аloqa seansini hosil qilish, kuzatib turish va ohirigacha ta’minlab berish vazifalarini OSI modelining qaysi sathi bajaradi",
     "options": [
-      "Fizik sath",
       "Seanslar sathi",
+      "Fizik sath",
       "Kanal sathi",
       "Tarmoq sathi"
     ],
@@ -2940,9 +2940,9 @@
   {
     "text": "Mobil aloqa tarmoqlari tushunchasi nimani anglatadi",
     "options": [
+      "Ko'chib yurish ma'nosini",
       "Simli aloqa ma'nosini",
       "Simsiz aloqa ma'nosini",
-      "Ko'chib yurish ma'nosini",
       "Aralash tarmoq ma'nosini"
     ],
     "correct": 0
@@ -2950,10 +2950,10 @@
   {
     "text": "Mobil terminallari qaysi qurilma bilan o'zaro bog'lanib tarmoqqa ulanishni amalga oshiradi",
     "options": [
+      "Baza stansiyasi",
       "Controller baza stansiyasi",
       "Switch",
-      "Sputnik",
-      "Baza stansiyasi"
+      "Sputnik"
     ],
     "correct": 0
   },
@@ -2980,9 +2980,9 @@
   {
     "text": "5G tarmoqlarining ma'lumot uzatish tezligi qancha",
     "options": [
+      "1 Gbit/s dan katta",
       "Yuqori tezlikda, aniq tezlik belgilanmagan",
       "100 Mbit/s dan kichik",
-      "1 Gbit/s dan katta",
       "5G tarmog'i hali mavjud emas"
     ],
     "correct": 0
@@ -2990,8 +2990,8 @@
   {
     "text": "LTE va WiMAX texnologiyalari qaysi avlodga tegishli",
     "options": [
-      "5G",
       "4G",
+      "5G",
       "3,5G",
       "3G"
     ],
@@ -3000,9 +3000,9 @@
   {
     "text": "PON so'zining ma'nosini toping.",
     "options": [
+      "Passiv opkit tarmog'i",
       "Abonent tarmog'i",
       "Keng polosali tarmoq",
-      "Passiv opkit tarmog'i",
       "Shisha tolali optik tarmog'i"
     ],
     "correct": 0
@@ -3020,19 +3020,19 @@
   {
     "text": "3G texnologiyasi asosida keng polosali abonent tarmog'ini qurish mumkinmi",
     "options": [
+      "Ha",
       "Kelajakda qurilishi mumkin",
       "Tajribada qurilmagan",
-      "Yoq",
-      "Ha"
+      "Yoq"
     ],
     "correct": 0
   },
   {
     "text": "xDSL texnologiyasi asosida lokal kompyuter tarmoqlarini yuqori tezlikli Internetga ulash mumkinmi",
     "options": [
+      "Faqat past tezlikli internetga ulash mumkin",
       "xDSL internetga ulash texnologiyasi emas",
       "Yoq",
-      "Faqat past tezlikli internetga ulash mumkin",
       "Hozirda xDSLdan foydalanilmaydi"
     ],
     "correct": 0
@@ -3060,8 +3060,8 @@
   {
     "text": "Transport tarmoqlari orqali uzatiladigan ma'lumot birligi nima",
     "options": [
-      "Paketlar",
       "Oqimlar",
+      "Paketlar",
       "Ma'lumotlar",
       "Signallar"
     ],
@@ -3070,9 +3070,9 @@
   {
     "text": "Transport tarmog'ida oxirgi yillarda eng ko'p foydalanilayotgan uzatish muhitini ko'rsating.",
     "options": [
+      "Optik muhitlar",
       "Simsiz muhitlar",
       "Simli muhitlar",
-      "Optik muhitlar",
       "Temir muhitlar"
     ],
     "correct": 0
@@ -3080,18 +3080,18 @@
   {
     "text": "PDH texnologiyasining kengaytirilgan ko'rinishini ko'rsating",
     "options": [
+      "Plesiochronous digital hierarchy",
       "Plesiochronous definition hierarchy",
       "Plesiochronous hierarchy",
-      "Personal digital hierarchy",
-      "Plesiochronous digital hierarchy"
+      "Personal digital hierarchy"
     ],
     "correct": 0
   },
   {
     "text": "SDH uzatish texnologiyasida qanday uzatish tizimlari mavjud",
     "options": [
-      "DWDM",
       "STM",
+      "DWDM",
       "PCM",
       "E1"
     ],
@@ -3100,9 +3100,9 @@
   {
     "text": "STM-1 tizimining uzatish tezligi qancha",
     "options": [
+      "155 Mbit/s",
       "100 Mbit/s",
       "1 Gbit/s",
-      "155 Mbit/s",
       "625 Mbit/s"
     ],
     "correct": 0
@@ -3110,9 +3110,9 @@
   {
     "text": "DWDM texnologiyasi asosida kanallar qanday parametrga ko'ra multipleksorlanadi",
     "options": [
+      "To'lqin uzunligiga ko'ra",
       "Tebranish davri bo'yicha",
       "Vaqt bo'yicha",
-      "To'lqin uzunligiga ko'ra",
       "Amplitutasi bo'yicha"
     ],
     "correct": 0
@@ -3120,28 +3120,28 @@
   {
     "text": "SONET tizimi bilan SDH tizimi bir xil imkoniyatli texnologiyalarmi",
     "options": [
+      "Deyarli bir xil",
       "SONET tizimi mavjud emas.",
       "Ikki xil",
-      "Tubdan farq qiladi",
-      "Deyarli bir xil"
+      "Tubdan farq qiladi"
     ],
     "correct": 0
   },
   {
     "text": "SDH uzatish tizimlari tarmoqning qaysi qismida foydalaniladi",
     "options": [
+      "Shahar tarmoqlarida",
       "Lokal tamroqlarida",
       "Istalgan qismida",
-      "Global tarmoqlarda",
-      "Shahar tarmoqlarida"
+      "Global tarmoqlarda"
     ],
     "correct": 0
   },
   {
     "text": "Global tarmoqlarni qurishda DWDM texnologiyasi qanday vazifani bajaradi",
     "options": [
-      "Ma'lumotlarni ko'rsatilgan adres bo'yicha marshrutlaydi",
       "Mamlakatlar va shaharlarni o'zaro bir biri bilan bog'lashni ta'minlaydi.",
+      "Ma'lumotlarni ko'rsatilgan adres bo'yicha marshrutlaydi",
       "U global tarmoqlarida ishlatilmaydi",
       "Lokal tarmoqlarida marshrutlaydi"
     ],
@@ -3150,10 +3150,10 @@
   {
     "text": "Multipleksorlash qanday ma'noni anglatadi.",
     "options": [
+      "Zichlashtirish",
       "Ko'paytirish",
       "Kuchaytirish",
-      "Adreslash",
-      "Zichlashtirish"
+      "Adreslash"
     ],
     "correct": 0
   },
@@ -3170,10 +3170,10 @@
   {
     "text": "Kompyuter tarmoqlarida server qanday vazifani amalga oshiradi",
     "options": [
+      "Serverga ulangan kompyuterlarni o'zaro bog'lanish, resurs almashish va Internet resurslarida foydalanish imkoniyatini ta'minlaydi",
       "Marshrutlash",
       "IP adres berish",
-      "Kompyuterlararo bog'lanish va faqat bir birini resursidan foydalanish imkoniyatini ta'minlaydi",
-      "Serverga ulangan kompyuterlarni o'zaro bog'lanish, resurs almashish va Internet resurslarida foydalanish imkoniyatini ta'minlaydi"
+      "Kompyuterlararo bog'lanish va faqat bir birini resursidan foydalanish imkoniyatini ta'minlaydi"
     ],
     "correct": 0
   },
@@ -3190,10 +3190,10 @@
   {
     "text": "Ilova nima",
     "options": [
+      "Foydalanuvchilarni tarmoq resurslaridan foydalanish imkoniyatini taqdim \netuvchi dasturlar.",
       "Smartfon dasturlari",
       "Xavfsizlikni ta'minlovchi dasturlar",
-      "Operatsiyon tizimga ulanish dastur",
-      "Foydalanuvchilarni tarmoq resurslaridan foydalanish imkoniyatini taqdim \netuvchi dasturlar."
+      "Operatsiyon tizimga ulanish dastur"
     ],
     "correct": 0
   },
@@ -3210,8 +3210,8 @@
   {
     "text": "Klient va server qurilmalari qanday topologiyalarda bog'lanishi mumkin",
     "options": [
-      "Yulduz, halqa, shina",
       "Yulduz, nuqta-nuqta, halqa, shina",
+      "Yulduz, halqa, shina",
       "Faqat yulduz",
       "Faqat nuqta-nuqta"
     ],
@@ -3220,9 +3220,9 @@
   {
     "text": "Klient va server qanday ko'rinishda bog'lanishni amalga oshiradi",
     "options": [
+      "Dastlab klient serverga so'rov jo'natadi va server so'rovga ishlov berib klientga javob qaytaradi.",
       "Har ikkalasi baravar so'rov-javob shaklida ishlaydi",
       "Bunda faqat klient so'rov va javoblarni amalga oshiradi.",
-      "Dastlab klient serverga so'rov jo'natadi va server so'rovga ishlov berib klientga javob qaytaradi.",
       "Nuqta ko'rinishida"
     ],
     "correct": 0
@@ -3230,9 +3230,9 @@
   {
     "text": "Smartfon qurilmalari bir vaqtda ham klient ham server bo'la oladimi",
     "options": [
+      "Ha, foydalanilayotgan protokol va ilovaga muvofiq",
       "Bunaqa bo'lishi mumkin emas",
       "Yoq",
-      "Ha, foydalanilayotgan protokol va ilovaga muvofiq",
       "Hozirda buning imkoniyati mavjud emas"
     ],
     "correct": 0
@@ -3240,28 +3240,28 @@
   {
     "text": "Server vazifasini bajarish uchun qanday shartlar topilishi kerak",
     "options": [
+      "So'rovlarga ishlov berish va javob qaytarish, resurslarga ega bo'lish va doim faol bo'lish",
       "Faqat resurslarga ega bo'lish",
       "So'rovlarga ishlov berish va resurslarga ega bo'lish",
-      "So'rovlarga ishlov berish va javob qaytarish, resurslarga ega bo'lish",
-      "So'rovlarga ishlov berish va javob qaytarish, resurslarga ega bo'lish va doim faol bo'lish"
+      "So'rovlarga ishlov berish va javob qaytarish, resurslarga ega bo'lish"
     ],
     "correct": 0
   },
   {
     "text": "Peer-to-Peer arxitekturasiga asoslangan saytini tanlang",
     "options": [
+      "Bit-torrent saytlari",
       "Barcha qidiruv tizimlariga asoslangan saytlar",
       "Yandex",
-      "Google",
-      "Bit-torrent saytlari"
+      "Google"
     ],
     "correct": 0
   },
   {
     "text": "DNS qanday tizim",
     "options": [
-      "Xotira tizimi",
       "Domen nomalar tizimi",
+      "Xotira tizimi",
       "Domen ro'yxatlari tizimi",
       "Resurslarning manzilini ko'rsatuvchi tizim"
     ],
@@ -3280,9 +3280,9 @@
   {
     "text": "Quyida keltirilgan qaysi domen nomlari to'g'ri ko'rsatilgan",
     "options": [
+      "Barcha domenlar to'g'ri ko'rsatilgan",
       "Google.com, Yahoo.com, Bombay.vni.com",
       "facebook.com, ok.ru",
-      "Barcha domenlar to'g'ri ko'rsatilgan",
       "tuit.uz, uztelecom.uz, csm.tuit.uz"
     ],
     "correct": 0
@@ -3290,18 +3290,18 @@
   {
     "text": "DNS tizimi IP adresini nomga va nomni IP adresga o'zgartiradi, masalan: google.com nomini 173.194.73.94 adresiga o'zgartiradi. Shu holat to'g'rimi",
     "options": [
+      "Ha",
       "Bo'lishi mumkin",
       "Yoq",
-      "Qisman",
-      "Ha"
+      "Qisman"
     ],
     "correct": 0
   },
   {
     "text": ".uz bilan tugagan barcha domenlar faqat O'zbekiston hududida foydalanish mumkinligini anglatadimi",
     "options": [
-      "Ba'zi hollarda O'zbekistondan tashqarida foydalanish mumkin.",
       "Yoq",
+      "Ba'zi hollarda O'zbekistondan tashqarida foydalanish mumkin.",
       "Aniq emas",
       "Ha"
     ],
@@ -3320,8 +3320,8 @@
   {
     "text": "DNS so'rovlariga qaysi qurilma ishlov beradi",
     "options": [
-      "Marshrutizatorlar",
       "DNS serveri.",
+      "Marshrutizatorlar",
       "DNS admini",
       "DNS switch"
     ],
@@ -3330,8 +3330,8 @@
   {
     "text": "ICMP nima maqsadda foydalaniladi",
     "options": [
-      "Marshrutlash jarayonini boshqaradi",
       "Ikki qurilmadagi IP protokollari o'rtasidagi aloqani ta'minlaydi, boshqaradi",
+      "Marshrutlash jarayonini boshqaradi",
       "Ikki qurilmadagi IP protokollari o'rtasidagi ma'lumot almashadi",
       "Monitoring qilish uchun"
     ],
@@ -3340,10 +3340,10 @@
   {
     "text": "Xostlar orasida ICMP boshqaruv xabarlari qanday shakllarda almashadi",
     "options": [
+      "So'rov-javob shaklida",
       "Xabar almashmaydi",
       "Faqat javob shaklida",
-      "Faqat so'rov shaklida",
-      "So'rov-javob shaklida"
+      "Faqat so'rov shaklida"
     ],
     "correct": 0
   },
@@ -3380,10 +3380,10 @@
   {
     "text": "ICMP xabari nechi qismdan tashkil topadi",
     "options": [
+      "2 qismdan: Sarlovha va ma'lumot",
       "1 qismdan: Ma'lumot",
       "1 qismdan: Sarlovha qismidan",
-      "3 qismdan: Ma'lumot, axborot, sarlovha",
-      "2 qismdan: Sarlovha va ma'lumot"
+      "3 qismdan: Ma'lumot, axborot, sarlovha"
     ],
     "correct": 0
   },
@@ -3400,9 +3400,9 @@
   {
     "text": "SNMP protokoli OSI modelining qaysi pog'onasida ishlatiladi",
     "options": [
+      "Amaliy pog'ona",
       "Fizik pog'ona",
       "Tarmoq pog'ona",
-      "Amaliy pog'ona",
       "Kanal pog'ona"
     ],
     "correct": 0
@@ -3410,9 +3410,9 @@
   {
     "text": "SNMP uchun qaysi port belgilangan",
     "options": [
+      "UDP 161 va 162 port",
       "TCP 161 port",
       "Faqat TCP 162",
-      "UDP 161 va 162 port",
       "Faqat UDP 161"
     ],
     "correct": 0
@@ -3420,8 +3420,8 @@
   {
     "text": "SNMP so'rov va javob shakli faqat bitta portdan amalga oshiriladimi",
     "options": [
-      "Ketma-ket bitta portdan",
       "Yoq",
+      "Ketma-ket bitta portdan",
       "Ha",
       "Parallel bitta portdan"
     ],
@@ -3430,9 +3430,9 @@
   {
     "text": "SNMP protokolining asosiy vazifalari nimadan iborat",
     "options": [
+      "Tarmoqni monitoringni uchun tarmoqni boshqarishda ishlatiladi, IP tarmoqlariga ulangan qurilmani boshqarish haqidagi ma'lumotlarni tashkil etish va to'plash uchun standart protokol hisbolanadi",
       "Faqat monitoring",
       "Email xabarlarni nazorat qilish",
-      "Tarmoqni monitoringni uchun tarmoqni boshqarishda ishlatiladi, IP tarmoqlariga ulangan qurilmani boshqarish haqidagi ma'lumotlarni tashkil etish va to'plash uchun standart protokol hisbolanadi",
       "Faqat boshqarish haqidagi ma'lumotlarni tashkil etish va to'plash"
     ],
     "correct": 0
@@ -3440,8 +3440,8 @@
   {
     "text": "Simsiz sensor tarmoqlari deganda nimani tushunasiz",
     "options": [
-      "Atrof muhitdagi holatlarga munosabad bildiruvchi qurilmalar",
       "Atrof muhitdagi holatlarni monitoring qiluvchi va o'zgarishlarni qayt etuvchi qurilmalar",
+      "Atrof muhitdagi holatlarga munosabad bildiruvchi qurilmalar",
       "Atrof muhitda ma'lumot etkazuvchi qurilmalar",
       "Atrof muhitdagi holatlarni o'rganuvchi qurilmalar"
     ],
@@ -3450,18 +3450,18 @@
   {
     "text": "Sensor tarmoqlari elementlariga misol keltiring.",
     "options": [
+      "Aqlli soat, EKG elektrod, gaz sensori",
       "Aqlli soat, EKG elektrod, web saytlar",
       "Barchasi xato",
-      "EKG elektrod, gas sensori, simsim sichqoncha",
-      "Aqlli soat, EKG elektrod, gaz sensori"
+      "EKG elektrod, gas sensori, simsim sichqoncha"
     ],
     "correct": 0
   },
   {
     "text": "Sensor qurilmalarini asosiy vazifasi nimadan iborat",
     "options": [
-      "Kontroller qurilmasiga xizmat qiladi",
       "Atrof muhitdagi o'zgarishlarni monitoring qilish va kontroller qurilmasiga o'zgarishlarni jo'natish",
+      "Kontroller qurilmasiga xizmat qiladi",
       "Atrof muhitdagi o'zgarishlarni monitoring qilish va kontroller qurilmaga o'zgarishlarni jo'natish va kerakli buyruqlarni qabul qilish",
       "Kontroller qurilmasi bilan so'rov-javob shaklida ishlash"
     ],
@@ -3470,8 +3470,8 @@
   {
     "text": "Hozirda qaysi sohalarda IoT texnologiyasidan foydalaniladi",
     "options": [
-      "Tibbiyot",
       "Barcha javob to'g'ri",
+      "Tibbiyot",
       "Qishloq xo'jaligi",
       "Ob-havo ma'lumotlarini aniqlashda"
     ],
@@ -3480,19 +3480,19 @@
   {
     "text": "Sensor qurilmalarida qanday muammolar mavjud",
     "options": [
+      "Barcha javob to'g'ri",
       "Xavfsizlik masalasi to'liq hal etilmagan",
       "Ish bajarish samaradorligi cheklangan",
-      "Xotira va quvvat ta'minoti",
-      "Barcha javob to'g'ri"
+      "Xotira va quvvat ta'minoti"
     ],
     "correct": 0
   },
   {
     "text": "Sensor tarmoqlari uchun maxsus operatsion tizim talab etiladimi",
     "options": [
+      "Ha",
       "Yoq",
       "Ba'zan",
-      "Ha",
       "O'zida mavjud bo'ladi"
     ],
     "correct": 0
@@ -3510,9 +3510,9 @@
   {
     "text": "Sensor qurilmalarni boshqaruvchi qurilma qanday nomlanadi",
     "options": [
+      "Kontroller",
       "Chip",
       "Protsessor",
-      "Kontroller",
       "Brouzer"
     ],
     "correct": 0
@@ -3530,19 +3530,19 @@
   {
     "text": "Sensor qurilmalarini taqdim etadigan afzalliklari nimadan iborat",
     "options": [
+      "Barcha javob to'g'ri",
       "Narxi arzon",
       "Tashib yurish qulay",
-      "Raqamli qurilmalar bilan moslashuvchan",
-      "Barcha javob to'g'ri"
+      "Raqamli qurilmalar bilan moslashuvchan"
     ],
     "correct": 0
   },
   {
     "text": "Nima sababdan sensor qurilmalarida ma'lumot almashish tezligi past",
     "options": [
+      "O'kazuvchanlik qobiliyati cheklangan",
       "Markaziy boshqaruv orqali tezlik pasaytiriladi",
       "Quvvat ta'minoti cheklanganligi uchun",
-      "O'kazuvchanlik qobiliyati cheklangan",
       "Quvvat ta'minoti cheklangan"
     ],
     "correct": 0
@@ -3550,9 +3550,9 @@
   {
     "text": "Sensor tarmoqlarida qanday marshrutlash protokollaridan foydalaniladi",
     "options": [
+      "OLSR, MRP",
       "TCP,UDP",
       "MRP, RIP",
-      "OLSR, MRP",
       "DSDV, IP"
     ],
     "correct": 0
@@ -3560,10 +3560,10 @@
   {
     "text": "Sensor tarmoqlarini qurishda qanday tarmoq topologiyalaridan foydalaniladi",
     "options": [
+      "Barcha javob to'g'ri",
       "Chiziqli, gibrid",
       "Yulduz, daraxt, mesh",
-      "Nuqta-nuqta",
-      "Barcha javob to'g'ri"
+      "Nuqta-nuqta"
     ],
     "correct": 0
   },
@@ -3590,19 +3590,19 @@
   {
     "text": "Tarmoq xavfsizligi qanday vositalar orqali ta'minlanadi",
     "options": [
+      "Apparat va dasturiy ta'minot vositalari orqali",
       "Faqat apparat ta'minoti vositalari orqali",
       "Tarmoq operatorlari orqali",
-      "Faqat dasturiy ta'minoti vositalari orqali",
-      "Apparat va dasturiy ta'minot vositalari orqali"
+      "Faqat dasturiy ta'minoti vositalari orqali"
     ],
     "correct": 0
   },
   {
     "text": "Tarmoq pog'onasida kimlar axborot xavfsizligini himoyalashga mas'ul",
     "options": [
+      "Barcha javob to'g'ri",
       "Tarmoq qurilmasi va dasturlarini ishlab chiqaruvchilar",
       "Provayderlar",
-      "Barcha javob to'g'ri",
       "Operatorlar"
     ],
     "correct": 0
@@ -3610,8 +3610,8 @@
   {
     "text": "Internet foydalanuvchilari uchun tarmoq xavfsizligi kafolatlanganmi",
     "options": [
-      "Internetnet provayderining imkoniyatiga bog'liq",
       "Kafolatlanmagan",
+      "Internetnet provayderining imkoniyatiga bog'liq",
       "Antiviruslar orqali kafolatlash mumkin",
       "Kafolatlangan"
     ],
@@ -3630,9 +3630,9 @@
   {
     "text": "Internet saytlarida mavjud resurslardan foydalanishga kim ruxsat beradi",
     "options": [
+      "Administrator",
       "Xizmat provayderi",
       "Meneger",
-      "Administrator",
       "Barcha javob to'g'ri"
     ],
     "correct": 0
@@ -3640,19 +3640,19 @@
   {
     "text": "Axborotlarni maxfiyligi qanday ta'minlanadi",
     "options": [
+      "Shifrlash algoritmlari orqali",
       "Uzatuvchi muhitlar orqali",
       "Antiviruslar orqali",
-      "Qurilma orqali",
-      "Shifrlash algoritmlari orqali"
+      "Qurilma orqali"
     ],
     "correct": 0
   },
   {
     "text": "Foydalanuvchilar axborot xavfsizligini buzilishida aybdor bo'lishlari mumkinmi",
     "options": [
+      "Ha",
       "Yoq",
       "Qurilma ishlab chiqaruvchi aybdor",
-      "Ha",
       "Dastur ishlab chiqaruvchi aybdor"
     ],
     "correct": 0
@@ -3660,8 +3660,8 @@
   {
     "text": "Nima uchun axborot xavfsizligi borgan sari dolzarb bo'lib bormoqda",
     "options": [
-      "Barcha javob to'g'ri",
       "Axborotlar - intellektual mulk darakasiga etib kelmoqda",
+      "Barcha javob to'g'ri",
       "Insonlar ish faoliyati axborotlar bilan bog'liq bo'lganligi uchun",
       "Tahdidlar resurslardan foydalanish darajasini cheklayotgani uchun"
     ],
@@ -3680,8 +3680,8 @@
   {
     "text": "Ilovalar axborot xavfsizlikni ta'minlashi mumkinmi",
     "options": [
-      "Ta'minlamaydi",
       "Ha",
+      "Ta'minlamaydi",
       "Mumkin emas",
       "Kelajakda"
     ],
@@ -3690,8 +3690,8 @@
   {
     "text": "Kompyuter tarmoqlarida xavfsizlikni ta'minlash uchun nima ishlab chiqilishi lozim",
     "options": [
-      "Xavfsizlik xaritasi",
       "Xavfsizlik siyosati",
+      "Xavfsizlik xaritasi",
       "Xavfsizlik qoidalari",
       "Xavfsizlik talabalari"
     ],
@@ -3710,9 +3710,9 @@
   {
     "text": "Qanday holatlarda konvergensiya jarayoni yuzaga keladi",
     "options": [
+      "Turli qurilmalar va dasturlarni bitta muhitda ishlash natijasida",
       "Har doim faol holat yuzaga kelganida",
       "Bir turdagi standart qurilmalarni o'zaro ishlashi natijasida",
-      "Turli qurilmalar va dasturlarni bitta muhitda ishlash natijasida",
       "Xar xil standartlarda ishlay ololmasligi natijasida"
     ],
     "correct": 0
@@ -3730,8 +3730,8 @@
   {
     "text": "Turli tarmoqlar va ularning formatini moslashtirib beruvchi qurilmani ko'rsating",
     "options": [
-      "Softswitch",
       "Shlyuz",
+      "Softswitch",
       "Modem",
       "Kommutator"
     ],
@@ -3750,19 +3750,19 @@
   {
     "text": "Konvergent tarmoqlariga o'tishning asosiy sababi...",
     "options": [
+      "Barcha javob to'g'ri",
       "Turli standartdagi qurilmalarning ishlab chiqarilishi",
       "Ma'lumot formatlarining turini ko'payib ketishi",
-      "Turli standartdagi dasturlarning ishlab chiqarilishi",
-      "Barcha javob to'g'ri"
+      "Turli standartdagi dasturlarning ishlab chiqarilishi"
     ],
     "correct": 0
   },
   {
     "text": "Konvergensiyaning kamchilik tomonlarini ko'rsating",
     "options": [
+      "Barcha javob to'g'ri",
       "Xavfsizlik darajasi pasayadi",
       "Boshqarish murakkablashadi",
-      "Barcha javob to'g'ri",
       "O'zaro ishlash murakkablashadi"
     ],
     "correct": 0
@@ -3770,29 +3770,29 @@
   {
     "text": "Tarmoq operatsion tizimiga ta'rif bering.",
     "options": [
+      "Barcha javob to'g'ri",
       "Lokal tarmoqqa ulangan barcha turdagi kompyuterlarni qo'llab quuvatlash uchun ishlab chiqiladi",
       "Tarmoq resurslarini boshqaradi",
-      "Tarmoqni uzluksiz ishlashini ta'minlaydi",
-      "Barcha javob to'g'ri"
+      "Tarmoqni uzluksiz ishlashini ta'minlaydi"
     ],
     "correct": 0
   },
   {
     "text": "Windows server tarmoq operatsion tizimi bo'la oladimi",
     "options": [
+      "Ha",
       "Moslashtirish kerak",
       "Yoq",
-      "Mumkin emas",
-      "Ha"
+      "Mumkin emas"
     ],
     "correct": 0
   },
   {
     "text": "Windows serverni qaysi tashkilot ishlab chiqqan.",
     "options": [
+      "Microsoft",
       "Android",
       "Google",
-      "Microsoft",
       "Unix"
     ],
     "correct": 0
@@ -3800,19 +3800,19 @@
   {
     "text": "Nima uchun IoT texnologiyasi ishlab chiqildi",
     "options": [
+      "Barcha javob to'g'ri",
       "Turli narsa-buyumlarni internetga ulab boshqarish",
       "Turli narsa-buyumlarni internetga ulab monitoring qilish",
-      "Turli narsa-buyumlarni internetga ulab nazorat qilish",
-      "Barcha javob to'g'ri"
+      "Turli narsa-buyumlarni internetga ulab nazorat qilish"
     ],
     "correct": 0
   },
   {
     "text": "IoT qanday ma'noni anglatadi",
     "options": [
+      "Internet buyumlar",
       "Sensor tarmoqlari",
       "Aqlli buyumlar",
-      "Internet buyumlar",
       "Internetga ulangan kompyuterlar"
     ],
     "correct": 0
@@ -3820,8 +3820,8 @@
   {
     "text": "Tumanli texnologiya qanday imkoniyatlarni taqdim etadi",
     "options": [
-      "Kichikishlar darajasi pastroq",
       "Barcha javob to'g'ri",
+      "Kichikishlar darajasi pastroq",
       "O'tkazuvchanlikka bog'liq muammolar yuzaga kelmaydi",
       "Foydalanuvchi qurilmasiga yaqin masofada joylashgan"
     ],
@@ -3830,9 +3830,9 @@
   {
     "text": "Ko'p foydalaniladagin tarmoq operatsion tizimlarining nechta asosiy turi bor",
     "options": [
+      "5",
       "4",
       "2",
-      "5",
       "3"
     ],
     "correct": 0
@@ -3840,9 +3840,9 @@
   {
     "text": "Bulutli texnologiyada axborot xavfsizligi doimiy kafolatlanganmi",
     "options": [
+      "Yoq",
       "Ha",
       "Qisman ta'minlangan",
-      "Yoq",
       "Ta'minlasa bo'ladi"
     ],
     "correct": 0
@@ -3850,19 +3850,19 @@
   {
     "text": "Zamonaviy kompyuter tarmoqlari bilan an’anaviy kompyuter tarmoqlarini qanday farqlari bor",
     "options": [
+      "Imkoniyatlari va sig'imi kengaytirilgan",
       "Ishlash tezligi pastligida",
       "Ko'rinishida va xotira sig'imida",
-      "O'lchamida",
-      "Imkoniyatlari va sig'imi kengaytirilgan"
+      "O'lchamida"
     ],
     "correct": 0
   },
   {
     "text": "Tumanli va bulutli texnologiyalarning farqini tushuntirib bering.",
     "options": [
+      "Tumanli kichik va bulutli katta hududdagi tarmoqlarni qamrab oladi",
       "Barcha javob to'g'ri",
       "Mobillilik darajasi bulutlida cheklangan, tumanlida cheklanmagan",
-      "Tumanli kichik va bulutli katta hududdagi tarmoqlarni qamrab oladi",
       "Bulutli markazlashgan va tumanli taqdimlangan"
     ],
     "correct": 0
@@ -3870,20 +3870,20 @@
   {
     "text": "Quyidagilarning qaysi biri niqobni ifodalaydi",
     "options": [
+      "255.255.192.0",
       "192.192.192.192",
       "255.255.100.000",
-      "0.0.0.1",
-      "255.255.192.0"
+      "0.0.0.1"
     ],
     "correct": 0
   },
   {
     "text": "Ushbu maskani o‘lik sanoq tizimida ifodalang: \n11111111.11111111.11111111.11100000",
     "options": [
+      "255.255.255.224",
       "255.255.255.192",
       "255.111.111.0",
-      "255.255.255.128",
-      "255.255.255.224"
+      "255.255.255.128"
     ],
     "correct": 0
   },
@@ -3900,9 +3900,9 @@
   {
     "text": "O‘rnatilgan tizimlarning asosiy xususiyati nima?",
     "options": [
+      "Maxsus vazifalarni bajarishga mo‘ljallanganligi",
       "Yuqori grafik imkoniyatlarga ega bo‘lishi",
       "Doimiy Internetga ulanib ishlashi",
-      "Maxsus vazifalarni bajarishga mo‘ljallanganligi",
       "Faqat dasturchilar tomonidan boshqarilishi"
     ],
     "correct": 0
@@ -3910,9 +3910,9 @@
   {
     "text": "O‘rnatilgan tizimlar qaysi sohalarda keng qo‘llaniladi?",
     "options": [
+      "Telekommunikatsiya, avtomobil sanoati, tibbiyot, sanoat avtomatlashtirish",
       "Faqat Internet xizmatlarida",
       "Faqat matn muharrirlarida",
-      "Telekommunikatsiya, avtomobil sanoati, tibbiyot, sanoat avtomatlashtirish",
       "Faqat kompyuter o‘yinlarida"
     ],
     "correct": 0
@@ -3920,8 +3920,8 @@
   {
     "text": "O‘rnatilgan tizimlar qanday platformalarda ishlaydi?",
     "options": [
-      "Faqat mobil operatsion tizimlarda",
       "Maxsus real vaqt tizimlarida (RTOS) yoki apparat platformasida",
+      "Faqat mobil operatsion tizimlarda",
       "Faqat Linux asosida",
       "Faqat Windows operatsion tizimida"
     ],
@@ -3940,9 +3940,9 @@
   {
     "text": "O‘rnatilgan tizimlarning muhim parametrlari qaysilar?",
     "options": [
+      "Kam quvvat sarfi, ishonchlilik, real vaqt rejimida ishlash",
       "Internetga ulanib ishlash",
       "Faqat kuchli grafik ishlov berish",
-      "Kam quvvat sarfi, ishonchlilik, real vaqt rejimida ishlash",
       "Katta o‘lchamli operativ xotira va tezkor protsessor"
     ],
     "correct": 0
@@ -3960,8 +3960,8 @@
   {
     "text": "Real vaqt tizimlari qanday xususiyatga ega?",
     "options": [
-      "Vazifalarni istalgan vaqtda bajarishi mumkin",
       "Muayyan vaqt oralig‘ida muhim jarayonlarni bajarishi shart",
+      "Vazifalarni istalgan vaqtda bajarishi mumkin",
       "Faqat sun’iy intellekt tizimlarida ishlaydi",
       "Faqat katta xotira talab qiladi"
     ],
@@ -3970,8 +3970,8 @@
   {
     "text": "Qaysi qurilma real vaqt tizimi bo‘lishi mumkin?",
     "options": [
-      "O‘yin noutbuki",
       "Tibbiyot uchun yurak monitori",
+      "O‘yin noutbuki",
       "Veb-brauzer",
       "Ish stoli kompyuteri"
     ],
@@ -3980,8 +3980,8 @@
   {
     "text": "O‘rnatilgan tizimlarning asosiy komponentlari qaysilar?",
     "options": [
-      "Printer va skaner",
       "Protsessor, xotira, kirish-chiqish interfeyslari, dasturiy ta’minot",
+      "Printer va skaner",
       "Faqat dasturiy ta’minot",
       "Faqat apparat qurilmalari"
     ],
@@ -4030,29 +4030,29 @@
   {
     "text": "O‘rnatilgan tizimlarda ishlatiladigan protsessorlar qanday bo‘ladi?",
     "options": [
+      "Maxsus vazifalarga mo‘ljallangan, energiya tejamkor protsessorlar",
       "Asosan yuqori tezlikda ishlovchi protsessorlar",
       "Faqat Intel protsessorlari",
-      "Faqat 64-bitli protsessorlar",
-      "Maxsus vazifalarga mo‘ljallangan, energiya tejamkor protsessorlar"
+      "Faqat 64-bitli protsessorlar"
     ],
     "correct": 0
   },
   {
     "text": "O‘rnatilgan tizimlar uchun qaysi dasturlash tili keng qo‘llaniladi?",
     "options": [
+      "C/C++",
       "HTML",
       "PHP",
-      "JavaScript",
-      "C/C++"
+      "JavaScript"
     ],
     "correct": 0
   },
   {
     "text": "O‘rnatilgan tizimlarning ishlash tezligi qanday belgilanadi?",
     "options": [
+      "Yozilgan kod sifati va apparat resurslariga bog‘liq",
       "Faqat protsessor chastotasi bilan",
       "Internet tezligi bilan",
-      "Yozilgan kod sifati va apparat resurslariga bog‘liq",
       "Faqat operativ xotira hajmi bilan"
     ],
     "correct": 0
@@ -4060,9 +4060,9 @@
   {
     "text": "O‘rnatilgan tizimlar uchun qanday operatsion tizim keng tarqalgan?",
     "options": [
+      "FreeRTOS, VxWorks, QNX",
       "Ubuntu",
       "MacOS",
-      "FreeRTOS, VxWorks, QNX",
       "Windows XP"
     ],
     "correct": 0
@@ -4070,8 +4070,8 @@
   {
     "text": "O‘rnatilgan tizimlar qayerda qo‘llaniladi?",
     "options": [
-      "Smartfon va planshetlarda",
       "Tibbiyot uskunalarida, avtomobillarda, sanoat robotlarida",
+      "Smartfon va planshetlarda",
       "Faqat superkompyuterlarda",
       "Faqat mobil ilovalarda"
     ],
@@ -4080,8 +4080,8 @@
   {
     "text": "O‘rnatilgan tizimlarning asosiy maqsadi nima?",
     "options": [
-      "Faqat ma’lumotlarni saqlash",
       "Maxsus vazifalarni samarali bajarish",
+      "Faqat ma’lumotlarni saqlash",
       "Ko‘p vazifali umumiy hisoblash tizimi yaratish",
       "Faqat grafik interfeys yaratish"
     ],
@@ -4100,9 +4100,9 @@
   {
     "text": "Boshqariluvchi obyekt datchiklari qanday vazifani bajaradi?",
     "options": [
+      "Tashqi fizikaviy kattaliklarni o‘lchab, elektr signaliga aylantiradi",
       "Faqat dasturiy ta’minot bilan ishlaydi",
       "Faqat analog signallarni uzatadi",
-      "Tashqi fizikaviy kattaliklarni o‘lchab, elektr signaliga aylantiradi",
       "Elektr signallarni kuchaytiradi"
     ],
     "correct": 0
@@ -4140,19 +4140,19 @@
   {
     "text": "Analog signallar qanday ma’lumot turi hisoblanadi?",
     "options": [
+      "Davomli (uzluksiz)",
       "Faqat impulsli",
       "Matn shaklida",
-      "Diskret (raqamli)",
-      "Davomli (uzluksiz)"
+      "Diskret (raqamli)"
     ],
     "correct": 0
   },
   {
     "text": "Raqamli signallar qanday xususiyatga ega?",
     "options": [
+      "Diskret (uzlukli) qiymatlarga ega bo‘ladi",
       "Davomli o‘zgaruvchan qiymatlarga ega bo‘ladi",
       "O‘z-o‘zidan qayta ishlanadi",
-      "Diskret (uzlukli) qiymatlarga ega bo‘ladi",
       "Faqat kuchaytiruvchi qurilmalar orqali uzatiladi"
     ],
     "correct": 0
@@ -4170,18 +4170,18 @@
   {
     "text": "Boshqariluvchi obyekt datchiklaridan qaysi biri haroratni o‘lchaydi?",
     "options": [
+      "DHT11 (harorat va namlik datchigi)",
       "MQ-2 (gaz datchigi)",
       "HC-SR04 (ultratovushli datchik)",
-      "LDR (yorug‘lik datchigi)",
-      "DHT11 (harorat va namlik datchigi)"
+      "LDR (yorug‘lik datchigi)"
     ],
     "correct": 0
   },
   {
     "text": "I2C interfeysi qanday ishlaydi?",
     "options": [
-      "Faqat elektr quvvati uzatadi",
       "Seriyali ikki simli protokol asosida ishlaydi",
+      "Faqat elektr quvvati uzatadi",
       "Parallel ravishda ma’lumot uzatadi",
       "Faqat analog signal uzatadi"
     ],
@@ -4190,8 +4190,8 @@
   {
     "text": "Analog signalni raqamli signalga aylantirishda qanday parametr muhim?",
     "options": [
-      "Dastur versiyasi",
       "Konvertatsiya tezligi",
+      "Dastur versiyasi",
       "Xotira hajmi",
       "Ekran rangi"
     ],
@@ -4200,9 +4200,9 @@
   {
     "text": "SPI interfeysining asosiy xususiyati nima?",
     "options": [
+      "Yuqori tezlikda seriyali ma’lumot uzatish",
       "Faqat simsiz ulanish orqali ishlash",
       "Faqat audio signal uzatish",
-      "Yuqori tezlikda seriyali ma’lumot uzatish",
       "Parallel ma’lumot uzatish"
     ],
     "correct": 0
@@ -4210,8 +4210,8 @@
   {
     "text": "O‘rnatilgan tizimlarda qaysi interfeys real vaqt rejimida ishlash uchun samarali?",
     "options": [
-      "USB",
       "SPI",
+      "USB",
       "Ethernet",
       "HDMI"
     ],
@@ -4220,8 +4220,8 @@
   {
     "text": "UART interfeysi qanday ishlaydi?",
     "options": [
-      "Elektr energiyasini uzatadi",
       "Asinxron seriyali aloqa orqali",
+      "Elektr energiyasini uzatadi",
       "Faqat simsiz aloqa uchun ishlatiladi",
       "Faqat raqamli signallarni qabul qiladi"
     ],
@@ -4230,39 +4230,39 @@
   {
     "text": "Boshqariluvchi obyekt datchiklari qanday signallarni ishlab chiqarishi mumkin?",
     "options": [
+      "Analog va raqamli",
       "Faqat raqamli",
       "Faqat chastotaviy",
-      "Faqat analog",
-      "Analog va raqamli"
+      "Faqat analog"
     ],
     "correct": 0
   },
   {
     "text": "O‘rnatilgan tizimlarda qaysi datchik harakatni aniqlash uchun ishlatiladi?",
     "options": [
+      "MPU6050 (gyroskop va akselerometr)",
       "LM35 (harorat datchigi)",
       "MQ-7 (gaz datchigi)",
-      "DS18B20 (harorat datchigi)",
-      "MPU6050 (gyroskop va akselerometr)"
+      "DS18B20 (harorat datchigi)"
     ],
     "correct": 0
   },
   {
     "text": "ADC qurilmalari qanday ishlaydi?",
     "options": [
+      "Analog signalni raqamli ko‘rinishga o‘tkazadi",
       "Raqamli signalni kuchaytiradi",
       "Signalni filtrlash uchun ishlatiladi",
-      "Analog signalni saqlaydi",
-      "Analog signalni raqamli ko‘rinishga o‘tkazadi"
+      "Analog signalni saqlaydi"
     ],
     "correct": 0
   },
   {
     "text": "Raqam-analog o‘zgartirgich (DAC) qanday signallarni hosil qiladi?",
     "options": [
+      "Analog",
       "Faqat raqamli",
       "Matnli",
-      "Analog",
       "Faqat impulsli"
     ],
     "correct": 0
@@ -4270,9 +4270,9 @@
   {
     "text": "Boshqariluvchi obyekt datchiklarining asosiy vazifasi nima?",
     "options": [
+      "Tashqi fizik jarayonlarni o‘lchash va ularga javob qaytarish",
       "Faqat tasvir hosil qilish",
       "Signalni shifrlash",
-      "Tashqi fizik jarayonlarni o‘lchash va ularga javob qaytarish",
       "Signalni faqat mustaqil saqlash"
     ],
     "correct": 0
@@ -4290,18 +4290,18 @@
   {
     "text": "O‘rnatilgan tizim qurilmalarini boshqarish obyekt bilan qanday vositalar orqali ulanadi?",
     "options": [
+      "Datchiklar va aktuatorlar orqali",
       "Faqat Wi-Fi orqali",
       "Faqat Bluetooth orqali",
-      "Faqat kabel orqali",
-      "Datchiklar va aktuatorlar orqali"
+      "Faqat kabel orqali"
     ],
     "correct": 0
   },
   {
     "text": "O‘rnatilgan tizimlarda datchiklar qanday rol o‘ynaydi?",
     "options": [
-      "Faqat kuchlanishni oshirish uchun ishlatiladi",
       "Fizikaviy kattaliklarni o‘lchab, signal shaklida uzatadi",
+      "Faqat kuchlanishni oshirish uchun ishlatiladi",
       "Dastur yozish uchun ishlatiladi",
       "Faqat ma’lumot saqlaydi"
     ],
@@ -4310,9 +4310,9 @@
   {
     "text": "Mikrokontrollerning asosiy tarkibiy qismlaridan biri qaysi?",
     "options": [
+      "Markaziy protsessor (CPU), xotira, kirish-chiqish portlari",
       "O‘yinga moslashtirilgan grafik protsessor",
       "Faqat operativ xotira",
-      "Markaziy protsessor (CPU), xotira, kirish-chiqish portlari",
       "Ish stoli kompyuteri"
     ],
     "correct": 0
@@ -4330,8 +4330,8 @@
   {
     "text": "Mikrokontroller qanday qurilma?",
     "options": [
-      "Faqat grafik ishlov berish uchun ishlatiladi",
       "Protsessor, xotira va kirish-chiqish interfeyslarini o‘z ichiga olgan mustaqil tizim",
+      "Faqat grafik ishlov berish uchun ishlatiladi",
       "Faqat ma’lumot saqlash uchun ishlatiladi",
       "Internetga ulanish uchun ishlatiladi"
     ],
@@ -4340,29 +4340,29 @@
   {
     "text": "Mikrokontrollerning xotira turlari qanday?",
     "options": [
+      "ROM, RAM va EEPROM",
       "Faqat operativ xotira",
       "Faqat flesh xotira",
-      "Faqat qattiq disk",
-      "ROM, RAM va EEPROM"
+      "Faqat qattiq disk"
     ],
     "correct": 0
   },
   {
     "text": "O‘rnatilgan tizim protsessorlari ko‘pincha qanday arxitekturaga ega bo‘ladi?",
     "options": [
+      "RISC (Reduced Instruction Set Computing)",
       "Faqat FPGA asosida qurilgan bo‘ladi",
       "Faqat x86 arxitekturasiga ega bo‘ladi",
-      "CISC (Complex Instruction Set Computing)",
-      "RISC (Reduced Instruction Set Computing)"
+      "CISC (Complex Instruction Set Computing)"
     ],
     "correct": 0
   },
   {
     "text": "Mikrokontrollerlarning eng mashhur oilalaridan biri qaysi?",
     "options": [
+      "AVR, PIC, ARM",
       "Intel Core i7",
       "Nvidia Tegra",
-      "AVR, PIC, ARM",
       "AMD Ryzen"
     ],
     "correct": 0
@@ -4370,8 +4370,8 @@
   {
     "text": "Mikrokontroller qanday dasturlanadi?",
     "options": [
-      "Faqat HTML va CSS orqali",
       "Assembly, C, C++ yordamida",
+      "Faqat HTML va CSS orqali",
       "Faqat JavaScript orqali",
       "Faqat Windows muhitida"
     ],
@@ -4380,19 +4380,19 @@
   {
     "text": "Mikrokontrollerning asosiy xususiyati nima?",
     "options": [
+      "Kam quvvat sarflaydi va maxsus vazifalarni bajaradi",
       "Faqat katta o‘lchamli operativ xotiraga ega",
       "Ko‘p dasturlarni bir vaqtning o‘zida ishga tushiradi",
-      "Faqat grafik ishlov berish uchun ishlatiladi",
-      "Kam quvvat sarflaydi va maxsus vazifalarni bajaradi"
+      "Faqat grafik ishlov berish uchun ishlatiladi"
     ],
     "correct": 0
   },
   {
     "text": "Mikrokontroller ichidagi ALU (Arithmetic Logic Unit) qanday vazifa bajaradi?",
     "options": [
+      "Arifmetik va mantiqiy amallarni bajaradi",
       "Grafiklarni qayta ishlaydi",
       "Faqat signal uzatadi",
-      "Arifmetik va mantiqiy amallarni bajaradi",
       "Ma’lumotlarni doimiy saqlaydi"
     ],
     "correct": 0
@@ -4400,8 +4400,8 @@
   {
     "text": "O‘rnatilgan tizim protsessorlari qanday interfeyslar bilan bog‘lanadi?",
     "options": [
-      "Faqat Wi-Fi",
       "UART, I2C, SPI, USB",
+      "Faqat Wi-Fi",
       "Faqat HDMI",
       "Faqat Ethernet"
     ],
@@ -4410,19 +4410,19 @@
   {
     "text": "Mikrokontrollerning soat chastotasi nimani belgilaydi?",
     "options": [
+      "Protsessor qancha tez ishlashini",
       "Operativ xotira hajmini",
       "Qancha elektr quvvati talab qilinishini",
-      "Qurilmaning fizik o‘lchamini",
-      "Protsessor qancha tez ishlashini"
+      "Qurilmaning fizik o‘lchamini"
     ],
     "correct": 0
   },
   {
     "text": "Mikrokontrollerlar qanday turdagi operatsion tizimlardan foydalanadi?",
     "options": [
+      "RTOS (Real-Time Operating System) yoki yalang‘och apparat tizimi",
       "Faqat Linux OS",
       "Faqat Android OS",
-      "RTOS (Real-Time Operating System) yoki yalang‘och apparat tizimi",
       "Faqat Windows OS"
     ],
     "correct": 0
@@ -4440,19 +4440,19 @@
   {
     "text": "Mikrokontrollerlarning asosiy xususiyati nima?",
     "options": [
+      "Dasturiy ta’minot va apparat vositalarini birgalikda boshqarish",
       "Faqat yuqori quvvat sarflash",
       "Faqat ma’lumot saqlash",
-      "Faqat grafik interfeys ishlatish",
-      "Dasturiy ta’minot va apparat vositalarini birgalikda boshqarish"
+      "Faqat grafik interfeys ishlatish"
     ],
     "correct": 0
   },
   {
     "text": "Mikrokontrollerda kirish-chiqish pinlari nima uchun kerak?",
     "options": [
+      "Tashqi qurilmalar bilan aloqa o‘rnatish uchun",
       "Protsessor tezligini o‘zgartirish uchun",
       "Operativ xotira hajmini oshirish uchun",
-      "Tashqi qurilmalar bilan aloqa o‘rnatish uchun",
       "Faqat displey boshqarish uchun"
     ],
     "correct": 0
@@ -4460,10 +4460,10 @@
   {
     "text": "Mikrokontrollerdagi taymer va sanagichlarning vazifasi nima?",
     "options": [
+      "Vaqtni hisoblash va jarayonlarni sinxronlashtirish",
       "Faqat dastur yozish uchun",
       "Faqat grafikni qayta ishlash",
-      "Operativ xotirani to‘ldirish",
-      "Vaqtni hisoblash va jarayonlarni sinxronlashtirish"
+      "Operativ xotirani to‘ldirish"
     ],
     "correct": 0
   },
@@ -4480,9 +4480,9 @@
   {
     "text": "Mikrokontroller qaysi sohalarda keng qo‘llaniladi?",
     "options": [
+      "Sanoat avtomatlashtirish, avtomobil sanoati, tibbiyot, smart qurilmalar",
       "Faqat superkompyuterlarda",
       "Faqat video o‘yinlar yaratishda",
-      "Sanoat avtomatlashtirish, avtomobil sanoati, tibbiyot, smart qurilmalar",
       "Faqat Internet xizmatlarida"
     ],
     "correct": 0
@@ -4490,10 +4490,10 @@
   {
     "text": "Uzulish (interruption) nima?",
     "options": [
+      "Mikrokontroller ish jarayonini vaqtincha to‘xtatib, muhimroq vazifani bajarish mexanizmi",
       "Qurilmalarni doimiy ravishda qayta yuklash usuli",
       "Elektr energiyasini boshqarish tizimi",
-      "Xotirani tozalash jarayoni",
-      "Mikrokontroller ish jarayonini vaqtincha to‘xtatib, muhimroq vazifani bajarish mexanizmi"
+      "Xotirani tozalash jarayoni"
     ],
     "correct": 0
   },
@@ -4510,10 +4510,10 @@
   {
     "text": "Uzulishlarga ishlov beruvchi maxsus dastur nima deb ataladi?",
     "options": [
+      "ISR (Interrupt Service Routine)",
       "RAM boshqaruvchi",
       "Multitasking protsessor",
-      "BIOS",
-      "ISR (Interrupt Service Routine)"
+      "BIOS"
     ],
     "correct": 0
   },
@@ -4530,19 +4530,19 @@
   {
     "text": "Tashqi qurilmalar qanday qilib uzilish hosil qiladi?",
     "options": [
+      "Maxsus signal yuborish orqali",
       "Internet orqali ma’lumot olish orqali",
       "Elektr quvvatini pasaytirish orqali",
-      "Dasturiy ta’minotni o‘zgartirish orqali",
-      "Maxsus signal yuborish orqali"
+      "Dasturiy ta’minotni o‘zgartirish orqali"
     ],
     "correct": 0
   },
   {
     "text": "Ichki uzilishlar qanday hosil bo‘ladi?",
     "options": [
+      "Taymer, xatolik yoki maxsus dasturiy signal orqali",
       "USB orqali ulanadigan qurilmalar orqali",
       "Tashqi qurilmalar signallari orqali",
-      "Taymer, xatolik yoki maxsus dasturiy signal orqali",
       "Internet orqali uzatish orqali"
     ],
     "correct": 0
@@ -4550,9 +4550,9 @@
   {
     "text": "O‘rnatilgan tizimlarda uzilishlarning asosiy afzalligi nima?",
     "options": [
+      "Protsessor vaqtini samarali ishlatish",
       "Xotira sarfini ko‘paytirish",
       "Qurilmalarning faqat tez ishlashini ta’minlash",
-      "Protsessor vaqtini samarali ishlatish",
       "Faqatgina operativ xotira ishlashini yaxshilash"
     ],
     "correct": 0
@@ -4570,9 +4570,9 @@
   {
     "text": "Uzulishlar qanday usullar bilan ustuvorlikka ega bo‘ladi?",
     "options": [
+      "Uzulish darajasi yoki apparat ustuvorligi orqali",
       "Operatsion tizimni qayta yuklash orqali",
       "Tarmoq tezligini o‘zgartirish orqali",
-      "Uzulish darajasi yoki apparat ustuvorligi orqali",
       "Faqat dasturiy ta’minot bilan"
     ],
     "correct": 0
@@ -4580,8 +4580,8 @@
   {
     "text": "Uzulishlar paytida protsessor qanday ma’lumotlarni saqlaydi?",
     "options": [
-      "Faqat vaqt belgilarini",
       "Joriy bajarilayotgan instruktsiya va registr qiymatlarini",
+      "Faqat vaqt belgilarini",
       "Operativ xotira tarkibini butunlay o‘chiradi",
       "Faqat kod segmentini"
     ],
@@ -4590,8 +4590,8 @@
   {
     "text": "Ishlov berishning vaqt ko‘rsatkichlari nimani ta’minlaydi?",
     "options": [
-      "Qurilmaning haroratini pasaytirishni",
       "Real vaqt rejimida uzilishlarga javob berish imkoniyatini",
+      "Qurilmaning haroratini pasaytirishni",
       "Internet tezligini oshirishni",
       "Faqat xotira miqdorini oshirishni"
     ],
@@ -4600,10 +4600,10 @@
   {
     "text": "ISR dasturlarini yozishda eng muhim jihat nima?",
     "options": [
+      "Tez bajarilishi va minimal kod ishlatilishi",
       "Juda ko‘p funksiya chaqirish",
       "Katta va murakkab kod yozish",
-      "Doimiy ravishda global o‘zgaruvchilarni o‘zgartirish",
-      "Tez bajarilishi va minimal kod ishlatilishi"
+      "Doimiy ravishda global o‘zgaruvchilarni o‘zgartirish"
     ],
     "correct": 0
   },
@@ -4630,8 +4630,8 @@
   {
     "text": "Qaysi komponent protsessorga uzilish signallarini yuboradi?",
     "options": [
-      "Qattiq disk",
       "IRQ (Interrupt Request) liniyalari",
+      "Qattiq disk",
       "LCD display",
       "RAM"
     ],
@@ -4650,8 +4650,8 @@
   {
     "text": "Real vaqt rejimida ishlov berish uchun qaysi mexanizm muhim?",
     "options": [
-      "Ko‘p operativ xotira ishlatish",
       "Uzilishlarni to‘g‘ri boshqarish va ustuvorlik belgilash",
+      "Ko‘p operativ xotira ishlatish",
       "Elektr quvvatini oshirish",
       "Faqat internetga ulanish"
     ],
@@ -4660,8 +4660,8 @@
   {
     "text": "ISR bajarilishida qaysi amallar bajarilishi kerak emas?",
     "options": [
-      "Minimal kod yozish va tez bajarilish",
       "Katta hajmli kod ishlatish va uzoq sikllarni bajarish",
+      "Minimal kod yozish va tez bajarilish",
       "Uzulish vektoridan to‘g‘ri foydalanish",
       "Registrlarni saqlash va tiklash"
     ],
@@ -4680,19 +4680,19 @@
   {
     "text": "Uzulishlarni to‘g‘ri boshqarish nima uchun muhim?",
     "options": [
+      "Tizimning barqaror va samarali ishlashini ta’minlash uchun",
       "Faqat xotira hajmini oshirish uchun",
       "Faqat elektr energiyasini tejash uchun",
-      "Faqat foydalanuvchi interfeysini yaxshilash uchun",
-      "Tizimning barqaror va samarali ishlashini ta’minlash uchun"
+      "Faqat foydalanuvchi interfeysini yaxshilash uchun"
     ],
     "correct": 0
   },
   {
     "text": "Kiritish-chiqarish interfeysi nima?",
     "options": [
+      "Tashqi qurilmalar bilan o‘rnatilgan tizim o‘rtasida ma’lumot almashish vositasi",
       "Faqat o‘rnatilgan tizimning operativ xotirasi",
       "Faqat ekran tasvirini boshqarish tizimi",
-      "Tashqi qurilmalar bilan o‘rnatilgan tizim o‘rtasida ma’lumot almashish vositasi",
       "Dasturlarni saqlash uchun ichki xotira"
     ],
     "correct": 0
@@ -4700,8 +4700,8 @@
   {
     "text": "Kiritish-chiqarish interfeysining turlari qaysilar?",
     "options": [
-      "Faqat USB interfeysi",
       "Paralel va ketma-ket interfeyslar",
+      "Faqat USB interfeysi",
       "Faqat Wi-Fi interfeysi",
       "Faqat qattiq disk bilan ishlovchi interfeys"
     ],
@@ -4710,8 +4710,8 @@
   {
     "text": "O‘rnatilgan tizimlarda ishlatiladigan eng keng tarqalgan ketma-ket interfeys qaysi?",
     "options": [
-      "VGA",
       "UART (Universal Asynchronous Receiver-Transmitter)",
+      "VGA",
       "HDMI",
       "PS/2"
     ],
@@ -4730,9 +4730,9 @@
   {
     "text": "Paralel interfeys qanday ishlaydi?",
     "options": [
+      "0 uzatadi",
       "Faqat simsiz aloqa uchun ishlatiladi",
       "Faqat audio signal uzatadi",
-      "0 uzatadi",
       "Faqat bitta bitni uzatadi"
     ],
     "correct": 0
@@ -4740,19 +4740,19 @@
   {
     "text": "USB interfeysi qaysi turga kiradi?",
     "options": [
+      "Ketma-ket interfeys",
       "Analog interfeys",
       "Faqat simsiz interfeys",
-      "Paralel interfeys",
-      "Ketma-ket interfeys"
+      "Paralel interfeys"
     ],
     "correct": 0
   },
   {
     "text": "SPI interfeysi qaysi ma’lumot almashish usuliga asoslangan?",
     "options": [
+      "Sinxron ketma-ket aloqa",
       "Faqat tasvir uzatish",
       "Faqat simsiz aloqa",
-      "Sinxron ketma-ket aloqa",
       "Asinxron ketma-ket aloqa"
     ],
     "correct": 0
@@ -4760,8 +4760,8 @@
   {
     "text": "Kiritish-chiqarish apparat interfeysi nima uchun kerak?",
     "options": [
-      "Operativ xotirani oshirish uchun",
       "O‘rnatilgan tizim va tashqi qurilmalar o‘rtasidagi ma’lumot almashuvini ta’minlash uchun",
+      "Operativ xotirani oshirish uchun",
       "Faqat tizimni elektr ta’minoti bilan ta’minlash uchun",
       "Faqat grafik tasvirlarni qayta ishlash uchun"
     ],
@@ -4790,20 +4790,20 @@
   {
     "text": "Ethernet interfeysi qanday ma’lumot uzatish usuliga asoslangan?",
     "options": [
+      "Simli aloqa",
       "Faqat ultratovush signallari",
       "Simsiz aloqa",
-      "Faqat infraqizil aloqa",
-      "Simli aloqa"
+      "Faqat infraqizil aloqa"
     ],
     "correct": 0
   },
   {
     "text": "O‘rnatilgan tizimlarda ishlatiladigan simsiz interfeyslar qaysilar?",
     "options": [
+      "Wi-Fi, Bluetooth, Zigbee",
       "Faqat USB",
       "Faqat DisplayPort",
-      "Faqat HDMI",
-      "Wi-Fi, Bluetooth, Zigbee"
+      "Faqat HDMI"
     ],
     "correct": 0
   },
@@ -4820,8 +4820,8 @@
   {
     "text": "CAN interfeysi qayerda keng qo‘llaniladi?",
     "options": [
-      "Faqat televizorlarda",
       "Avtomobil elektronikasi va sanoat avtomatlashtirishida",
+      "Faqat televizorlarda",
       "Faqat mobil telefonlarda",
       "Faqat ofis kompyuterlarida"
     ],
@@ -4840,9 +4840,9 @@
   {
     "text": "RS-232 interfeysi qaysi turga kiradi?",
     "options": [
+      "Ketma-ket interfeys",
       "Paralel interfeys",
       "Faqat simsiz interfeys",
-      "Ketma-ket interfeys",
       "Faqat audio interfeys"
     ],
     "correct": 0
@@ -4860,9 +4860,9 @@
   {
     "text": "USB interfeysining asosiy afzalliklari qaysilar?",
     "options": [
+      "Yuqori tezlikda ma’lumot uzatish va universal ulanish",
       "Faqat quvvat manbai sifatida ishlatilishi",
       "Faqat audio signal uzatish",
-      "Yuqori tezlikda ma’lumot uzatish va universal ulanish",
       "Faqat grafik interfeys"
     ],
     "correct": 0
@@ -4880,19 +4880,19 @@
   {
     "text": "O‘rnatilgan tizimlar uchun operatsion tizimlarning asosiy vazifasi nima?",
     "options": [
+      "Dasturlarni boshqarish va tizim resurslarini samarali taqsimlash",
       "Faqat apparat qurilmalarni boshqarish",
       "Faqat internetga ulanishni ta’minlash",
-      "Faqat grafik interfeys taqdim etish",
-      "Dasturlarni boshqarish va tizim resurslarini samarali taqsimlash"
+      "Faqat grafik interfeys taqdim etish"
     ],
     "correct": 0
   },
   {
     "text": "O‘rnatilgan tizimlar uchun operatsion tizimlarning muhim talablari qaysilar?",
     "options": [
+      "Resurslarni samarali boshqarish, real vaqt rejimida ishlash va ishonchlilik",
       "Faqat katta hajmdagi xotira talab qilish",
       "Faqat foydalanuvchilar uchun qulaylik yaratish",
-      "Resurslarni samarali boshqarish, real vaqt rejimida ishlash va ishonchlilik",
       "Faqat grafik interfeysning mavjudligi"
     ],
     "correct": 0
@@ -4900,9 +4900,9 @@
   {
     "text": "O‘rnatilgan tizimlarda ishlatiladigan eng mashhur real vaqt operatsion tizimlari (RTOS) qaysilar?",
     "options": [
+      "FreeRTOS, VxWorks, QNX",
       "Windows XP, MacOS, Ubuntu",
       "Faqat Linux",
-      "FreeRTOS, VxWorks, QNX",
       "Faqat Android"
     ],
     "correct": 0
@@ -4910,9 +4910,9 @@
   {
     "text": "Monolit operatsion tizim arxitekturasi qanday ishlaydi?",
     "options": [
+      "Barcha tizim xizmatlari yadro ichida bajariladi",
       "Faqat apparat bilan bog‘langan tizim",
       "Har bir xizmat mustaqil modullar sifatida ishlaydi",
-      "Barcha tizim xizmatlari yadro ichida bajariladi",
       "Har bir dastur alohida yadroni ishlatadi"
     ],
     "correct": 0
@@ -4920,9 +4920,9 @@
   {
     "text": "Monolit yadrolarning asosiy afzalligi nima?",
     "options": [
+      "Yuqori ishlash tezligi va kam kechikish",
       "Juda kichik hajmda bo‘lishi",
       "Faqat ma’lumot saqlashni ta’minlashi",
-      "Yuqori ishlash tezligi va kam kechikish",
       "Barcha xizmatlarning alohida ishlashi"
     ],
     "correct": 0
@@ -4930,8 +4930,8 @@
   {
     "text": "Monolit yadro operatsion tizimiga misol keltiring.",
     "options": [
-      "Windows NT",
       "Linux",
+      "Windows NT",
       "MacOS",
       "FreeRTOS"
     ],
@@ -4940,9 +4940,9 @@
   {
     "text": "Modulli arxitektura qanday ishlaydi?",
     "options": [
+      "Operatsion tizim komponentlari mustaqil modullar shaklida bo‘ladi",
       "Barcha kodlar yadroga joylashgan bo‘ladi",
       "Faqat mijoz-server modelidan foydalanadi",
-      "Operatsion tizim komponentlari mustaqil modullar shaklida bo‘ladi",
       "Faqat grafik interfeysni ta’minlaydi"
     ],
     "correct": 0
@@ -4950,8 +4950,8 @@
   {
     "text": "Modulli arxitekturaning afzalligi nimada?",
     "options": [
-      "Faqat Linux yadrosi uchun mo‘ljallangan",
       "Tizimni oson sozlash va kengaytirish mumkin",
+      "Faqat Linux yadrosi uchun mo‘ljallangan",
       "Faqat real vaqt tizimlari uchun ishlatiladi",
       "Har doim tez ishlaydi"
     ],
@@ -4960,9 +4960,9 @@
   {
     "text": "Modulli arxitekturaga misol keltiring.",
     "options": [
+      "Linux yadrosi",
       "Windows 3.1",
       "DOS",
-      "Linux yadrosi",
       "FreeDOS"
     ],
     "correct": 0
@@ -4970,8 +4970,8 @@
   {
     "text": "Mikroyadro nima?",
     "options": [
-      "Operatsion tizim yadrosining eng katta versiyasi",
       "Minimal xizmatlarni ta’minlovchi yadro arxitekturasi",
+      "Operatsion tizim yadrosining eng katta versiyasi",
       "Faqat Windows operatsion tizimlari uchun ishlatiladi",
       "Faqat grafik interfeysni ta’minlaydi"
     ],
@@ -4990,9 +4990,9 @@
   {
     "text": "Mikroyadro operatsion tizimlariga misollar qaysilar?",
     "options": [
+      "QNX, Minix, L4",
       "MS-DOS, FreeDOS",
       "Windows 98, MacOS",
-      "QNX, Minix, L4",
       "FreeBSD, Solaris"
     ],
     "correct": 0
@@ -5000,8 +5000,8 @@
   {
     "text": "Mijoz-server modeli qanday ishlaydi?",
     "options": [
-      "Faqat foydalanuvchilar uchun mo‘ljallangan",
       "Xizmatlar alohida jarayonlar sifatida bajariladi va yadroga minimal yuk tushadi",
+      "Faqat foydalanuvchilar uchun mo‘ljallangan",
       "Barcha xizmatlar yadro ichida bajariladi",
       "Faqat bitta mijoz ishlashi mumkin"
     ],
@@ -5030,9 +5030,9 @@
   {
     "text": "Qaysi operatsion tizim mikroyadro arxitekturasidan foydalanadi?",
     "options": [
+      "QNX",
       "DOS",
       "Windows XP",
-      "QNX",
       "Linux"
     ],
     "correct": 0
@@ -5040,8 +5040,8 @@
   {
     "text": "Mikroyadro tizimida xizmatlarning ishlashi qanday tashkil etiladi?",
     "options": [
-      "Faqat bitta jarayon ishlashi mumkin",
       "Har bir xizmat alohida jarayon sifatida ishlaydi",
+      "Faqat bitta jarayon ishlashi mumkin",
       "Operatsion tizim grafik interfeyssiz ishlaydi",
       "Barcha xizmatlar yagona yadro ichida joylashadi"
     ],
@@ -5050,8 +5050,8 @@
   {
     "text": "Monolit yadroda xatoliklar qanday ta’sir qiladi?",
     "options": [
-      "Hech qanday ta’sir qilmaydi",
       "Barcha tizimga ta’sir qiladi va tizim ishdan chiqishi mumkin",
+      "Hech qanday ta’sir qilmaydi",
       "Xatolik faqat bitta jarayonga ta’sir qiladi",
       "Faqat tarmoq xizmatlariga ta’sir qiladi"
     ],
@@ -5060,10 +5060,10 @@
   {
     "text": "Mikroyadro tizimida xatoliklar qanday ta’sir qiladi?",
     "options": [
+      "Xatolik faqat muayyan xizmatga ta’sir qiladi",
       "Barcha jarayonlar to‘xtaydi",
       "Faqat grafik interfeys o‘chadi",
-      "Butun tizim ishdan chiqadi",
-      "Xatolik faqat muayyan xizmatga ta’sir qiladi"
+      "Butun tizim ishdan chiqadi"
     ],
     "correct": 0
   },
@@ -5080,8 +5080,8 @@
   {
     "text": "Arduino nima?",
     "options": [
-      "Ish stoli kompyuterlari uchun mo‘ljallangan operatsion tizim",
       "Ochiq kodli apparat va dasturiy ta’minot platformasi",
+      "Ish stoli kompyuterlari uchun mo‘ljallangan operatsion tizim",
       "Faqat robototexnikada ishlatiladigan dastur",
       "Faqat grafik interfeysga ega bo‘lgan dastur"
     ],
@@ -5100,10 +5100,10 @@
   {
     "text": "Arduino platalarida ishlatiladigan asosiy mikrokontroller qaysi?",
     "options": [
+      "Atmel (Microchip) AVR va ARM Cortex-M",
       "AMD Ryzen",
       "NVIDIA Tegra",
-      "Intel Core i7",
-      "Atmel (Microchip) AVR va ARM Cortex-M"
+      "Intel Core i7"
     ],
     "correct": 0
   },
@@ -5120,8 +5120,8 @@
   {
     "text": "Arduino platalari qanday interfeys orqali kompyuterga ulanadi?",
     "options": [
-      "VGA",
       "USB",
+      "VGA",
       "Ethernet",
       "HDMI"
     ],
@@ -5130,9 +5130,9 @@
   {
     "text": "Arduino Uno platasida qaysi mikrokontroller ishlatiladi?",
     "options": [
+      "ATmega328P",
       "STM32F103",
       "PIC16F877A",
-      "ATmega328P",
       "ESP8266"
     ],
     "correct": 0
@@ -5140,9 +5140,9 @@
   {
     "text": "Arduino Mega 2560 platasining asosiy xususiyati nima?",
     "options": [
+      "Ko‘proq kirish-chiqarish pinlariga ega",
       "Faqat quvvatni boshqarish uchun ishlatiladi",
       "O‘ta kichik o‘lchamga ega",
-      "Ko‘proq kirish-chiqarish pinlariga ega",
       "Faqat Wi-Fi bilan ishlaydi"
     ],
     "correct": 0
@@ -5150,9 +5150,9 @@
   {
     "text": "Qaysi Arduino modeli Wi-Fi bilan integratsiyalashgan?",
     "options": [
+      "Arduino Uno WiFi",
       "Arduino Due",
       "Arduino Nano",
-      "Arduino Uno WiFi",
       "Arduino Mega"
     ],
     "correct": 0
@@ -5160,8 +5160,8 @@
   {
     "text": "Arduino Due platasining asosiy afzalligi nima?",
     "options": [
-      "Faqat ma’lumot uzatish uchun ishlatilishi",
       "ARM Cortex-M3 yadrosiga ega bo‘lishi",
+      "Faqat ma’lumot uzatish uchun ishlatilishi",
       "Faqat LEDlarni boshqarish imkoniyati",
       "Juda kichik o‘lchamga ega bo‘lishi"
     ],
@@ -5170,8 +5170,8 @@
   {
     "text": "Arduino Nano qanday ishlaydi?",
     "options": [
-      "Faqat grafik interfeys uchun ishlatiladi",
       "Arduino Uno'ning ixcham versiyasi bo‘lib, USB orqali dasturlanadi",
+      "Faqat grafik interfeys uchun ishlatiladi",
       "Faqat Wi-Fi moduli sifatida ishlaydi",
       "Ko‘p yadroli protsessorni o‘z ichiga oladi"
     ],
@@ -5180,19 +5180,19 @@
   {
     "text": "Arduino LilyPad qayerda ishlatiladi?",
     "options": [
+      "Kiyim-kechakka tikiladigan elektron tizimlarda",
       "Smartfon protsessorlarida",
       "Sun’iy yo‘ldosh boshqaruvida",
-      "Faqat televizor pultlarida",
-      "Kiyim-kechakka tikiladigan elektron tizimlarda"
+      "Faqat televizor pultlarida"
     ],
     "correct": 0
   },
   {
     "text": "O‘rnatilgan tizimlar uchun ARM arxitekturasining asosiy afzalligi nima?",
     "options": [
+      "Kam quvvat sarfi va yuqori unumdorlik",
       "Faqat katta hajmdagi xotira talab qilishi",
       "Faqat katta hajmdagi grafik interfeyslarni qo‘llab-quvvatlashi",
-      "Kam quvvat sarfi va yuqori unumdorlik",
       "Juda qimmat bo‘lishi"
     ],
     "correct": 0
@@ -5200,19 +5200,19 @@
   {
     "text": "ARM arxitekturasiga asoslangan qaysi mikrokontrollerlar Arduino platalarida ishlatiladi?",
     "options": [
+      "STM32, SAM3X8E",
       "AMD Ryzen",
       "NVIDIA GPU",
-      "Intel Pentium",
-      "STM32, SAM3X8E"
+      "Intel Pentium"
     ],
     "correct": 0
   },
   {
     "text": "Arduino platalarida qanday dastur yozish mumkin?",
     "options": [
+      "Mikrokontrollerga mos keladigan har qanday C/C++ kodi",
       "Faqat grafik interfeys dasturlari",
       "Faqat JavaScript bilan ishlaydigan dasturlar",
-      "Mikrokontrollerga mos keladigan har qanday C/C++ kodi",
       "Faqat Linux operatsion tizimlarini boshqarish dasturlari"
     ],
     "correct": 0
@@ -5230,20 +5230,20 @@
   {
     "text": "Arduino platalarida qaysi dasturlash modeli ishlatiladi?",
     "options": [
+      "Loop va Setup funksiyalaridan iborat",
       "Faqat server-klient modeli",
       "Faqat obyektga yo‘naltirilgan dasturlash",
-      "Faqat voqealarga asoslangan dasturlash",
-      "Loop va Setup funksiyalaridan iborat"
+      "Faqat voqealarga asoslangan dasturlash"
     ],
     "correct": 0
   },
   {
     "text": "Arduino orqali qanday sensorlarni ulash mumkin?",
     "options": [
+      "Temperaturali, bosimli, namlik, harakat datchiklari",
       "Faqat video kameralar",
       "Faqat Wi-Fi modular",
-      "Faqat ovoz chiqaruvchi qurilmalar",
-      "Temperaturali, bosimli, namlik, harakat datchiklari"
+      "Faqat ovoz chiqaruvchi qurilmalar"
     ],
     "correct": 0
   },
@@ -5260,10 +5260,10 @@
   {
     "text": "Arduino bilan ishlovchi ARM protsessorli mikrokontrollerlar qaysilar?",
     "options": [
+      "STM32F103, SAM3X8E",
       "NVIDIA Tegra X1",
       "Intel Core i5, Core i7",
-      "AMD Ryzen 9, Ryzen 7",
-      "STM32F103, SAM3X8E"
+      "AMD Ryzen 9, Ryzen 7"
     ],
     "correct": 0
   },
@@ -5280,8 +5280,8 @@
   {
     "text": "O‘rnatilgan tizimlarni tashxislashda qaysi vositalar ishlatiladi?",
     "options": [
-      "Faqat operatsion tizim",
       "Oscilloscope, Logic Analyzer, JTAG debuggers",
+      "Faqat operatsion tizim",
       "Faqat LED indikatorlar",
       "Faqat multimetr"
     ],
@@ -5290,9 +5290,9 @@
   {
     "text": "O‘rnatilgan tizimlarda eng keng tarqalgan dasturiy tashxislash vositasi qaysi?",
     "options": [
+      "GDB (GNU Debugger)",
       "Microsoft Word",
       "VLC Media Player",
-      "GDB (GNU Debugger)",
       "Photoshop"
     ],
     "correct": 0
@@ -5300,8 +5300,8 @@
   {
     "text": "Logic Analyzer qaysi maqsadda ishlatiladi?",
     "options": [
-      "Analog signallarni tahlil qilish uchun",
       "Raqamli signallarni tahlil qilish uchun",
+      "Analog signallarni tahlil qilish uchun",
       "Elektr toki kuchini o‘lchash uchun",
       "Faoliyat vaqtini o‘lchash uchun"
     ],
@@ -5320,19 +5320,19 @@
   {
     "text": "O‘rnatilgan tizimlarda real vaqt tashxislash qanday amalga oshiriladi?",
     "options": [
+      "Real vaqt operatsion tizimlari va maxsus diagnostika vositalari orqali",
       "Faqat elektr kuchlanishini o‘lchash orqali",
       "Barcha tizimni o‘chirib, qayta yoqish orqali",
-      "Faqat LED indikatorlar yordamida",
-      "Real vaqt operatsion tizimlari va maxsus diagnostika vositalari orqali"
+      "Faqat LED indikatorlar yordamida"
     ],
     "correct": 0
   },
   {
     "text": "Debugging nima?",
     "options": [
+      "Dasturdagi xatolarni topish va ularni tuzatish jarayoni",
       "Faqat kod yozish jarayoni",
       "Qurilmalarning fizik o‘lchamlarini hisoblash jarayoni",
-      "Dasturdagi xatolarni topish va ularni tuzatish jarayoni",
       "Qurilmalarni elektr tarmog‘iga ulash jarayoni"
     ],
     "correct": 0
@@ -5340,9 +5340,9 @@
   {
     "text": "Mikrokontrollerlarni tashxislashda Breakpoint nima uchun ishlatiladi?",
     "options": [
+      "Dastur bajarilishini muayyan joyda to‘xtatish uchun",
       "Dastur kodining hajmini oshirish uchun",
       "Signalni kuchaytirish uchun",
-      "Dastur bajarilishini muayyan joyda to‘xtatish uchun",
       "Qurilmaning ishlash vaqtini pasaytirish uchun"
     ],
     "correct": 0
@@ -5370,8 +5370,8 @@
   {
     "text": "Mikrokontrollerlar uchun eng keng tarqalgan tashxislash interfeysi qaysi?",
     "options": [
-      "HDMI",
       "JTAG va SWD",
+      "HDMI",
       "VGA",
       "Ethernet"
     ],
@@ -5380,9 +5380,9 @@
   {
     "text": "Debugger nima?",
     "options": [
+      "Dastur bajarilishini nazorat qiluvchi va xatolarni topishga yordam beruvchi vosita",
       "Qurilmalarni faqat ishlab chiqarish jarayoni",
       "Tizimlarni qayta yoqish jarayoni",
-      "Dastur bajarilishini nazorat qiluvchi va xatolarni topishga yordam beruvchi vosita",
       "Qurilmalarni quvvat bilan ta’minlovchi qurilma"
     ],
     "correct": 0
@@ -5390,20 +5390,20 @@
   {
     "text": "O‘rnatilgan tizimlarning tashxislash jarayonida “Watchdog Timer” qanday ishlaydi?",
     "options": [
+      "Tizim ishdan chiqsa, uni avtomatik qayta yuklash orqali muammoni bartaraf etadi",
       "Internet ulanishini tekshiradi",
       "Faqat dasturiy ta’minotni yuklaydi",
-      "Elektr quvvatini nazorat qiladi",
-      "Tizim ishdan chiqsa, uni avtomatik qayta yuklash orqali muammoni bartaraf etadi"
+      "Elektr quvvatini nazorat qiladi"
     ],
     "correct": 0
   },
   {
     "text": "Mikrokontrollerlarni tashxislashda oscilloscope nima uchun ishlatiladi?",
     "options": [
+      "Analog va raqamli signallarni ko‘rish va tahlil qilish uchun",
       "USB interfeysini tekshirish uchun",
       "Faqat tarmoq tezligini o‘lchash uchun",
-      "Faqat dasturlarni yozish uchun",
-      "Analog va raqamli signallarni ko‘rish va tahlil qilish uchun"
+      "Faqat dasturlarni yozish uchun"
     ],
     "correct": 0
   },
@@ -5420,8 +5420,8 @@
   {
     "text": "Mikrokontroller tizimlarida \"Watchpoint\" nima?",
     "options": [
-      "Qurilma haroratini o‘lchovchi datchik",
       "Muayyan xotira maydoni o‘zgarishini kuzatish imkonini beruvchi debugging texnikasi",
+      "Qurilma haroratini o‘lchovchi datchik",
       "Elektr quvvati nazorati tizimi",
       "Internet signalini kuchaytiruvchi moslama"
     ],
@@ -5440,19 +5440,19 @@
   {
     "text": "Dasturiy debugging vositalari qaysilar?",
     "options": [
+      "GDB, OpenOCD, Keil uVision",
       "Windows Media Player",
       "Excel va Word",
-      "Photoshop va AutoCAD",
-      "GDB, OpenOCD, Keil uVision"
+      "Photoshop va AutoCAD"
     ],
     "correct": 0
   },
   {
     "text": "Logic Analyzer yordamida qanday signallar tahlil qilinadi?",
     "options": [
+      "Raqamli signallar",
       "Faqat elektr kuchlanishi",
       "Faqat audio signallar",
-      "Raqamli signallar",
       "Faqat video signallar"
     ],
     "correct": 0
@@ -5470,8 +5470,8 @@
   {
     "text": "O‘rnatilgan tizimlarning dasturiy ta’minoti qanday qismlardan iborat?",
     "options": [
-      "Faqat amaliy dasturiy ta’minot",
       "Tizimli, amaliy va instrumental dasturiy ta’minot",
+      "Faqat amaliy dasturiy ta’minot",
       "Faqat tizimli dasturiy ta’minot",
       "Faqat instrumental dasturiy ta’minot"
     ],
@@ -5500,28 +5500,28 @@
   {
     "text": "Amaliy dasturiy ta’minotning asosiy vazifasi nima?",
     "options": [
+      "Foydalanuvchi va tizim ehtiyojlariga mos xizmatlarni ta’minlash",
       "Faqat internetga ulanishni ta’minlash",
       "Faqat operatsion tizimni boshqarish",
-      "Faqat apparat vositalarni boshqarish",
-      "Foydalanuvchi va tizim ehtiyojlariga mos xizmatlarni ta’minlash"
+      "Faqat apparat vositalarni boshqarish"
     ],
     "correct": 0
   },
   {
     "text": "Instrumental dasturiy ta’minot nima uchun ishlatiladi?",
     "options": [
+      "Dasturlarni ishlab chiqish va sinovdan o‘tkazish uchun",
       "Faqat internetdan foydalanish uchun",
       "Faqat audio va video fayllarni qayta ishlash uchun",
-      "Faqat ma’lumotlarni tahlil qilish uchun",
-      "Dasturlarni ishlab chiqish va sinovdan o‘tkazish uchun"
+      "Faqat ma’lumotlarni tahlil qilish uchun"
     ],
     "correct": 0
   },
   {
     "text": "Qaysi dasturiy ta’minot turi operatsion tizim tarkibiga kiradi?",
     "options": [
-      "Faqat antivirus dasturlari",
       "Drayverlar, yadro va tizimli kutubxonalar",
+      "Faqat antivirus dasturlari",
       "Faqat grafik dasturlar",
       "Faqat ofis dasturlari"
     ],
@@ -5530,10 +5530,10 @@
   {
     "text": "Real vaqt operatsion tizimlari (RTOS) qanday tizimlar uchun zarur?",
     "options": [
+      "Vaqt kritik bo‘lgan o‘rnatilgan tizimlar uchun",
       "Faqat mobil qurilmalar uchun",
       "Faqat multimedia tizimlari uchun",
-      "Oddiy ofis kompyuterlarida ishlash uchun",
-      "Vaqt kritik bo‘lgan o‘rnatilgan tizimlar uchun"
+      "Oddiy ofis kompyuterlarida ishlash uchun"
     ],
     "correct": 0
   },
@@ -5560,8 +5560,8 @@
   {
     "text": "Dasturiy ta’minotni yaratish bosqichlari qanday?",
     "options": [
-      "Faqat grafik interfeys yaratish",
       "Talablarni aniqlash, loyihalash, dasturlash, sinov va integratsiya, foydalanish",
+      "Faqat grafik interfeys yaratish",
       "Faqat kod yozish",
       "Faqat ma’lumotlarni saqlash"
     ],
@@ -5580,8 +5580,8 @@
   {
     "text": "Amaliy dasturiy ta’minotga misol bo‘ladigan dasturlar qaysilar?",
     "options": [
-      "Faqat antivirus dasturlari",
       "Signalni qayta ishlash, avtomatlashtirish va monitoring dasturlari",
+      "Faqat antivirus dasturlari",
       "Faqat video pleerlar",
       "Faqat matn muharrirlari"
     ],
@@ -5590,18 +5590,18 @@
   {
     "text": "Tizimli dasturiy ta’minotning yadro (kernel) qismi qanday vazifani bajaradi?",
     "options": [
+      "Resurslarni boshqarish va jarayonlarni taqsimlash",
       "Faqat matn tahrirlash",
       "Faqat rasm va videolarni qayta ishlash",
-      "Faqat internet tarmog‘ini boshqarish",
-      "Resurslarni boshqarish va jarayonlarni taqsimlash"
+      "Faqat internet tarmog‘ini boshqarish"
     ],
     "correct": 0
   },
   {
     "text": "Dasturiy ta’minotni yaratishda testlashning asosiy maqsadi nima?",
     "options": [
-      "Faqat kod yozish tezligini oshirish",
       "Xatolarni aniqlash va tuzatish",
+      "Faqat kod yozish tezligini oshirish",
       "Faqat internetga ulanishni ta’minlash",
       "Faqat grafik interfeys yaratish"
     ],
@@ -5610,20 +5610,20 @@
   {
     "text": "Dasturiy ta’minotning texnik xizmat ko‘rsatish bosqichi nimani anglatadi?",
     "options": [
+      "Dasturiy ta’minotni yangilash va xatolarni bartaraf etish",
       "Faqat dastur grafik interfeysini o‘zgartirish",
       "Faqat dastur kodini o‘chirish",
-      "Faqat kompyuterning quvvat sarfini kamaytirish",
-      "Dasturiy ta’minotni yangilash va xatolarni bartaraf etish"
+      "Faqat kompyuterning quvvat sarfini kamaytirish"
     ],
     "correct": 0
   },
   {
     "text": "Embedded Linux nima?",
     "options": [
+      "O‘rnatilgan tizimlar uchun moslashtirilgan Linux distributivi",
       "Faqat mobil telefonlar uchun tizim",
       "Faqat Windows muhitida ishlaydi",
-      "Faqat shaxsiy kompyuterlar uchun operatsion tizim",
-      "O‘rnatilgan tizimlar uchun moslashtirilgan Linux distributivi"
+      "Faqat shaxsiy kompyuterlar uchun operatsion tizim"
     ],
     "correct": 0
   },
@@ -5640,8 +5640,8 @@
   {
     "text": "Dasturiy ta’minotning interfeys qismi qanday maqsadda ishlatiladi?",
     "options": [
-      "Faqat internetga ulanish uchun",
       "Foydalanuvchilar va tizim o‘rtasida aloqa o‘rnatish uchun",
+      "Faqat internetga ulanish uchun",
       "Faqat xotira boshqarish uchun",
       "Faqat protsessor yuklanishini tekshirish uchun"
     ],
@@ -5870,8 +5870,8 @@
   {
     "text": "Intel XDK mobil ilovalarni quyidagilar yordamida ishlab chiqmoqda:",
     "options": [
-      "C ++",
       "HTML5",
+      "C ++",
       "Tizen",
       "Java"
     ],
@@ -5880,8 +5880,8 @@
   {
     "text": "Amalni bajarish uchun jarayonlar satrini o‘z ichiga olgan dialog P oynasi",
     "options": [
-      "AlertDialog",
       "ProgressDialog",
+      "AlertDialog",
       "DialogFragment",
       "DatePickerDialog"
     ],
@@ -5900,8 +5900,8 @@
   {
     "text": "GridView uchun ustunlar soni qanday o’rnatiladi",
     "options": [
-      "Statik va dinamik",
       "Static",
+      "Statik va dinamik",
       "Avtomatik",
       "Dinamik"
     ],
@@ -5910,8 +5910,8 @@
   {
     "text": "Ilovada yangi Faoliyat yaratishda ma'lumot qo'shish uchun qaysi fayl talab qilinadi?",
     "options": [
-      "layout.xml",
       "AndroidManifest.xml",
+      "layout.xml",
       "activity.xml",
       "main.java"
     ],
@@ -5920,19 +5920,19 @@
   {
     "text": "Intel XDK muhitida siz quyidagi platformalar uchun dasturlarni ishlab chiqishingiz mumkin:",
     "options": [
+      "Android, Apple iOS,Tizen",
       "Linux",
       "Android, Windows",
-      "Windows",
-      "Android, Apple iOS,Tizen"
+      "Windows"
     ],
     "correct": 0
   },
   {
     "text": "Ikki NFC qurilmasi o'rtasida qulay almashinish vositasi:",
     "options": [
+      "AndroidBeam",
       "Wi-Fi Direct",
       "Bluetooth",
-      "AndroidBeam",
       "Dalvik"
     ],
     "correct": 0
@@ -5940,8 +5940,8 @@
   {
     "text": "Qaysi kompaniya o'z yaratilishiga birinchi bo'lib smartfon deb nom bergan?",
     "options": [
-      "Nokia",
       "Ericsson",
+      "Nokia",
       "Motorola",
       "Samsung"
     ],
@@ -5960,19 +5960,19 @@
   {
     "text": "iOS operatsion tizimini kamchiligi nimada?",
     "options": [
+      "Norasmiy dasturlarni o'rnatishda Jailbreak operatsiyasini talab qiladi",
       "Katta trafik sarfi.",
       "Yangilanishlarni kutish vaqti.",
-      "Ochiq manba. Siz ushbu elementni operatsion tizimning afzalliklari ro'yxatida ko'rgansiz, ammo bu nafaqat fazilat, balki uning kamchiliklari hamdir.",
-      "Norasmiy dasturlarni o'rnatishda Jailbreak operatsiyasini talab qiladi"
+      "Ochiq manba. Siz ushbu elementni operatsion tizimning afzalliklari ro'yxatida ko'rgansiz, ammo bu nafaqat fazilat, balki uning kamchiliklari hamdir."
     ],
     "correct": 0
   },
   {
     "text": "WINDOWS operatsion tizimini afzalligi nimada?",
     "options": [
+      "Intuitiv va sodda interfeys. Xbox o'yin xizmatidan foydalanish imkoniyati.",
       "Ma'lumotni sinxronizatsiya qilish uchun qulay va tushunarli dastur mavjud emas",
       "Interfeysi murakkab",
-      "Intuitiv va sodda interfeys. Xbox o'yin xizmatidan foydalanish imkoniyati.",
       "Xbox o'yin xizmatidan foydalanish imkoniyati mavjud emas"
     ],
     "correct": 0
@@ -5980,19 +5980,19 @@
   {
     "text": "Emulyator – bu",
     "options": [
+      "boshqa kompyuter yoki dasturga taqlid qiladigan dastur.",
       "Ma’lumotlarni ekranga chiqaradi",
       "Jadval kiritadi",
-      "Dasturga rasm qo’shadi",
-      "boshqa kompyuter yoki dasturga taqlid qiladigan dastur."
+      "Dasturga rasm qo’shadi"
     ],
     "correct": 0
   },
   {
     "text": "….bu har qanday kompyuterda iOS dasturlaridan foydalanishga imkon beruvchi brauzer emulyatori.",
     "options": [
+      "Appetize.io",
       "BlueStacks",
       "Game Loope",
-      "Appetize.io",
       "Xcode"
     ],
     "correct": 0
@@ -6000,16 +6000,17 @@
   {
     "text": "…kabi emulyatorlar Windows va Mac-da Android dasturlaridan foydalanishga imkon beradi.",
     "options": [
+      "BlueStacks",
       "Appetize.io",
       "Xcode",
-      "Game Loope",
-      "BlueStacks"
+      "Game Loope"
     ],
     "correct": 0
   },
   {
     "text": "…..kabi dasturlar Mac va Windows-da iOS-ni boshqarishi mumkin",
     "options": [
+      "Xcode",
       "Game Loope",
       "Appetize.io",
       "BlueStacks"
@@ -6021,26 +6022,25 @@
     "options": [
       "WINE",
       "Appetize.io",
-      "BlueStacks",
-      "Xcode"
+      "BlueStacks"
     ],
     "correct": 0
   },
   {
     "text": "MotionEvent sinfida teginish hodisalarini ko'rsatish uchun qanday doimiylik aniqlanmagan",
     "options": [
+      "ACTION_CLICK",
       "ACTION_MOVE",
       "ACTION_UP",
-      "ACTION_DOWN",
-      "ACTION_CLICK"
+      "ACTION_DOWN"
     ],
     "correct": 0
   },
   {
     "text": "Nestopia nima vazifani bajaradi?",
     "options": [
-      "Windows va Mac-da Android dasturlaridan foydalanishga imkon beradi",
       "Linuxda Nintendo o'yinlarini o'ynashlari mumkin.",
+      "Windows va Mac-da Android dasturlaridan foydalanishga imkon beradi",
       "bu har qanday kompyuterda iOS dasturlaridan foydalanishga imkon beruvchi brauzer emulyatori",
       "Mac va Windows-da iOS-ni boshqarishi mumkin."
     ],
@@ -6059,10 +6059,10 @@
   {
     "text": "Kross platformali ilova – ?",
     "options": [
+      "bir vaqtning o’zida bir nechta operatsion tizimlarda ishlaydigan ilovalardir.",
       "Faqat bitta platformada ishlaydigan ilova",
       "Faqat IOS operatsion tizimida ishlaydigan ilova",
-      "Android operatsion tizimida ishladigan ilova",
-      "bir vaqtning o’zida bir nechta operatsion tizimlarda ishlaydigan ilovalardir."
+      "Android operatsion tizimida ishladigan ilova"
     ],
     "correct": 0
   },
@@ -6079,8 +6079,8 @@
   {
     "text": "SQLite bilan ishlash uchun",
     "options": [
-      "android.data.sqlite paketi mavjud",
       "android.database.sqlite paketi mavjud",
+      "android.data.sqlite paketi mavjud",
       "android.database.sql paketi mavjud",
       "android.base.sqlite paketi mavjud"
     ],
@@ -6089,8 +6089,8 @@
   {
     "text": "Qaysi usul yangi faoliyatni boshlaydi?",
     "options": [
-      "beginActivity()",
       "startActivity()",
+      "beginActivity()",
       "newActivity()",
       "intentActivity()"
     ],
@@ -6109,8 +6109,8 @@
   {
     "text": "Androidda SQLite-dan foydalanish uchun",
     "options": [
-      "dasturlash tillari yordamida ma'lumotlar bazasini yaratish kerak uch yoki undan kam yorliq",
       "SQL tili yordamida ma'lumotlar bazasini yaratish kerak uch yoki undan kam yorliq.",
+      "dasturlash tillari yordamida ma'lumotlar bazasini yaratish kerak uch yoki undan kam yorliq",
       "PhP tili yordamida ma'lumotlar bazasini yaratish kerak uch yoki undan kam yorliq",
       "Phyton tili yordamida ma'lumotlar bazasini yaratish kerak uch yoki undan kam yorliq"
     ],
@@ -6119,8 +6119,8 @@
   {
     "text": "Java bu—?",
     "options": [
-      "quyi darajada himoyalangan va obyektga yo'naltirilgan dashturlash tilidir",
       "yuqori darajada himoyalangan va obyektga yo'naltirilgan dashturlash tilidir",
+      "quyi darajada himoyalangan va obyektga yo'naltirilgan dashturlash tilidir",
       "quyi darajada himoyalanmagan va obyektga yo'naltirilgan dashturlash tilidir",
       "yuqori darajada himoyalanmagan va obyektga yo'naltirilgan dashturlash tilidir"
     ],
@@ -6129,9 +6129,9 @@
   {
     "text": "Kotlin v1.0 qachon paydo bo’lgan?",
     "options": [
+      "2016 yil 15 fevralda chiqarilgan",
       "2020 yil 15 fevralda chiqarilgan",
       "2014 yil 15 fevralda chiqarilgan",
-      "2016 yil 15 fevralda chiqarilgan",
       "2018 yil 15 fevralda chiqarilgan"
     ],
     "correct": 0
@@ -6139,19 +6139,19 @@
   {
     "text": "Unity-",
     "options": [
+      "kompyuter o'yinlarini ishlab chiqishning o'zaro platformali muhitidir",
       "kompyuter taqdimotlari ishlab chiqishning o'zaro platformali muhitidir",
       "kompyuter yozuvlarining ishlab chiqishning o'zaro platformali muhitidir",
-      "kompyuter dasturlarini ishlab chiqishning o'zaro platformali muhitidir",
-      "kompyuter o'yinlarini ishlab chiqishning o'zaro platformali muhitidir"
+      "kompyuter dasturlarini ishlab chiqishning o'zaro platformali muhitidir"
     ],
     "correct": 0
   },
   {
     "text": "Android dasturlari uchun qaysi til ishlatiladi?",
     "options": [
+      "Java",
       "C #",
       "C ++",
-      "Java",
       "JavaScript"
     ],
     "correct": 0
@@ -6159,19 +6159,19 @@
   {
     "text": "Dart  qaysi kompaniya tomonidan ishlab chiqarilgan?",
     "options": [
+      "Google",
       "Apple",
       "Opera",
-      "Yandex",
-      "Google"
+      "Yandex"
     ],
     "correct": 0
   },
   {
     "text": "Tasvirlarni qaerga joylashtirish kerak?",
     "options": [
+      "Chizilgan papkaga",
       "Har qanday jildga",
       "Qadriyatlar papkasida",
-      "Chizilgan papkaga",
       "Jild papkasiga"
     ],
     "correct": 0
@@ -6189,9 +6189,9 @@
   {
     "text": "Elementni ekranning to'liq kengligiga qanday xususiyat uzatadi?",
     "options": [
+      "match_parent",
       "wrap_parent",
       "parent_wrap",
-      "match_parent",
       "fill_parent"
     ],
     "correct": 0
@@ -6209,9 +6209,9 @@
   {
     "text": "Android bilan ishlash uchun qanday dasturlar talab qilinadi?",
     "options": [
+      "JDK, Android Studio",
       "Faqat JDK",
       "JDK Android Studio va Visual Studio",
-      "JDK, Android Studio",
       "Faqat Android Studio"
     ],
     "correct": 0
@@ -6229,9 +6229,9 @@
   {
     "text": "Kontent dasturlari bu—?",
     "options": [
+      "Tarkibiy ilovalar juda mashhur: ular musiqa tinglash, filmlar va fotosuratlarni tomosha qilish, raqamli kitoblar va jurnallarni o'qish uchun mo'ljallangan",
       "Ijtimoiy tarmoqlar kun sayin tobora ommalashib bormoqda, butun dunyo bo'ylab katta auditoriyani ko'paytirmoqda, bunga smartfonlardan tarmoqlarning mavjudligi yordam beradi",
       "onlayn-do'konlarga, to'lov tizimlariga va bank hisob raqamlariga kirishni ta'minlaydi",
-      "Tarkibiy ilovalar juda mashhur: ular musiqa tinglash, filmlar va fotosuratlarni tomosha qilish, raqamli kitoblar va jurnallarni o'qish uchun mo'ljallangan",
       "Ofis ishlarida, hisob-kitoblarda, xizmat ma'lumotlari almashinuvida yordam beradi"
     ],
     "correct": 0
@@ -6239,10 +6239,10 @@
   {
     "text": "Biznes-ilovalar bu-?",
     "options": [
+      "Ofis ishlarida, hisob-kitoblarda, xizmat ma'lumotlari almashinuvida yordam beradi   kirish elementlarini chegaralaydi",
       "Ijtimoiy tarmoqlar kun sayin tobora ommalashib bormoqda, butun dunyo bo'ylab katta auditoriyani ko'paytirmoqda, bunga smartfonlardan tarmoqlarning mavjudligi yordam beradi",
       "Tarkibiy ilovalar juda mashhur: ular musiqa tinglash uchun mo'ljallangan",
-      "Filmlar va fotosuratlarni tomosha qilish, raqamli kitoblar va jurnallarni o'qish uchun mo’ljallangan",
-      "Ofis ishlarida, hisob-kitoblarda, xizmat ma'lumotlari almashinuvida yordam beradi   kirish elementlarini chegaralaydi"
+      "Filmlar va fotosuratlarni tomosha qilish, raqamli kitoblar va jurnallarni o'qish uchun mo’ljallangan"
     ],
     "correct": 0
   },
@@ -6259,8 +6259,8 @@
   {
     "text": "Bitta DP teng:",
     "options": [
-      "0,5 dyuym",
       "MDPI tipidagi ekran uchun 1 dan bitta pikselgacha bo'lgan variant",
+      "0,5 dyuym",
       "0,3 mm",
       "300 dpi"
     ],
@@ -6269,10 +6269,10 @@
   {
     "text": "Dunyodagi birinchi sensorli telefon modeli qaysi?",
     "options": [
+      "Simon modeli edi",
       "Sensorli modeli",
       "Monoblok modeli",
-      "Smartfon modeli",
-      "Simon modeli edi"
+      "Smartfon modeli"
     ],
     "correct": 0
   },
@@ -6289,8 +6289,8 @@
   {
     "text": "Android operatsion tizimini kamchiligi nimada?",
     "options": [
-      "Yangilash jarayoni tez bo’ladi",
       "Katta trafik sarfi. Yangilanishlarni kutish vaqti.",
+      "Yangilash jarayoni tez bo’ladi",
       "Trafik kam sarflaydi",
       "Yopiq manbaligi. Trafik kam sarflaydi"
     ],
@@ -6299,9 +6299,9 @@
   {
     "text": "Loyihaga yangi faoliyatni qo‘shishda nima qilish kerak?",
     "options": [
+      "manifestda yangi faoliyat to'g'risidagi, ma'lumotlarni ro'yxatdan o'tkazing",
       "MultiActivity SDK maxsus vositasini yuklab oling va o'rnating",
       "yangi loyiha yaratish",
-      "manifestda yangi faoliyat to'g'risidagi, ma'lumotlarni ro'yxatdan o'tkazing",
       "emulyatorni ishga tushirish"
     ],
     "correct": 0
@@ -6319,18 +6319,18 @@
   {
     "text": "Animatsiya uchun qaysi kutubxona mo‘ljallangan?",
     "options": [
+      "NineOldAnimationAndroids",
       "ActionBarSherlock",
       "Yandex.Metrica for Apps",
-      "Universal Image Loader for Android",
-      "NineOldAnimationAndroids"
+      "Universal Image Loader for Android"
     ],
     "correct": 0
   },
   {
     "text": "android.database.sqlite.SQLiteQueryBuilder klassi",
     "options": [
-      "SQL so'rovlarini qabul qilishga imkon beradi",
       "SQL so'rovlarini yaratishga imkon beradi",
+      "SQL so'rovlarini qabul qilishga imkon beradi",
       "SQLite so'rovlarini yaratishga imkon beradi",
       "SQL so'rovlarini qabul qilib yaratishga imkon beradi"
     ],
@@ -6339,9 +6339,9 @@
   {
     "text": "Ovozli yordamchilar haqida. Bilasizmi, \"Alisa\" kimning ovozida gapiradi?",
     "options": [
+      "Tatyana Shitova",
       "Marina Golub",
       "Yana Troyanova",
-      "Tatyana Shitova",
       "Natalya Bochkareva"
     ],
     "correct": 0
@@ -6359,9 +6359,9 @@
   {
     "text": "jsoup kutubxonasi quyidagilarga ruxsat bermaydi:",
     "options": [
+      "Stentlarga xabarlar yozish. holatlarni o'qish va o'zgartirish, do'stlar yozishmasini tomosha qilish",
       "HTML elementlari, atributlari va matnini boshqarish",
       "parametr sifatida URL, fayl yoki satrni qabul qiling",
-      "Stentlarga xabarlar yozish. holatlarni o'qish va o'zgartirish, do'stlar yozishmasini tomosha qilish",
       "DOM va CSS tanlovchilaridan foydalanib ma'lumotlarni topish va olish"
     ],
     "correct": 0
@@ -6369,10 +6369,10 @@
   {
     "text": "Rasmlarni yuklashni osonlashtiradigan qaysi kutubxona mavjud?",
     "options": [
+      "Universal Image Loader, for Android",
       "Yandex.Metrica for Apps;",
       "ActionBarSherlock",
-      "NineOldAndroids",
-      "Universal Image Loader, for Android"
+      "NineOldAndroids"
     ],
     "correct": 0
   },
@@ -6399,8 +6399,8 @@
   {
     "text": "Smartfonning kosmosdagi o'rnini aniqlash uchun datchiklardan qaysi biri ishlatilmaydi?",
     "options": [
-      "Magnetometr",
       "GPS",
+      "Magnetometr",
       "Giroskop",
       "Akselerometr"
     ],
@@ -6439,6 +6439,7 @@
   {
     "text": "Mobil dastur boshqa dasturda yaratilgan ma'lumotlar bazasiga kira oladimi",
     "options": [
+      "mumkin, lekin faqat kontent-provayderlar yordamida",
       "hech qanday sharoitda qila olmaydi.",
       "kirish huquqi ma'lumotlar bazasi master dasturini ochadi",
       "to'g'ridan-to'g'ri murojaat qilishi mumkin"
@@ -6448,9 +6449,9 @@
   {
     "text": "Ilova ishlayotganda qurilmaning request yo‘nalishini o‘zgartirishi uchun qanday usulni qo‘llash mumkin?",
     "options": [
+      "setRequestedOrientation",
       "disableChangeOrientation",
       "setChangeOritentation",
-      "setRequestedOrientation",
       "setOritentation"
     ],
     "correct": 0
@@ -6458,8 +6459,8 @@
   {
     "text": "Siz Intel XDK muhitida dasturlarni ishlab chiqish imkoniyati mavjud:",
     "options": [
-      "elementlarni ko'rsatish uchun o'rnatilgan \"element dizayneridan\" foydalanish imkoniyati mavjud emas",
       "\"Noldan\", barcha elementlarni tayinlash",
+      "elementlarni ko'rsatish uchun o'rnatilgan \"element dizayneridan\" foydalanish imkoniyati mavjud emas",
       "xaritalar bilan ishlash",
       "ro'yxatga olish kitobi bilan ishlash"
     ],
@@ -6478,18 +6479,18 @@
   {
     "text": "Quyida berilgan ta’riflardan qaysi biri to‘g‘ri:",
     "options": [
+      "HTML5 ilovalari sekin ishlaydi va \"nativie\" ga qaraganda ko'proq manbalarni talab qiladi",
       "JavaScript-ni boshqa tillarda yozilgan boshqa tashqi kutubxonalarni ulashga ruxsat berilmaydi",
       "HTML5 dasturlari tezroq ishlaydi va \"native\" ga qaraganda kamroq resurslarni talab qiladi",
-      "Intel XDK muhiti multisensor bilan ishlamaydi",
-      "HTML5 ilovalari sekin ishlaydi va \"nativie\" ga qaraganda ko'proq manbalarni talab qiladi"
+      "Intel XDK muhiti multisensor bilan ishlamaydi"
     ],
     "correct": 0
   },
   {
     "text": "Intel XDK muhitida ishlab chiqilgan har qanday dasturni tayyorlashda quyidagicha yozilgan:",
     "options": [
-      "dastur o'lchamlarini moslama o'lchamiga moslashtirish mavjud emas",
       "Intel XDK boshlang\"ich ekranini yashirish",
+      "dastur o'lchamlarini moslama o'lchamiga moslashtirish mavjud emas",
       "Intel XDK boshlang'ich ekranini yashirish imkoniyati mavjud emas",
       "dastur hajmini aniqlash (\"o'tish\" ni taqiqlash) imkoniyati yo’q"
     ],
@@ -6498,10 +6499,10 @@
   {
     "text": "Intel XDK muhitida dasturlarning foydalanuvchi interfeysini yaratishingiz va tahrirlashingiz mumkin:",
     "options": [
+      "o'rnatilgan App Designer-dan foydalanish",
       "o'rnatilgan App Designerdan foydalanish imkoniyati mavjud emas",
       "faqat interfeys bilan tayyor shablonlarni o'zgartirish imkoniyati mavjud emas",
-      "teglarni faqat qo'lda yozish imkoniyati mavjud emas",
-      "o'rnatilgan App Designer-dan foydalanish"
+      "teglarni faqat qo'lda yozish imkoniyati mavjud emas"
     ],
     "correct": 0
   },
@@ -6518,8 +6519,8 @@
   {
     "text": "Android dasturlarini xavfsiz yuklab olish uchun mos manbani ko'rsating.",
     "options": [
-      "Apple App Store",
       "Google play",
+      "Apple App Store",
       "bepul dasturiy ta'minotga ega saytlar",
       "iTunes"
     ],
@@ -6528,19 +6529,19 @@
   {
     "text": "Siz iOS mobil qurilmangizdagi Uy tugmachasi yordamida qaysi ikkita funktsiyani bajarishingiz mumkin?",
     "options": [
+      "Android navigatsiya tugmalari bilan bir xil funktsiyalar, Ovozli boshqaruvni ishga tushirish",
       "TouchFLO interfeysini ishga tushirish",
       "Qurilmani bloklash",
-      "Qurilmani zavod parametrlariga qaytarish",
-      "Android navigatsiya tugmalari bilan bir xil funktsiyalar, Ovozli boshqaruvni ishga tushirish"
+      "Qurilmani zavod parametrlariga qaytarish"
     ],
     "correct": 0
   },
   {
     "text": "2006 yilda ushbu telefon avtomatik ravishda yosh kompaniyaning eng zo'r  kompaniyaga aylantirdi.",
     "options": [
+      "Sony Ericsson W810i",
       "Benefon Dragon",
       "Siemens M35i",
-      "Sony Ericsson W810i",
       "Motorola StarTAC"
     ],
     "correct": 0
@@ -6548,8 +6549,8 @@
   {
     "text": "Mobil qurilmaning qaysi xavfsizlik xususiyati foydalanuvchidan qurilmani qulfini ochish uchun ma'lum bir tarzda ekranni siljitishni talab qiladi?",
     "options": [
-      "masofadan o'chirish",
       "shablon",
+      "masofadan o'chirish",
       "oddiy maxfiy kod",
       "Siljish"
     ],
@@ -6558,8 +6559,8 @@
   {
     "text": "Mobil xotira uchun flesh xotiradan foydalanishning afzalligi nimada?",
     "options": [
-      "Fleshli xotira harakatlanuvchi disk boshi bilan jihozlangan bo'lib, qidiruv vaqtini qisqartirishi mumkin.",
       "Flash xotira ma'lumotlarni saqlash va olish uchun juda kam quvvat sarflaydi.",
+      "Fleshli xotira harakatlanuvchi disk boshi bilan jihozlangan bo'lib, qidiruv vaqtini qisqartirishi mumkin.",
       "Flash xotira ESDga javob bermaydi.",
       "Fleshli xotira namlik va sovuqqa juda chidamli."
     ],
@@ -6578,10 +6579,10 @@
   {
     "text": "Ko'pgina qurilmalarda foydalanuvchi qaysi komponentni almashtirishi mumkin?",
     "options": [
+      "xotira kartasi",
       "Markaziy protsessor",
       "Ram",
-      "sensorli ekran",
-      "xotira kartasi"
+      "sensorli ekran"
     ],
     "correct": 0
   },
@@ -6608,9 +6609,9 @@
   {
     "text": "2002 yilda smartfonlarning aksariyati qaysi edi?",
     "options": [
+      "Sensorli",
       "QWERTY klaviatura bilan",
       "Katlanadigan dengiz qobiqlari",
-      "Sensorli",
       "To'qqiz tugma bilan"
     ],
     "correct": 0
@@ -6638,9 +6639,9 @@
   {
     "text": "Qanday holat yoki vaziyat foydalanuvchiga Android qurilmasidagi OSni yangilashga to'sqinlik qiladi?",
     "options": [
+      "Uskunalar texnik shartlardan tashqarida.",
       "Ishlab chiqaruvchidan rozilik olinmagan.",
       "O'rnatishdan oldin dasturiy ta'minot mualliflik huquqi olinmadi",
-      "Uskunalar texnik shartlardan tashqarida.",
       "Kerakli tuzatishlar o'rnatilmagan."
     ],
     "correct": 0
@@ -6648,9 +6649,9 @@
   {
     "text": "Masofadan qulflash va ishlashga masofadan turib tozalash kabi mobil xavfsizlikning ikkita sharti qanday?",
     "options": [
+      "Qurilma tarmoqqa ulangan bo'lishi va qurilma yoqilgan bo'lishi kerak.",
       "GPS-lokator yoqilgan bo'lishi kerak.",
       "Yashirin kod o'chirilgan bo'lishi kerak.",
-      "Qurilma tarmoqqa ulangan bo'lishi va qurilma yoqilgan bo'lishi kerak.",
       "Sandboxing xususiyati yoqilgan bo'lishi kerak."
     ],
     "correct": 0
@@ -6658,8 +6659,8 @@
   {
     "text": "Qaysi element Android va iOS qurilmalari uchun keng tarqalgan va masofadan zaxiralashni qo'llab-quvvatlaydi? (Ikkisini tanlang.)",
     "options": [
-      "Xabarlar",
       "taqvim, kontaktlar",
+      "Xabarlar",
       "Fotosuratlar",
       "Xususiylashtirish"
     ],
@@ -6688,9 +6689,9 @@
   {
     "text": "Mobil qurilmalar nuqtai nazaridan nuqta rejimi nimani anglatadi?",
     "options": [
+      "mobil qurilmani boshqa mobil qurilmaga ulash yoki\nmobil qurilmani zaryad qilish uchun mobil qurilmani kompyuterning USB portiga ulash",
       "tarmoq ulanishini baham ko'rish uchun kompyuter",
       "mobil qurilmani naushnikka ulash",
-      "mobil qurilmani boshqa mobil qurilmaga ulash yoki\nmobil qurilmani zaryad qilish uchun mobil qurilmani kompyuterning USB portiga ulash",
       "mobil qurilmani 4G uyali aloqa tarmog'iga ulash"
     ],
     "correct": 0
@@ -6698,8 +6699,8 @@
   {
     "text": "Uyali aloqa tarmoqlari uchun sanoat standartlari to'g'risida qaysi so'z to'g'ri?",
     "options": [
-      "Raqamli standartlarning uchinchi avlodi past tezlikda harakatlanayotganda, masalan, mobil telefon foydalanuvchisi yurganida, mobil qurilmalar uchun maksimal 1 Gbit / s tezlikni talab qiladi.",
       "Xuddi shu standartdan foydalanadigan uyali telefonlardan ko'pincha faqat ma'lum geografik hududlarda foydalanish mumkin.",
+      "Raqamli standartlarning uchinchi avlodi past tezlikda harakatlanayotganda, masalan, mobil telefon foydalanuvchisi yurganida, mobil qurilmalar uchun maksimal 1 Gbit / s tezlikni talab qiladi.",
       "Uyali aloqa standartlarini qo'llash tufayli boshqa tarmoq abonentlariga qo'ng'iroqlar qiyinlashdi va qimmatlashdi.",
       "Uyali aloqa standartlarining birinchi avlodi asosan raqamli standartlardir"
     ],
@@ -6708,9 +6709,9 @@
   {
     "text": "Mobil qurilmani kompyuter bilan sinxronlashtirish haqidagi qaysi gap to'g'ri?",
     "options": [
+      "IOS qurilmangizdagi ma'lumotlarni sinxronlashtirish uchun kompyuteringizda iTunes o'rnatilgan bo'lishi kerak.",
       "Motocast USB-dan ma'lumotlarni iOS qurilmasiga sinxronlashtirish uchun foydalanish mumkin.",
       "IOS sinxronizatsiyasi faqat USB ulanishi orqali amalga oshiriladi.",
-      "IOS qurilmangizdagi ma'lumotlarni sinxronlashtirish uchun kompyuteringizda iTunes o'rnatilgan bo'lishi kerak.",
       "Android qurilmalaridagi ma'lumotlarni kompyuter bilan sinxronlash mumkin emas."
     ],
     "correct": 0
@@ -6718,10 +6719,10 @@
   {
     "text": "Ushbu xususiyat nima qiladi                                                                    android: backgroundTint = \"@android: color / holo_green_light\"",
     "options": [
+      "Ob'ektning orqa fonini o'rnatadi",
       "Matnning fonini o'rnatadi",
       "Matn rangini belgilaydi",
-      "Ob'ektning soyasini o'rnatadi",
-      "Ob'ektning orqa fonini o'rnatadi"
+      "Ob'ektning soyasini o'rnatadi"
     ],
     "correct": 0
   },
@@ -6748,9 +6749,9 @@
   {
     "text": "Mobil qurilmalarda parolni blokirovka qilish xususiyatining maqsadini ko’rsating",
     "options": [
+      "shaxsni o'g'irlashni oldini olish, o'g'irlik holatida qurilmani masofadan blokirovka qilish",
       "qurilmani quvvatni tejash rejimiga o'tkazish",
       "qurilmani zavod parametrlariga qaytarish",
-      "shaxsni o'g'irlashni oldini olish, o'g'irlik holatida qurilmani masofadan blokirovka qilish",
       "barcha shaxsiy ma'lumotlarni qurilmadan o'chirish"
     ],
     "correct": 0
@@ -6758,9 +6759,9 @@
   {
     "text": "Sony Xperia 1 rang chuqurligi 10 bit bo'lgan videoni suratga olishi mumkin . Bu 8 bitga nisbatan sifatga qanday ta'sir qiladi ?",
     "options": [
+      "Ko'proq yarim tonlar ko'rinadi, ranglar orasidagi o'tish silliqdir",
       "Ruxsat berish darajasi 50% ga oshdi",
       "Yorqinligi va kontrasti 20% ga oshdi",
-      "Ko'proq yarim tonlar ko'rinadi, ranglar orasidagi o'tish silliqdir",
       "8 bit bilan solishtirganda sifatga ta'sir qiladimi?"
     ],
     "correct": 0
@@ -6768,8 +6769,8 @@
   {
     "text": "RAW fotosurati ko'proq ma'lumotni saqlaydi, ya'ni sifatni yo'qotmasdan qayta ishlash osonroq .",
     "options": [
-      "Hech narsa o'zgarmaydi",
       "RAW sizga keyingi ishlov berish uchun ko'proq imkoniyatlar beradi",
+      "Hech narsa o'zgarmaydi",
       "Boshqa rasmlar ustida flesh qurilmasi",
       "Fokus aniqligi"
     ],
@@ -6778,10 +6779,10 @@
   {
     "text": "Sony Xperia 1-da o'ynaganda oddiy SDR- video nima bo'ladi ?",
     "options": [
+      "Tasvir yanada yorqinroq, qarama-qarshi va to'yingan bo'ladi",
       "Kvadrat tezligi 120 kvadrat / s gacha ko'tariladi",
       "Hech narsa o'zgarmaydi",
-      "Kvadrat tezligi 80 kvadrat / s gacha ko'tariladi",
-      "Tasvir yanada yorqinroq, qarama-qarshi va to'yingan bo'ladi"
+      "Kvadrat tezligi 80 kvadrat / s gacha ko'tariladi"
     ],
     "correct": 0
   },
@@ -6798,20 +6799,20 @@
   {
     "text": "Sony Xperia 1 kamerasining sozlamalarida siz buzilishlarni to'g'rilashni yoqishingiz mumkin. Agar siz uni keng burchakli kamera bilan suratga olsangiz , unda nima bo'ladi ?",
     "options": [
+      "Buzilish va barrel effekti ramkaning chetlarida yo'qoladi",
       "Yorqinlik va raqamli shovqin butun ramkada yo'qoladi",
       "Hech narsa o'zgarmaydi",
-      "Qizil ko'z yo'qoladi",
-      "Buzilish va barrel effekti ramkaning chetlarida yo'qoladi"
+      "Qizil ko'z yo'qoladi"
     ],
     "correct": 0
   },
   {
     "text": "Siz hamkasblaringiz bilan yozishmalar o'tkazishingiz va shu bilan birga eslatmalaringizga muhim ma'lumotlarni kiritishingiz kerak . Smartfonda buni amalga oshirishning eng qulay usuli qanday ?",
     "options": [
+      "Displeyda bir vaqtning o'zida ikkita dasturni oching",
       "Oldinga va orqaga ilovalar o'rtasida almashinish",
       "Displeyda faqat bitta dasturni oching",
-      "Yozib olish paytida hamkasblardan kutib turishini so'rang",
-      "Displeyda bir vaqtning o'zida ikkita dasturni oching"
+      "Yozib olish paytida hamkasblardan kutib turishini so'rang"
     ],
     "correct": 0
   },
@@ -6828,8 +6829,8 @@
   {
     "text": "Qaysi biri to'g'ri emas?",
     "options": [
-      "Bluetooth USB-dan oldinroq bo'lgan",
       "5G Internet Rossiyada ishlaydi",
+      "Bluetooth USB-dan oldinroq bo'lgan",
       "Bir marta Nokia \"g'azablandi\" va 41 megapikselli kameraga ega smartfonni chiqardi",
       "Ikkita ekranli (ikkala tomonda) birinchi smartfon Rossiyada ishlab chiqarilgan"
     ],
@@ -6848,29 +6849,29 @@
   {
     "text": "Id tomonidan ob'ektni qanday usul topadi?",
     "options": [
+      "findViewById",
       "FindViewID",
       "findViewId",
-      "findById",
-      "findViewById"
+      "findById"
     ],
     "correct": 0
   },
   {
     "text": "Faoliyat nima?",
     "options": [
+      "Bu barcha turdagi komponentlarning to'plami",
       "Bu parchalar uchun ombor",
       "Bu matn va rasmlar to'plami",
-      "Bu matn, rasm va videolar to'plamidir",
-      "Bu barcha turdagi komponentlarning to'plami"
+      "Bu matn, rasm va videolar to'plamidir"
     ],
     "correct": 0
   },
   {
     "text": "Pio Smart Recorder - bu?",
     "options": [
+      "Diktofon.",
       "Asosiy fikrlarni ko'rsatadigan aql xaritalarini yaratish uchun dastur.",
       "Onlayn kutubxona.",
-      "Diktofon.",
       "Ishga va o'ynashga qancha vaqt sarflaganingizni hisobga olishga yordam beradigan vaqt menejeri."
     ],
     "correct": 0
@@ -6878,9 +6879,9 @@
   {
     "text": "android.database.sqlite.SQLiteOpenHelper klassi—?",
     "options": [
+      "agar ular mavjud bo'lmasa, barcha jadvallar bilan ma'lumotlar bazasini yaratishga imkon beradi.",
       "SQL so'rovlarini yaratishga imkon beradi",
       "agar ular mavjud bo'lsa, barcha jadvallar bilan ma'lumotlar bazasini yaratishga imkon beradi.",
-      "agar ular mavjud bo'lmasa, barcha jadvallar bilan ma'lumotlar bazasini yaratishga imkon beradi.",
       "SQL so'rovlarini bajarishga imkon beradi."
     ],
     "correct": 0
@@ -6888,20 +6889,20 @@
   {
     "text": "INTEGER—?",
     "options": [
+      "javadagi int turiga o'xshash butun sonni ifodalaydi",
       "javada float va double -ga o'xshash raqamni ifodalayditadqiqot usuli.",
       "javada String va char -ga o'xshash belgilar majmuini ifodalaydi",
-      "binar ma'lumotlarning massivini ifodalaydi",
-      "javadagi int turiga o'xshash butun sonni ifodalaydi"
+      "binar ma'lumotlarning massivini ifodalaydi"
     ],
     "correct": 0
   },
   {
     "text": "REAL—?",
     "options": [
+      "javada float va double -ga o'xshash raqamni ifodalaydi",
       "binar ma'lumotlarning massivini ifodalaydi",
       "javada String va char -ga o'xshash belgilar majmuini ifodalaydi",
-      "javadagi int turiga o'xshash butun sonni ifodalaydi",
-      "javada float va double -ga o'xshash raqamni ifodalaydi"
+      "javadagi int turiga o'xshash butun sonni ifodalaydi"
     ],
     "correct": 0
   },
@@ -6928,9 +6929,9 @@
   {
     "text": "Butun ta'lim jarayonini loyiha asosida o'qitishga o'tkazish maqsadga muvofiqmi?",
     "options": [
+      "yo'q, bu usul an'anaviy o'qitish usullari bilan birlashtirilgan ma'qul.",
       "ha, bu o'quv jarayoni samaradorligini oshiradi.",
       "Ha, bu texnologiya kattalar ta'limida yaxshi qo'llaniladi.",
-      "yo'q, bu usul an'anaviy o'qitish usullari bilan birlashtirilgan ma'qul.",
       "yo'q, bu texnologiya kattalar ta'limida yaxshi qo'llaniladi."
     ],
     "correct": 0
@@ -6938,9 +6939,9 @@
   {
     "text": "Tadqiqot usuli va loyihalash uslubining farqi nimada?",
     "options": [
+      "tadqiqot usulida ilgari ma'lum bo'lgan natija (qidirish ob'ekti) mavjud emas, bu natija tadqiqot jarayonida.",
       "Tadqiqot usuli ko’p mablag’ talab qiladi",
       "tadqiqot usuli kamroq vaqt va mablag 'talab qiladi.",
-      "tadqiqot usulida ilgari ma'lum bo'lgan natija (qidirish ob'ekti) mavjud emas, bu natija tadqiqot jarayonida.",
       "tadqiqot usuli o'qituvchining ishtirokiga muhtoj emas."
     ],
     "correct": 0
@@ -6948,8 +6949,8 @@
   {
     "text": "Adapter interfeysi quyidagilarga imkon beradi:",
     "options": [
-      "telefonni zaryadlash jarayonini optimallashtiradi",
       "ro'yxatni va uning elementlari nomlarini bog'laydi",
+      "telefonni zaryadlash jarayonini optimallashtiradi",
       "ilovani istalgan Android SDK versiyasiga moslashtiradi",
       "sekin urish bilan ishlaydi"
     ],
@@ -6958,10 +6959,10 @@
   {
     "text": "Gamifikatsiya bu:",
     "options": [
+      "o'yinchilarning faolligini oshirish uchun kompyuter o'yinlarida qo'llaniladigan yondashuvlarni, o'yindan tashqari jarayonlarda: mukofotlar, nishonlar, mahorat darajasi, bitta hikoya yaratish.",
       "tadqiqot usulida ilgari ma'lum bo'lgan natija (qidirish ob'ekti) mavjud emas, bu natija tadqiqot jarayoni",
       "guruh a'zolarining o'zaro bog'liqligi tamoyillariga asoslangan talabalarga yo'naltirilgan ta'lim texnologiyalari.",
-      "ilmiy tadqiqot jarayoni kabi o'quv jarayonini qurish, tadqiqot jarayonining asosiy bosqichlarini amalga oshirish.",
-      "o'yinchilarning faolligini oshirish uchun kompyuter o'yinlarida qo'llaniladigan yondashuvlarni, o'yindan tashqari jarayonlarda: mukofotlar, nishonlar, mahorat darajasi, bitta hikoya yaratish."
+      "ilmiy tadqiqot jarayoni kabi o'quv jarayonini qurish, tadqiqot jarayonining asosiy bosqichlarini amalga oshirish."
     ],
     "correct": 0
   },
@@ -6998,19 +6999,19 @@
   {
     "text": "Reverse Classroom texnologiyasi nimani anglatadi?",
     "options": [
+      "reproduktiv ta'lim faoliyatini uy sharoitida o'qishga o'tkazish .",
       "o'qituvchi talabalar bilan rollarni o'zgartiradi.",
       "sinfdan tashqarida mashg'ulotlar o'tkazish (manzaralarni o'zgartirish).",
-      "talabalar o’qituvchilar bilan mashg’ulot o’tkazadi",
-      "reproduktiv ta'lim faoliyatini uy sharoitida o'qishga o'tkazish ."
+      "talabalar o’qituvchilar bilan mashg’ulot o’tkazadi"
     ],
     "correct": 0
   },
   {
     "text": "MOOC bu:",
     "options": [
+      "masofaviy ta'lim shakllaridan biri bo'lgan Internet orqali ochiq ta'lim va elektron ta'lim texnologiyalaridan foydalangan holda massiv interaktiv ishtirokidagi o'quv kursi.",
       "ta'lim jarayoniga xos bo'lgan va Internet texnologiyalari yoki boshqa vositalar yordamida amalga oshiriladigan barcha tarkibiy qismlarni aks ettiruvchi o'qituvchi va talabalarning bir-birlari bilan masofadan turib o'zaro aloqasi.",
       "Ishga va o'ynashga qancha vaqt sarflaganingizni hisobga olishga yordam beradigan vaqt menejeri.",
-      "masofaviy ta'lim shakllaridan biri bo'lgan Internet orqali ochiq ta'lim va elektron ta'lim texnologiyalaridan foydalangan holda massiv interaktiv ishtirokidagi o'quv kursi.",
       "mobil qurilmalardan (planshetlar, smartfonlar, o'yin pristavkalari, multimedia qo'llanmalari) foydalanishga xos bo'lgan masofaviy elektron ta'lim turi."
     ],
     "correct": 0
@@ -7018,9 +7019,9 @@
   {
     "text": "Gero—bu?",
     "options": [
+      "Vaqt menejeri sizga ishlashga va o'ynashga qancha vaqt sarflaganingizni hisobga olishga yordam beradigan vaqt menejeri",
       "Diktofon.",
       "Onlayn kutubxona.",
-      "Vaqt menejeri sizga ishlashga va o'ynashga qancha vaqt sarflaganingizni hisobga olishga yordam beradigan vaqt menejeri",
       "Asosiy fikrlarni ko'rsatadigan aql xaritalarini yaratish uchun dastur."
     ],
     "correct": 0
@@ -7028,8 +7029,8 @@
   {
     "text": "ListActivity klassi nima uchun kerak?",
     "options": [
-      "Asosiy elementi jadval bo'lgan faoliyatni yaratish uchun",
       "Asosiy elementi ro'yxat bo'lgan faoliyatni yaratish uchun",
+      "Asosiy elementi jadval bo'lgan faoliyatni yaratish uchun",
       "Yangi varaq yaratish uchun",
       "Doimiy faoliyatni yaratish uchun"
     ],
@@ -7048,8 +7049,8 @@
   {
     "text": "textViewResourceId bu—?",
     "options": [
-      "10 ta satr uchun belgilar bilan resurs identifikatori",
       "har bir satr uchun belgilar bilan resurs identifikatori",
+      "10 ta satr uchun belgilar bilan resurs identifikatori",
       "id kiritish uchun belgilar bilan resurs identifikatori",
       "bitta satr uchun belgilar bilan resurs identifikatori"
     ],
@@ -7068,9 +7069,9 @@
   {
     "text": "DialogFragment bu:",
     "options": [
+      "O'zingizning dialog oynalarini yaratish uchun imkon beradigan konteyner",
       "- amalni bajarish uchun protsessor satrini o'z ichiga olgan dialog oynasi",
       "sana yoki vaqtni tanlashga imkon beruvchi oldindan belgilangan interfeysga ega dialog oynasi",
-      "O'zingizning dialog oynalarini yaratish uchun imkon beradigan konteyner",
       "sarlavhani, uchta tugmachani, tanlanadigan qiymatlar ro'yxatini yoki maxsus tarkibni o'z ichiga oladigan dialog oynasi"
     ],
     "correct": 0
@@ -7078,8 +7079,8 @@
   {
     "text": "Ushbu xususiyat nima qiladi                                                                      android: background = \"@android: color / holo_green_light\"",
     "options": [
-      "Matn rangini belgilaydi",
       "orqa fonini o'rnatadi",
+      "Matn rangini belgilaydi",
       "Ob'ektning soyasini o'rnatadi",
       "Matnning fonini o'rnatadi"
     ],
@@ -7098,18 +7099,18 @@
   {
     "text": "Context bu-?",
     "options": [
+      "joriy kontekst",
       "Rasm joylash buyrug’i",
       "Matn",
-      "Jadval",
-      "joriy kontekst"
+      "Jadval"
     ],
     "correct": 0
   },
   {
     "text": "Android yo'nalishi xususiyati…..bilan belgilanadi",
     "options": [
-      "Gravity",
       "Orientation",
+      "Gravity",
       "Margen",
       "Bacgraund"
     ],
@@ -7118,9 +7119,9 @@
   {
     "text": "Android arxitekturasidagi qaysi element apparat va dasturiy ta'minot to'plami o'rtasida mavhumlik qatlami bo'lib xizmat qiladi?",
     "options": [
+      "Linux yadrosi",
       "dastur doirasi",
       "Kutubxonalar va Android ishlash vaqti",
-      "Linux yadrosi",
       "arizalar"
     ],
     "correct": 0
@@ -7148,9 +7149,9 @@
   {
     "text": "PacketVideo OpenCORE-ga asoslangan kutubxonalar:",
     "options": [
+      "Media doirasi",
       "3D kutubxonalar",
       "SQLite",
-      "Media doirasi",
       "FreeType"
     ],
     "correct": 0
@@ -7168,29 +7169,29 @@
   {
     "text": "O'zining mobil qurilmasi dasturlari to'plamini to'ldirish uchun foydalanuvchi ushbu xizmatdan foydalanishi mumkin",
     "options": [
+      "Google Play",
       "Google xaritalari",
       "Google Market",
-      "Android Play",
-      "Google Play"
+      "Android Play"
     ],
     "correct": 0
   },
   {
     "text": "Mobil dasturni yaratish, kompilyatsiya qilish va yig'ish uchun zarur bo'lgan vositalarni o'z ichiga olgan dasturlash vositalarining to'plami deyiladi",
     "options": [
+      "Android SDK",
       "JDK",
       "ADT plagini",
-      "Android NDK",
-      "Android SDK"
+      "Android NDK"
     ],
     "correct": 0
   },
   {
     "text": "SetAdapter usuli(ListAdapter) bu-?",
     "options": [
+      "Tayyorlangan ro'yxatni adapter bilan bog'laydi.",
       "Jadval bilan matnni bog’laydi",
       "Ro’yxat bilan jadvalni bog’laydi",
-      "Tayyorlangan ro'yxatni adapter bilan bog'laydi.",
       "Rasm bilan matnni bog’laydi"
     ],
     "correct": 0
@@ -7198,9 +7199,9 @@
   {
     "text": "Androidda ichki elementlari atributlarda …. qiymatini ishlatadi.",
     "options": [
+      "match_parent",
       "wrap_content",
       "Margen",
-      "match_parent",
       "Padding"
     ],
     "correct": 0
@@ -7208,9 +7209,9 @@
   {
     "text": "Intel * Beacon Mountain rivojlanish muhitida nima uchun Intel * Hardware Accelerated Execution Manager (Intel * HAXM) vositasi ishlatiladi?",
     "options": [
+      "rivojlanish muhitida emulyatorni tezlashtirish",
       "optimallashtirilgan ma'lumotlar va tasvirni qayta ishlash uchun",
       "C ++ mobil dasturlarini samarali ravishda parallellashtirish uchun",
-      "rivojlanish muhitida emulyatorni tezlashtirish",
       "OpenGL muntazam foydalanish paytida tizim yukini optimallashtirish"
     ],
     "correct": 0
@@ -7218,18 +7219,18 @@
   {
     "text": "Intel * Beacon Mountain rivojlanish muhitida ishlatiladigan Intel * Threading Building Blocks (Intel * TBB) vositasi nima?",
     "options": [
+      "ishlab chiquvchilarga C ++ mobil dasturlarini samarali ravishda parallellashtirishga imkon berish",
       "optimallashtirilgan ma'lumotlar va tasvirni qayta ishlash uchun",
       "dasturchilarga OpenGL dasturlaridan foydalanishda tizim yukini optimallashtirishga imkon berish",
-      "rivojlanish muhitida emulyatorni tezlashtirish",
-      "ishlab chiquvchilarga C ++ mobil dasturlarini samarali ravishda parallellashtirishga imkon berish"
+      "rivojlanish muhitida emulyatorni tezlashtirish"
     ],
     "correct": 0
   },
   {
     "text": "numColumns-ning vazifasi bu-?",
     "options": [
-      "jadvalga matn joylaydi",
       "ustunlar sonini aniqlaydi",
+      "jadvalga matn joylaydi",
       "matnga rasm joylaydi",
       "satrlar sonini aniqlaydi"
     ],
@@ -7248,38 +7249,38 @@
   {
     "text": "Intel * Beacon Mountain rivojlanish muhitida ishlatiladigan Intel * Integrated Performance Primitives (Intel * IPP) vositasi nima?",
     "options": [
+      "optimallashtirilgan ma'lumotlar va tasvirni qayta ishlash uchun",
       "ishlab chiquvchilarga C ++ mobil dasturlarini samarali ravishda parallellashtirishga imkon berish",
       "rivojlanish muhitida emulyatorning ishini tezlashtirish",
-      "dasturchilarga OpenGL dasturlaridan foydalanishda tizim yukini optimallashtirishga imkon berish",
-      "optimallashtirilgan ma'lumotlar va tasvirni qayta ishlash uchun"
+      "dasturchilarga OpenGL dasturlaridan foydalanishda tizim yukini optimallashtirishga imkon berish"
     ],
     "correct": 0
   },
   {
     "text": "Ro’yxat bilan ishlash necha qismdan iborat",
     "options": [
+      "2",
       "3",
       "5",
-      "4",
-      "2"
+      "4"
     ],
     "correct": 0
   },
   {
     "text": "GridView komponenti bu-?",
     "options": [
+      "tekis jadval hisoblanadi",
       "rasm hisoblanadi",
       "matn hisoblanadi",
-      "matn va jadvalni bir-biriga bog’alydi",
-      "tekis jadval hisoblanadi"
+      "matn va jadvalni bir-biriga bog’alydi"
     ],
     "correct": 0
   },
   {
     "text": "-har bir satr uchun belgilar bilan resurs identifikatori",
     "options": [
-      "Context",
       "textViewResourceId",
+      "Context",
       "SetAdapter",
       "SetAdapter"
     ],
@@ -7288,29 +7289,29 @@
   {
     "text": "Intel XDK-da ishlab chiqilgan haqiqiy qurilmalar dasturlarida sinov",
     "options": [
+      "qurilmaga maxsus dasturni o'rnatish yoki loyihani yig'ish va montaj natijasini qurilmaga o'rnatish orqali amalga oshirilishi mumkin",
       "qurilmaga maxsus dastur o'rnatish orqali amalga oshirilishi mumkin",
       "mumkin emas",
-      "loyihani yig'ish va yig'ish natijasini qurilmaga o'rnatish orqali amalga oshirilishi mumkin",
-      "qurilmaga maxsus dasturni o'rnatish yoki loyihani yig'ish va montaj natijasini qurilmaga o'rnatish orqali amalga oshirilishi mumkin"
+      "loyihani yig'ish va yig'ish natijasini qurilmaga o'rnatish orqali amalga oshirilishi mumkin"
     ],
     "correct": 0
   },
   {
     "text": "Intel XDK ishlab chiqish muhiti quyidagi dasturlash tillarini qo'llab-quvvatlaydi:",
     "options": [
+      "JavaScript",
       "C ++",
       "C #",
-      "Java",
-      "JavaScript"
+      "Java"
     ],
     "correct": 0
   },
   {
     "text": "Intel XDK rivojlanish muhiti emulyatori:",
     "options": [
+      "akselerometr yordamida dasturlarning ishlashini tekshirishga imkon beradi",
       "bir qator qurilmalarda dastur bajarilishini simulyatsiya qilishga imkon bermaydi",
       "akselerometr yordamida dasturlarning ishlashini tekshirishga imkon bermaydi",
-      "akselerometr yordamida dasturlarning ishlashini tekshirishga imkon beradi",
       "katta tizim resurslarini talab qiladi"
     ],
     "correct": 0
@@ -7328,8 +7329,8 @@
   {
     "text": "Eclipse va IDE nima?",
     "options": [
-      "SDK (ishlab chiqish to'plami)",
       "IDE (Integratsiyalashgan rivojlanish muhiti)",
+      "SDK (ishlab chiqish to'plami)",
       "API (dastur dasturlash interfeysi)",
       "ADT (Android Development Tools)"
     ],
@@ -7348,18 +7349,18 @@
   {
     "text": "\"Ochiq telefon\" alyansining maqsadi nima edi?",
     "options": [
+      "mobil qurilmalar uchun ochiq standartlarni ishlab chiqish",
       "Android smartfonlarini sotish",
       "Android OS rivojlanish tarixini yozing",
-      "Android smartfonlarini reklama qilish",
-      "mobil qurilmalar uchun ochiq standartlarni ishlab chiqish"
+      "Android smartfonlarini reklama qilish"
     ],
     "correct": 0
   },
   {
     "text": "Android 4.4 versiyasining nomi nima?",
     "options": [
-      "Kitekat",
       "Kit kat",
+      "Kitekat",
       "krem-karamel",
       "Krispy kreme"
     ],
@@ -7368,10 +7369,10 @@
   {
     "text": "RelativeLayout bu—?",
     "options": [
+      "ekranda boshqa elementlar qanday stacked yoki ko'rsatilishini aniqlaydi.",
       "TextView boshqaruviga o'xshash yagona farq shundaki, foydalanuvchilar matnni tahrirlashlari mumkin",
       "element matnni ko'rsatish uchun ishlatiladi",
-      "foydalanuvchi buyruqlariga javob beradi",
-      "ekranda boshqa elementlar qanday stacked yoki ko'rsatilishini aniqlaydi."
+      "foydalanuvchi buyruqlariga javob beradi"
     ],
     "correct": 0
   },
@@ -7388,9 +7389,9 @@
   {
     "text": "TextView bu—?",
     "options": [
+      "element matnni, ko'rsatish uchun ishlatiladi",
       "TextView boshqaruviga o'xshash yagona farq shundaki foydalanuvchilar matnni tahrirlashlari mumkin",
       "foydalanuvchi buyruqlariga javob beradi",
-      "element matnni, ko'rsatish uchun ishlatiladi",
       "ekranda boshqa elementlar qanday stacked yoki ko'rsatilishini aniqlaydi"
     ],
     "correct": 0
@@ -7398,8 +7399,8 @@
   {
     "text": "Ikki NFC qurilmasi o'rtasida almashishning qulay vositasi:",
     "options": [
-      "Dalvik",
       "AndroidBeam",
+      "Dalvik",
       "Wi-Fi Direct",
       "Bluetooth"
     ],
@@ -7408,9 +7409,9 @@
   {
     "text": "Birinchi telefonni yaratuvchisi kim?",
     "options": [
+      "Bell A.G.",
       "I.Grey",
       "Bil Geyst",
-      "Bell A.G.",
       "I. F. Reys"
     ],
     "correct": 0
@@ -7418,38 +7419,38 @@
   {
     "text": "Greyning to'lov telefoni birinchi bo'lib qayerda o’rnatildi",
     "options": [
+      "Xartford banki",
       "Oq uyda",
       "Maktabda",
-      "Oksford universitettida",
-      "Xartford banki"
+      "Oksford universitettida"
     ],
     "correct": 0
   },
   {
     "text": "Android dasturining qaysi papkasida Java manba fayllari mavjud?",
     "options": [
+      "src",
       "Gen",
       "axlat qutisi",
-      "Res",
-      "src"
+      "Res"
     ],
     "correct": 0
   },
   {
     "text": "Batareya quvvati, ob-havo prognozi, sana va vaqt kabi dinamik ma'lumotlarni namoyish qilish uchun qanday dasturni ishlatish mantiqan to'g'ri keladi?",
     "options": [
+      "Vidjet",
       "fon dasturi",
       "oldingi dastur",
-      "aralash dastur",
-      "Vidjet"
+      "aralash dastur"
     ],
     "correct": 0
   },
   {
     "text": "Har bir eshittirish qabul qiluvchisi ... dan meros qilib oladi.",
     "options": [
-      "ContentProvider",
       "BroadcastReceiver",
+      "ContentProvider",
       "ViewReceiver",
       "IntentReceiver"
     ],
@@ -7458,8 +7459,8 @@
   {
     "text": "Birinchi telefon kitobi birinchi qayerda paydo bo’lgan?",
     "options": [
-      "Konnektikut shtatidagi Xartford shahrida",
       "Konnektikut shtatining Nyu-Xeyven shahrida,",
+      "Konnektikut shtatidagi Xartford shahrida",
       "Berlinda",
       "Angliyada"
     ],
@@ -7468,8 +7469,8 @@
   {
     "text": "Gen papkasida nima bor?",
     "options": [
-      "Audiofayllar",
       "avtomatik ravishda yaratilgan java fayllari",
+      "Audiofayllar",
       "Dastur manbalari",
       "Rasm opsiyasi"
     ],
@@ -7488,9 +7489,9 @@
   {
     "text": "Android dasturlaridagi GUI komponentlarining jadval tartibini qanday tartib belgilaydi?",
     "options": [
+      "Tablelayout",
       "GridLayout",
       "RowLayout",
-      "Tablelayout",
       "GridBagLayout"
     ],
     "correct": 0
@@ -7498,9 +7499,9 @@
   {
     "text": "Mobil dasturni yaratish, kompilyatsiya qilish va yig‘ish uchun zarur bo‘lgan vositalarni o‘z ichiga olgan SDK dasturlash vositalarining to‘plami:",
     "options": [
+      "Android SDK",
       "Android NDK",
       "JDK",
-      "Android SDK",
       "ADT plagini"
     ],
     "correct": 0
@@ -7508,8 +7509,8 @@
   {
     "text": "Android OS qanday ma'lumotlar bazasi dvigatelidan foydalanadi?",
     "options": [
-      "InnoDB",
       "SQLite",
+      "InnoDB",
       "MyISAM",
       "DBM"
     ],
@@ -7528,10 +7529,10 @@
   {
     "text": "Mobile Applications",
     "options": [
+      "Mobil qurilmalarga mos dasturlarni ham Javada yozish mumkin",
       "Linux, Mac yoki Windowsga o`rnatib, kundalik ishlatadigan dasturlarimiz",
       "bu dasturlar yirik salmoqga ega bo`lib, odatda katta jabhalarda ishlatiladi",
-      "tarmoq orqali ishlovchi ixtiyoriy dasturlar",
-      "Mobil qurilmalarga mos dasturlarni ham Javada yozish mumkin"
+      "tarmoq orqali ishlovchi ixtiyoriy dasturlar"
     ],
     "correct": 0
   },
@@ -7548,10 +7549,10 @@
   {
     "text": "Web Applications bu—?",
     "options": [
+      "tarmoq orqali ishlovchi ixtiyoriy dasturlar",
       "Mobil qurilmalarga mos dasturlarni ham Javada yozish mumkin",
       "Bu dasturlar yirik salmoqga ega bo`lib, odatda katta jabhalarda ishlatiladi",
-      "Linux, Mac yoki Windowsga o`rnatib, kundalik ishlatadigan dasturlarimiz",
-      "tarmoq orqali ishlovchi ixtiyoriy dasturlar"
+      "Linux, Mac yoki Windowsga o`rnatib, kundalik ishlatadigan dasturlarimiz"
     ],
     "correct": 0
   },
@@ -7568,9 +7569,9 @@
   {
     "text": "Qaysi sinf foydalanuvchi interfeysi (UI) komponentlari view uchun asosiy qurilish blokidir, ekranning to‘rtburchaklar maydonini belgilaydi va voqealarni chizish va boshqarish uchun javob beradi?",
     "options": [
+      "View",
       "UIComponent",
       "GUI",
-      "View",
       "Widget"
     ],
     "correct": 0
@@ -7578,9 +7579,9 @@
   {
     "text": "Emulyator –?",
     "options": [
+      "bu boshqa kompyuter, yoki dasturga taqlid qiladigan dastur",
       "bu faqat android operatsion tizimiga tushadigan dasturlash tili",
       "bu faqat kompyuterga tushadigan dasturlar majmuasi",
-      "bu boshqa kompyuter, yoki dasturga taqlid qiladigan dastur",
       "bu amaliy dasturlar paketiga tushadigan dasturlash tili"
     ],
     "correct": 0
@@ -7588,9 +7589,9 @@
   {
     "text": "BlueStacks  bu—?",
     "options": [
+      "Windows va Mac-da Android dasturlaridan foydalanishga imkon beradi",
       "bu har qanday kompyuterda iOS dasturlaridan foydalanishga imkon beruvchi brauzer emulyatori",
       "Linux operatsion tizimida Windows dasturlarini ishlaydi",
-      "Windows va Mac-da Android dasturlaridan foydalanishga imkon beradi",
       "Mac va Windows-da iOS-ni boshqarishi mumkin."
     ],
     "correct": 0
@@ -7598,8 +7599,8 @@
   {
     "text": "Loyihaning talab qilinadigan fayllari va papkalarining to'liq ierarxik ro'yxatini yorliqda ko'rish mumkin ...",
     "options": [
-      "Navigator",
       "Package Explorer, Project Explorer",
+      "Navigator",
       "internet navigator",
       "Internet Explorer"
     ],
@@ -7608,8 +7609,8 @@
   {
     "text": "Android ilovasining grafik foydalanuvchi interfeysi komponentlari iyerarxiyasini tavsiflash uchun qanday belgilash tili ishlatiladi?",
     "options": [
-      "Gml",
       "xml",
+      "Gml",
       "Html",
       "Xhtml"
     ],
@@ -7618,9 +7619,9 @@
   {
     "text": "Xcode.",
     "options": [
+      "Mac va Windows-da iOS-ni boshqarishi mumkin.",
       "bu har qanday kompyuterda iOS dasturlaridan foydalanishga imkon beruvchi brauzer emulyatori",
       "Windows va Mac-da Android dasturlaridan foydalanishga imkon beradi",
-      "Mac va Windows-da iOS-ni boshqarishi mumkin.",
       "Linux operatsion tizimida Windows dasturlarini ishlaydi"
     ],
     "correct": 0
@@ -7628,8 +7629,8 @@
   {
     "text": "Intent-Obyekt haqida berilgan to’g’ri ta’rifni tanlang.",
     "options": [
-      "foydalanuvchi ko'rsatmalar qabul qilish uchun ishlatiladi",
       "Bir oynadan ikkinchi oynaga o’tishni amalga oshiradi",
+      "foydalanuvchi ko'rsatmalar qabul qilish uchun ishlatiladi",
       "faqat bitta sahifada ishlaydi",
       "foydalanuvchi xabarlarni uzatish uchun ishlatiladi"
     ],
@@ -7638,8 +7639,8 @@
   {
     "text": "Xususiylashtirish harakatlari uchun qanday boshqaruv elementlar ishlatiladi?",
     "options": [
-      "kirish elementlari",
       "elementlar tanlanadi",
+      "kirish elementlari",
       "buyruq boshqaruvlari",
       "displey elementlari"
     ],
@@ -7658,8 +7659,8 @@
   {
     "text": "iOS operatsion tizimini afzalligi nimada?",
     "options": [
-      "Ochiq manba",
       "Xavfsizlik Ushbu OS uchun manba kodi yopiq, ya'ni \"olma\" korporatsiyasining muhandislari va dasturchilaridan tashqari hech kim unga kira olmaydi.",
+      "Ochiq manba",
       "Katta trafik sarfi",
       "Yangilanishlarni kutish vaqti"
     ],
@@ -7668,19 +7669,19 @@
   {
     "text": "WINDOWS operatsion tizimini kamchiligin nimada?",
     "options": [
+      "Ilovalarning kichik tanlovi. Windows 7 bilan ishlaydigan smartfonlarning noqulayligi",
       "multimediya fayllarini gadgetning xotirasiga o'tkazish qiyin emas.",
       "Windows 7 bilan ishlaydigan smartfonlarning noqulay emas.",
-      "Ilovalarni katta tanlovi.",
-      "Ilovalarning kichik tanlovi. Windows 7 bilan ishlaydigan smartfonlarning noqulayligi"
+      "Ilovalarni katta tanlovi."
     ],
     "correct": 0
   },
   {
     "text": "Android qurilmalari uchun quyidagi ekran zichligi toifalari mavjud:",
     "options": [
+      "LDPI, MDPI, HDPI, XHDPI, XXHDPI va XXXHDPI.",
       "HDPI, XHDPI, XXHDPI va XXXHDPI",
       "LDPI, MDPI, HDPI",
-      "LDPI, MDPI, HDPI, XHDPI, XXHDPI va XXXHDPI.",
       "to'g'ri javob yo'q"
     ],
     "correct": 0
@@ -7688,9 +7689,9 @@
   {
     "text": "Quyidagi berilgan ta’riflardan qaysi biri noto‘g‘ri",
     "options": [
+      "interfeys elementlaridan foydalanmang",
       "rasmlar so'zlardan ko'ra tezroq ishlaydi.",
       "agar ob'ektlar o'xshash bo'lsa, ular shunga o'xshash harakatlarni bajarishlari kerak.",
-      "interfeys elementlaridan foydalanmang",
       "har qanday qadamda orqaga qaytish imkoniyati bo'lishi kerak."
     ],
     "correct": 0
@@ -7698,8 +7699,8 @@
   {
     "text": "Dart bu—?",
     "options": [
-      "java va java Script dasturlash tillari kabi mijozlarni rivojlantirish uchun mo'ljallangan dasturlash tilidir",
       "veb ilovalar va mobil ilovalar kabi, mijozlarni rivojlantirish uchun mo'ljallangan dasturlash tilidir",
+      "java va java Script dasturlash tillari kabi mijozlarni rivojlantirish uchun mo'ljallangan dasturlash tilidir",
       "veb ilovalar kabi mijozlarni rivojlantirish uchun mo'ljallangan dasturlash tilidir",
       "mobil ilovalar kabi mijozlarni rivojlantirish uchun mo'ljallangan dasturlash tilidir"
     ],
@@ -7708,9 +7709,9 @@
   {
     "text": "Mobil telefon, qoʻl telefon qanday telefon turiga kiradi?",
     "options": [
+      "Simsiz telefon turiga",
       "Cho’ntak telefon turi",
       "Liniyali telefon turi",
-      "Simsiz telefon turiga",
       "Datchikli telefon turlariga kiradi"
     ],
     "correct": 0
@@ -7718,9 +7719,9 @@
   {
     "text": "ProgressDialog bu—?",
     "options": [
+      "harakatni bajarish uchun bajarilish satrini o'z ichiga olgan, dialog oynasi",
       "sana yoki vaqtni tanlashga imkon beruvchi oldindan belgilangan interfeysga ega dialog oynasi",
       "o'zingizning dialog oynalarini yaratish uchun konteyner",
-      "harakatni bajarish uchun bajarilish satrini o'z ichiga olgan, dialog oynasi",
       "sarlavha, uchta tugmacha, tanlanadigan qiymatlar ro'yxati yoki maxsus tarkibni o'z ichiga oladigan dialog oynasi"
     ],
     "correct": 0
@@ -7758,9 +7759,9 @@
   {
     "text": "iOS * dasturlarini HTML5 muhitiga ko‘chirish mumkinmi:",
     "options": [
+      "ha, Intel XDK vositalaridan, foydalangan holda",
       "ha, faqat uchinchi tomon vositalaridan foydalangan holda",
       "yo'q, to'g'ridan-to'g'ri arizani o'tkazish mumkin emas",
-      "ha, Intel XDK vositalaridan, foydalangan holda",
       "ha, faqat Intel XDK vositalaridan foydalangan holda iPhone"
     ],
     "correct": 0
@@ -7768,9 +7769,9 @@
   {
     "text": "Ilovaning tarqatilgan ma'lumotlar to‘plamini qaysi komponent boshqaradi?",
     "options": [
+      "Xizmat (Service)",
       "kontent-provayder (Content Provider)",
       "faoliyat (Activity)",
-      "Xizmat (Service)",
       "eshittirish qabul qiluvchisi (Broadcast Receiver)"
     ],
     "correct": 0
@@ -7778,8 +7779,8 @@
   {
     "text": "Mobil dastur elementlarining joylashuvi::",
     "options": [
-      "ekrandagi ob'ektlar va real dunyo ob'ektlari orasidagi fazoviy munosabatlarni yaratish uchun foydali emas",
       "ekrandagi ob'ektlar va real dunyo ob'ektlari orasidagi: fazoviy munosabatlarni yaratish uchun foydalidir",
+      "ekrandagi ob'ektlar va real dunyo ob'ektlari orasidagi fazoviy munosabatlarni yaratish uchun foydali emas",
       "iyerarxiyani o'tkazish uchun foydali emas",
       "foydalanishga ta'sir qilmaydi"
     ],
@@ -7788,8 +7789,8 @@
   {
     "text": "Intel XDK quyidagilarni ishlab chiqishni qo‘llab-quvvatlaydi:",
     "options": [
-      "JavaFX Mobile",
       "Android, Apple iOS, Microsoft Windows 8. Tizen",
+      "JavaFX Mobile",
       "Apple iOS, BlackBerry OS",
       "MtkOS, Symbian OS, Microsoft Windows 8"
     ],
@@ -7798,9 +7799,9 @@
   {
     "text": "android:columnWidth bu-?",
     "options": [
+      "satrlar kengligini o’rnatadi",
       "matnni kiritadi",
       "jadvalni o’rnatadi",
-      "satrlar kengligini o’rnatadi",
       "ustunlar kenglik width o'rnatadi"
     ],
     "correct": 0
@@ -7808,9 +7809,9 @@
   {
     "text": "Intel XDK ishlab chiqish muhitining afzalliklari quyidagilarni o‘z ichiga oladi.",
     "options": [
+      "platformalararo dasturlarni: ishlab chiqish qulayligi",
       "platformalararo dasturlarni ishlab chiqish qulay emas",
       "o'zingizning samarali emulyatoringiz mavjud emasligi",
-      "platformalararo dasturlarni: ishlab chiqish qulayligi",
       "ishlab chiqilgan dasturlar uchun bulutli xotiraning mavjud emasligi"
     ],
     "correct": 0
@@ -7818,9 +7819,9 @@
   {
     "text": "Intel * Graphics Performance Analyzers (Intel * GPA) tizim analizatori vositasi nima uchun Intel * Beacon Mountain rivojlanish muhitida ishlatiladi?",
     "options": [
+      "dasturchilarga OpenGL Django dasturlaridan foydalanishda tizim yukini optimallashtirishga imkon berish",
       "optimallashtirilgan ma'lumotlar va tasvirni qayta ishlash uchun",
       "ishlab chiquvchilarga C ++ mobil dasturlarini samarali ravishda parallellashtirishga imkon berish",
-      "dasturchilarga OpenGL Django dasturlaridan foydalanishda tizim yukini optimallashtirishga imkon berish",
       "rivojlanish muhitida emulyatorning ishini tezlashtirish"
     ],
     "correct": 0
