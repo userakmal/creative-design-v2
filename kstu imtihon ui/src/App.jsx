@@ -90,9 +90,9 @@ export default function App() {
       <div className="main-layout">
         <div className="content-area">
           <div className="exam-info-card">
-            <h2>2025/2026 60110500-Boshlang'ich ta'lim (sirtqi) 1-kurs Umumiy psixologiya</h2>
+            <h2>2025/2026 60110500-Raqamli iqsodiyot sun'iy intellek (sirtqi) 5-kurs YaDa imtihoni</h2>
             <p>
-              2023/2024 60110500-Bitiruv ishi (sirtqi) 5-kurs Umumiy. Jami 50 ta savol. O'tish bali 30 ball. Buning uchun kamida 15 ta savolga to'g'ri javob berishingiz kerak bo'ladi.
+              2025/2026 60110500-Bitiruv ishi (sirtqi) 5-kurs Umumiy. Jami 50 ta savol. O'tish bali 30 ball. Buning uchun kamida 30 ta savolga to'g'ri javob berishingiz kerak bo'ladi.
             </p>
           </div>
 
