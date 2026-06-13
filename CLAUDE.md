@@ -23,14 +23,19 @@ taklifnomalari, telegram bot va h.k. — pastga qara).
 
 - **Manba (tracked):** `client/public/` — backend (PHP), data, media, `.htaccess`,
   va statik sub-saytlar shu yerda turadi.
-- **Build natijasi:** `dist/` — **gitignore'da** (`.gitignore:78`). Vite
-  `client/public/*` ni `dist/` ga ko'chiradi + React bundle qo'shadi.
-  **Hech qachon faqat `dist/` ni tahrirlama** — u qayta build'da yo'qoladi.
-  Doim `client/public/` dagi manbani o'zgartir.
-- **Deploy:** `main` ga push → GitHub Actions (`.github/workflows/deploy-ftp.yml`)
-  `npm run build` qilib `dist/` ni FTP orqali hosting root'iga yuboradi.
+- **Build natijasi:** `dist/` — **gitignore'da** (`.gitignore:78`), build artefakti.
+  ⚠️ **`dist/` ni qo'lda umuman ishlatma/tahrirlama.** Egasi unga hech qachon
+  tegmaydi — doim git orqali push qiladi va `dist/` ni **GitHub Actions avtomatik**
+  build qiladi. Barcha o'zgarishlar faqat **`client/public/`** (yoki `client/src/`)
+  da qilinadi. Lokal `dist/` papkasi eski bo'lishi mumkin — uni manba deb olma.
+- **Deploy oqimi (yagona to'g'ri yo'l):**
+  1. O'zgarishni `client/public/` yoki `client/src/` da qil.
+  2. Commit qilib `main` ga push qil.
+  3. GitHub Actions (`.github/workflows/deploy-ftp.yml`) o'zi `npm run build`
+     qiladi va `dist/` ni FTP orqali hosting root'iga yuboradi.
   Workflow serverdagi yuklangan media (`videos/`, `image/`, `music/`) va jonli
   JSON (`data/*.json`) ni saqlab qoladi — production holati o'chmaydi.
+  Qo'lda `npm run build` yoki `dist/` ni deploy qilish **shart emas**.
 - Deploy'dan keyin smoke-test: `https://creative-design.uz/api/health.php`.
 
 ## Buyruqlar
