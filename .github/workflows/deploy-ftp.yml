@@ -33,11 +33,12 @@ jobs:
       # Hosting is nginx-fronted and doesn't honor .htaccess SPA fallback,
       # so deep links like /admin would 404. Materialise an index.html for
       # each React route so direct URL access serves the SPA shell and the
-      # router takes over client-side. /music isn't listed because that
-      # path is also the media folder for uploaded music files.
+      # router takes over client-side. /music is included too: it's also the
+      # uploaded-music folder, so the FTP `exclude` below ships music/index.html
+      # while still preserving the audio files (excluded by extension, not whole dir).
       - name: Generate per-route index.html for SPA deep links
         run: |
-          for route in admin templates popular websites custom video-downloader; do
+          for route in admin templates popular websites custom video-downloader music; do
             mkdir -p "dist/$route"
             cp dist/index.html "dist/$route/index.html"
           done
@@ -51,11 +52,19 @@ jobs:
           local-dir: ./dist/
           server-dir: /
           # Preserve uploaded media + live JSON data on the server.
+          # NOTE: music/ is excluded by audio extension (not the whole dir) so
+          # music/index.html — the SPA shell for the /music deep link — still
+          # ships, while uploaded audio files are left untouched.
           exclude: |
             **/.git*
             **/.git*/**
             **/node_modules/**
             videos/**
             image/**
-            music/**
+            music/*.mp3
+            music/*.m4a
+            music/*.wav
+            music/*.ogg
+            music/*.aac
+            music/*.flac
             data/*.json

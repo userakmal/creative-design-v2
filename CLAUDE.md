@@ -78,23 +78,29 @@ serveri endi yo'q — lokal upload test uchun: `php -S localhost:3001 -t client/
 - `upload.php`, `upload-music.php` — media yuklash (admin paroli kerak).
 - `auth.php`, `stats.php`, `proxy.php`.
 
-## ⚠️ Routing gotcha — SPA route + fizik papka konflikti (.htaccess)
+## ⚠️ SPA deep-link routing — server NGINX, `.htaccess` ISHLAMAYDI
 
 Bu yerda allaqachon bitta 404 bag bo'lgan, qaytarmaslik uchun yodda tut.
 
-`client/public/.htaccess` Apache rewrite orqali SPA fallback qiladi. Lekin ba'zi
-route'lar **bir vaqtning o'zida fizik papka** (`music/`, `optom_gulbozor/` —
-ichida media/rasm bor). SPA catch-all faqat `!-d` (papka emas) so'rovlarni
-`index.html` ga yo'naltiradi, shuning uchun fizik papka bo'lgan route'lar 404 beradi.
+**Eng muhim fakt:** production hosting **nginx** orqali ishlaydi. `client/public/.htaccess`
+(Apache rewrite) server tomonidan **umuman e'tiborga olinmaydi** — uni SPA fallback
+uchun ishonib bo'lmaydi (qoldirilgan, lekin inert).
 
-**Yechim:** bunday har bir route uchun media-skip qoidasidan **OLDIN** aniq qoida:
-```apache
-RewriteRule ^music/?$ /index.html [L]
-RewriteRule ^optom_gulbozor/?$ /index.html [L]
-RewriteRule ^(videos|image|music|data|assets|logo|api)/ - [L]   # media-skip
-```
-`^route/?$` faqat toza route'ni ushlaydi; `/music/qoshiq.mp3` baribir real fayl
-bo'lib qoladi. **Yangi shunday route qo'shsang, `.htaccess` ga ham qoida qo'sh.**
+Deep-link'lar (masalan `/admin` ga to'g'ridan-to'g'ri kirish) **deploy workflow'ida
+har bir route uchun fizik `index.html` yaratish** orqali ishlaydi:
+`.github/workflows/deploy-ftp.yml` → "Generate per-route index.html" qadami
+`dist/<route>/index.html` larni yaratadi. nginx shu fayllarni xizmat qiladi, keyin
+React Router brauzerda boshqaruvni oladi.
+
+**Yangi React route qo'shsang:** uni o'sha workflow loopidagi route'lar ro'yxatiga
+**qo'shishni unutma**, aks holda link orqali kirilganda 404/403 beradi.
+
+**`/music` ning alohida holati** (bu bag aynan shu edi): `/music` ham route, ham
+yuklangan audio papkasi. FTP deploy `music/` ni saqlab qoladi, lekin **butun papkani
+emas, faqat audio kengaytmalarini** exclude qiladi (`music/*.mp3`, `*.m4a`, ...) —
+shunda `music/index.html` (SPA shell) yetib boradi, audio fayllar esa o'chmaydi.
+Avval `music/**` butunlay exclude qilingani uchun index.html hech qachon
+yuklanmasdi → 403/404. Audio yangi formatda bo'lsa, exclude ro'yxatiga qo'sh.
 
 ## Repo ichidagi alohida loyihalar (asosiy platformaga bog'liq emas)
 
