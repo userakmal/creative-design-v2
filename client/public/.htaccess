@@ -84,6 +84,12 @@
   # Skip rewrite for media/static file extensions
   RewriteRule \.(mp4|webm|mov|avi|jpg|jpeg|png|gif|webp|svg|mp3|m4a|ogg|wav|json|js|css|ico|woff|woff2|ttf|eot|xml)$ - [L,NC]
 
+  # SPA route /music — fizik papka ham (audio fayllar shu yerda).
+  # Bare /music yoki /music/ React sahifasiga ketsin; /music/qoshiq.mp3 esa
+  # quyidagi media-skip qoidasi orqali real fayl sifatida xizmat qiladi.
+  # MUHIM: bu qoida media-skip ^(...|music|...)/ dan OLDIN turishi shart.
+  RewriteRule ^music/?$ /index.html [L]
+
   # Skip rewrite for media directories and API directory
   RewriteRule ^(videos|image|music|data|assets|logo|api)/ - [L]
 
