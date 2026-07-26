@@ -380,12 +380,33 @@ window.tildastatcookie='no';setTimeout(function(){(function(d,w,k,o,g) {var n=d.
 document.addEventListener("DOMContentLoaded",function(){
   var a=document.getElementById("bg-sound");
   var btn=document.querySelector('[data-elem-id="1749117380488"]');
-  if(!a||!btn)return;
-  btn.style.cursor="pointer";
-  btn.addEventListener("click",function(e){
-    e.stopPropagation(); e.preventDefault();
-    if(a.paused){ a.play().catch(function(){}); } else { a.pause(); }
-  },true);
+  if(!a)return;
+  a.loop=true;
+  if(btn){
+    btn.style.cursor="pointer";
+    btn.addEventListener("click",function(e){
+      e.stopPropagation(); e.preventDefault();
+      if(a.paused){ a.play().catch(function(){}); } else { a.pause(); }
+    },true);
+  }
+  // Sayt ochilishi bilan musiqa. Brauzerlar tovushli avtoplay'ni birinchi
+  // ta'sirlashuvgacha bloklaydi -> bloklansa birinchi teginish/scroll/bosishda
+  // ishga tushiramiz (bir marta).
+  var started=false;
+  var evs=["pointerdown","touchstart","click","keydown","scroll"];
+  function detach(){ evs.forEach(function(ev){window.removeEventListener(ev,onFirst,true);}); }
+  function start(){
+    if(started) return;
+    var p=a.play();
+    if(p&&p.then){ p.then(function(){started=true; detach();}).catch(function(){}); }
+    else { started=true; detach(); }
+  }
+  function onFirst(e){
+    if(btn && e && e.target && btn.contains(e.target)){ detach(); return; } // play tugmasi o'zi boshqaradi
+    start();
+  }
+  evs.forEach(function(ev){window.addEventListener(ev,onFirst,{capture:true,passive:true});});
+  start(); // avtoplay ruxsat etilgan joyda darhol ishlaydi
 },{once:true});
 </script>
 <script>
